@@ -1,0 +1,2 @@
+Models are TS types which represent the shape of the data in the database
+Schemas use those models to define JSON schemas
