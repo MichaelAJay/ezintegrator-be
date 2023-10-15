@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String         @id @default(uuid())
+  name         String
+  contactEmail String
+  Caterer      Caterer[]
+  AccountEvent AccountEvent[]
+  User         User[]
+}
+
+model AccountEvent {
+  id        String    @id @default(uuid())
+  eventName EventName
+  accountId String
+  account   Account   @relation(fields: [accountId], references: [id])
+
+  @@index([accountId], type: Hash)
+}
+
+enum EventName {
+  OrderCreated
+}
+
+model Caterer {
+  id                    String                 @id @default(uuid())
+  name                  String
+  ezManageId            String?
+  accountId             String
+  account               Account                @relation(fields: [accountId], references: [id])
+  Menu                  Menu[]
+  CatererPointOfContact CatererPointOfContact?
+  Order                 Order[]
+  ArchivedOrder         ArchivedOrder[]
+
+  @@index([accountId], type: Hash)
+}
+
+model CatererPointOfContact {
+  catererId String  @id
+  caterer   Caterer @relation(fields: [catererId], references: [id])
+  firstName String
+  lastName  String?
+  email     String
+  phone     String?
+}
+
+model Menu {
+  id        String     @id @default(uuid())
+  catererId String
+  caterer   Caterer    @relation(fields: [catererId], references: [id])
+  source    MenuSource
+  sourceId  String
+  MenuItem  MenuItem[]
+}
+
+enum MenuSource {
+  EZMANAGE
+  OTHER
+}
+
+model MenuItem {
+  id                String              @id @default(uuid())
+  menuId            String
+  menu              Menu                @relation(fields: [menuId], references: [id])
+  OrderItem         OrderItem[]
+  ArchivedOrderItem ArchivedOrderItem[]
+
+  @@index([menuId], type: Hash)
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  status          OrderStatus
+  placementDate   DateTime
+  fulfillmentDate DateTime
+  fulfilledDate   DateTime?
+  canceledDate    DateTime?
+  sourceId        String
+  source          OrderSource   @default(OTHER)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  catererId       String
+  caterer         Caterer       @relation(fields: [catererId], references: [id])
+  targets         OrderTarget[]
+  items           OrderItem[]
+
+  @@index([catererId], type: Hash)
+}
+
+enum OrderStatus {
+  ACTIVE
+  CANCELED
+  FULFILLED
+}
+
+enum OrderSource {
+  EZMANAGE
+  INTERNAL
+  OTHER
+}
+
+model OrderTarget {
+  id         String          @id @default(uuid())
+  targetHost OrderTargetHost
+  hostType   String
+  hostId     String
+  orderId    String
+  order      Order           @relation(fields: [orderId], references: [id])
+}
+
+enum OrderTargetHost {
+  NUTSHELL
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  quantity   Int
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId], type: Hash)
+}
+
+model ArchivedOrder {
+  id              String                @id @default(uuid())
+  archivedOn      DateTime
+  archivedBy      String
+  status          OrderStatus
+  placementDate   DateTime
+  fulfillmentDate DateTime
+  fulfilledDate   DateTime?
+  canceledDate    DateTime?
+  sourceId        String
+  source          OrderSource           @default(OTHER)
+  catererId       String
+  caterer         Caterer               @relation(fields: [catererId], references: [id])
+  targets         ArchivedOrderTarget[]
+  items           ArchivedOrderItem[]
+  archiver        User                  @relation(fields: [archivedBy], references: [id])
+}
+
+model ArchivedOrderTarget {
+  id         String          @id @default(uuid())
+  targetHost OrderTargetHost
+  hostType   String
+  hostId     String
+  orderId    String
+  order      ArchivedOrder   @relation(fields: [orderId], references: [id])
+}
+
+model ArchivedOrderItem {
+  id         String        @id @default(uuid())
+  quantity   Int
+  name       String
+  menuItemId String?
+  menuName   String?
+  orderId    String
+  order      ArchivedOrder @relation(fields: [orderId], references: [id])
+  MenuItem   MenuItem?     @relation(fields: [menuItemId], references: [id])
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String
+  firstName      String
+  lastName       String?
+  hashedPassword String
+  salt           String
+  accountId      String
+  account        Account         @relation(fields: [accountId], references: [id])
+  ArchivedOrder  ArchivedOrder[]
+
+  @@unique([email, accountId])
+}

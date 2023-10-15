@@ -1,0 +1,2 @@
+This module is used to COMPLETELY contain DB client specific implementations.
+The rest of the application must ALWAYS use types & the db client provider.
