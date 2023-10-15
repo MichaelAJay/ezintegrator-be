@@ -19,6 +19,17 @@ model Account {
   User         User[]
 }
 
+model AccountCrm {
+  accountId String  @id
+  name      CrmName
+  username  String
+  apikey    String
+}
+
+enum CrmName {
+  NUTSHELL
+}
+
 model AccountEvent {
   id        String    @id @default(uuid())
   eventName EventName
@@ -120,7 +131,7 @@ model OrderTarget {
 }
 
 enum OrderTargetHost {
-  NUTSHELL
+  CRM
 }
 
 model OrderItem {

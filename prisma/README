@@ -1,0 +1,5 @@
+AccountCRM - should it include credentials?
+That way the AccountCRM table doesn't get a ton of unused data
+
+For example, in Nutshell maybe I need username/apikey
+In Freshdesk, I need ... I dunno.  I dunno.
