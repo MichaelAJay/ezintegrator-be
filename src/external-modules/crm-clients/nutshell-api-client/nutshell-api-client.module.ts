@@ -1,10 +1,11 @@
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
+import { SecretManagerModule } from 'src/external-modules/secret-manager/secret-manager.module';
 import { NutshellApiClientConfigurationService } from './nutshell-api-client-configuration.service';
 import { NutshellApiClientService } from './nutshell-api-client.service';
 
 @Module({
-  imports: [CacheModule.register({})],
+  imports: [CacheModule.register({}), SecretManagerModule],
   providers: [NutshellApiClientService, NutshellApiClientConfigurationService],
   exports: [NutshellApiClientService],
 })

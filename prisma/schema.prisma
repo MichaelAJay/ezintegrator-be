@@ -11,36 +11,43 @@ datasource db {
 }
 
 model Account {
-  id           String         @id @default(uuid())
-  name         String
-  contactEmail String
-  Caterer      Caterer[]
-  AccountEvent AccountEvent[]
-  User         User[]
+  id                   String                        @id @default(uuid())
+  name                 String
+  contactEmail         String
+  Caterer              Caterer[]
+  User                 User[]
+  crm                  AccountCrm?
+  processConfiguration AccountProcessConfiguration[]
+}
+
+model AccountProcessConfiguration {
+  accountId String
+  event     Event
+  process   EventProcess
+  account   Account      @relation(fields: [accountId], references: [id])
+
+  @@id([accountId, event, process])
+  @@index([accountId, event])
+}
+
+enum Event {
+  ORDER_CREATED
+}
+
+enum EventProcess {
+  CREATE_CRM_LEAD
+  CREATE_CRM_CONTACT
+  CREATE_CRM_ORDER
 }
 
 model AccountCrm {
   accountId String  @id
   name      CrmName
-  username  String
-  apikey    String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
 
 enum CrmName {
   NUTSHELL
-}
-
-model AccountEvent {
-  id        String    @id @default(uuid())
-  eventName EventName
-  accountId String
-  account   Account   @relation(fields: [accountId], references: [id])
-
-  @@index([accountId], type: Hash)
-}
-
-enum EventName {
-  OrderCreated
 }
 
 model Caterer {

@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { INutshellApiClientService } from './interfaces';
+import { NutshellApiClientConfigurationService } from './nutshell-api-client-configuration.service';
 
 @Injectable()
 export class NutshellApiClientService implements INutshellApiClientService {
+  constructor(
+    private readonly nutshellApiClientConfiguration: NutshellApiClientConfigurationService,
+  ) {}
+
   getLead() {
     throw new Error('Method not implemented.');
   }
