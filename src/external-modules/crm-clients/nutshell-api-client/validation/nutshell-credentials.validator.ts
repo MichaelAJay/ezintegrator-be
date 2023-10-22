@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import { validateWithAjv } from 'src/utility';
-import { ajv } from 'src/utility/singletons/ajv.singleton';
+import { validateWithAjv } from '../../../../utility';
+import { ajv } from '../../../../utility/singletons/ajv.singleton';
 import { INutshellCredentials } from '../interfaces';
 
 const nutshellCredentialsSchema: JSONSchemaType<INutshellCredentials> = {
