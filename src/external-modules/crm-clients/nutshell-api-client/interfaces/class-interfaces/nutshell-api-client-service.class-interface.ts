@@ -1,13 +1,17 @@
+import { FullAccountModel } from 'src/external-modules';
+import { INutshellCredentials } from '../nutshell-credentials.interface';
+
 export interface INutshellApiClientService {
-  getLead(): any;
+  getLead(
+    leadId: string,
+    account: FullAccountModel,
+    accountCredentials: INutshellCredentials,
+    validator: (arg: unknown) => boolean,
+  ): any;
   updateLead(): any;
   createLead(): any;
   deleteLead(): any;
   addTaskToEntity(): any;
   getProducts(): any;
-  internalLeadFetcher(): any;
-  retrieveLeadFromCache(): any;
-  cacheLead(): any;
-  refreshLead(): any;
   tryTwice(): any;
 }

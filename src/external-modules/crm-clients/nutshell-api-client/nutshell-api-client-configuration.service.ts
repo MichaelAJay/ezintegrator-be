@@ -1,11 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
 import {
   INutshellApiClientConfigurationService,
@@ -15,18 +8,16 @@ import * as jayson from 'jayson/promise';
 import { generateBasicAuth } from 'src/utility';
 import * as Sentry from '@sentry/node';
 import { validateGetApiForUsernameNutshellResponse } from './validation/nutshell-api-responses';
+import { NutshellApiCacheService } from './nutshell-api-cache.service';
 
 @Injectable()
 export class NutshellApiClientConfigurationService
   implements INutshellApiClientConfigurationService
 {
-  private cacheTTL_in_MS: number;
   constructor(
     private readonly secretManager: SecretManagerService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {
-    this.cacheTTL_in_MS = 20 * 60 * 1000;
-  }
+    private readonly cache: NutshellApiCacheService,
+  ) {}
   async generateClient({ username, apiKeySecretName }: INutshellCredentials) {
     const apiKey = await this.secretManager.getSecret(apiKeySecretName);
     const basicAuth = generateBasicAuth(username, apiKey);
@@ -42,8 +33,8 @@ export class NutshellApiClientConfigurationService
   }
   async getApiForUsername(username: string, basicAuth: string) {
     // Check cache & return if cached
-    const userCachedDomain = await this.cacheManager.get(username);
-    if (typeof userCachedDomain === 'string') {
+    const userCachedDomain = await this.cache.get<string>(username, 'string');
+    if (userCachedDomain) {
       return userCachedDomain;
     }
 
@@ -77,19 +68,7 @@ export class NutshellApiClientConfigurationService
       throw err;
     }
 
-    await this.cacheManager
-      .set(username, domain, this.cacheTTL_in_MS)
-      .catch((reason) => {
-        const err = new InternalServerErrorException(
-          'Cache manager failure',
-          reason,
-        );
-        Sentry.withScope((scope) => {
-          scope.setExtra('message', reason.message);
-          Sentry.captureException(err);
-        });
-        throw err;
-      });
+    await this.cache.set(username, domain);
 
     return domain;
   }
