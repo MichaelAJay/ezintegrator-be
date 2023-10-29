@@ -3,3 +3,13 @@ That way the AccountCRM table doesn't get a ton of unused data
 
 For example, in Nutshell maybe I need username/apikey
 In Freshdesk, I need ... I dunno.  I dunno.
+
+The way that OrderTarget works:
+An orderTarget has a targetType.
+Take, for example, targetType = CRM.
+Then target externalHostId would be a CRM ID, from the CRM relation.
+externalHostId should reference SOME record.
+- If targetType is CRM, then externalHostId is a CRM.id
+
+externalHostRecordType references some targetType recordType.
+For example, if targetType is CRM, then externalHostRecordType is a CRMRecordType
