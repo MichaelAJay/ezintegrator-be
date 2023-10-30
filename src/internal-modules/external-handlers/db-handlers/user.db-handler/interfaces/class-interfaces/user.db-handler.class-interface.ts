@@ -3,6 +3,25 @@ import { IUpdateUserDbQueryBuilderArgs } from '../update-user.db-query-builder.a
 
 export interface IUserDbHandler {
   create(args: ICreateUserDbQueryBuilderArgs): any;
-  retrieveByEmail(): any;
+  retrieveById(id: string): Promise<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string | null;
+    hashedPassword: string;
+    hashedRt: string | null;
+    salt: string;
+    accountId: string;
+  } | null>;
+  retrieveByEmail(email: string): Promise<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string | null;
+    hashedPassword: string;
+    hashedRt: string | null;
+    salt: string;
+    accountId: string;
+  } | null>;
   update(userId: string, args: IUpdateUserDbQueryBuilderArgs): any;
 }

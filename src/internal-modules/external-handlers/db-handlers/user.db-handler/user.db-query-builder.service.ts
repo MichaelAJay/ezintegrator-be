@@ -12,6 +12,14 @@ export class UserDbQueryBuilderService implements IUserDbQueryBuilder {
     return { data: args };
   }
 
+  buildFindUniqueByIdQuery(id: string): Prisma.UserFindUniqueArgs {
+    return { where: { id } };
+  }
+
+  buildFindUniqueByEmailQuery(email: string): Prisma.UserFindUniqueArgs {
+    return { where: { email } };
+  }
+
   buildUpdateQuery(
     userId: string,
     args: Partial<

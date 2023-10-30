@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import {
   ICreateUserDbQueryBuilderArgs,
   UserDbHandlerService,
@@ -17,6 +17,16 @@ export class UserService implements IUserService {
     private readonly cryptoUtility: CryptoUtilityService,
   ) {}
   async create(args: ICreateUserArgs): Promise<IGetAuthAndRefreshTokens> {
+    // @TODO - Add check on email
+    const existingUser = await this.userDbHandler.retrieveByEmail(args.email);
+    if (existingUser) {
+      const errMsg =
+        existingUser.accountId === args.accountId
+          ? 'This email is already associated with this account'
+          : 'This email may not be used to create a user account';
+      throw new ConflictException(errMsg);
+    }
+
     const salt = this.cryptoUtility.generateSalt();
     const hashedPassword = await this.cryptoUtility.hash(args.password, salt);
     const dbHandlerArgs: ICreateUserDbQueryBuilderArgs = {

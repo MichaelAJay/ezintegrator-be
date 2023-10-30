@@ -14,14 +14,28 @@ export class UserDbHandlerService implements IUserDbHandler {
     private readonly queryBuilder: UserDbQueryBuilderService,
   ) {}
 
-  create(args: ICreateUserDbQueryBuilderArgs) {
+  async create(args: ICreateUserDbQueryBuilderArgs) {
     const query = this.queryBuilder.buildCreateQuery(args);
     return this.dbClient.user.create(query);
   }
-  retrieveByEmail() {
-    throw new Error('Method not implemented.');
+  async retrieveById(id: string): Promise<{
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string | null;
+    hashedPassword: string;
+    hashedRt: string | null;
+    salt: string;
+    accountId: string;
+  } | null> {
+    const query = this.queryBuilder.buildFindUniqueByIdQuery(id);
+    return this.dbClient.user.findUnique(query);
   }
-  update(userId: string, args: IUpdateUserDbQueryBuilderArgs) {
+  async retrieveByEmail(email: string) {
+    const query = this.queryBuilder.buildFindUniqueByEmailQuery(email);
+    return this.dbClient.user.findUnique(query);
+  }
+  async update(userId: string, args: IUpdateUserDbQueryBuilderArgs) {
     const query = this.queryBuilder.buildUpdateQuery(userId, args);
     return this.dbClient.user.update(query);
   }

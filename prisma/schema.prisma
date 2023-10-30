@@ -228,7 +228,8 @@ model User {
   account        Account         @relation(fields: [accountId], references: [id])
   archivedOrders ArchivedOrder[]
 
-  @@unique([email, accountId])
+  @@unique([email])
+  @@index([email], type: BTree)
 }
 
 model Crm {

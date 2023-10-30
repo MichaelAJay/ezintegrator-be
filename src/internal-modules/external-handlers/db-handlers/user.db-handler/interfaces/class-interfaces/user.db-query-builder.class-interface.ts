@@ -4,6 +4,8 @@ import { IUpdateUserDbQueryBuilderArgs } from '../update-user.db-query-builder.a
 
 export interface IUserDbQueryBuilder {
   buildCreateQuery(args: ICreateUserDbQueryBuilderArgs): Prisma.UserCreateArgs;
+  buildFindUniqueByIdQuery(id: string): Prisma.UserFindUniqueArgs;
+  buildFindUniqueByEmailQuery(email: string): Prisma.UserFindUniqueArgs;
   buildUpdateQuery(
     userId: string,
     args: IUpdateUserDbQueryBuilderArgs,
