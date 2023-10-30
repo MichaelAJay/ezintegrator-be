@@ -7,6 +7,8 @@ import { IAuthService, ILoginArgs } from './interfaces';
 
 @Injectable()
 export class AuthService implements IAuthService {
+  // MAY NOT inject UserService (internal service provider)
+  // MAY NOT inject AccountAndCatererService (internal service provider)
   constructor(
     private readonly userDbHandler: UserDbHandlerService,
     private readonly cryptoHandler: CryptoUtilityService,

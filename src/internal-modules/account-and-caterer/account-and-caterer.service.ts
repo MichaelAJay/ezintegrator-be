@@ -39,7 +39,9 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     if (args.lastName) {
       createUserArgs.lastName = args.lastName;
     }
+    // Await created user resolution - important for stack trace
     const tokens = await this.userService.create(createUserArgs);
+
     return tokens;
   }
 }

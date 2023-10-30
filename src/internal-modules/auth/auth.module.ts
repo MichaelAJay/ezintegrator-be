@@ -3,6 +3,8 @@ import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-ha
 import { SecurityUtilityModule } from '../security-utility';
 import { AuthService } from './auth.service';
 
+// MAY NOT import UserModule (internal module)
+// MAY NOT import AccountAndCatererModule (internal module)
 @Module({
   imports: [UserDbHandlerModule, SecurityUtilityModule],
   providers: [AuthService],

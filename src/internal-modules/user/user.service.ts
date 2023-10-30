@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { AuthService } from '../auth/auth.service';
 import {
   ICreateUserDbQueryBuilderArgs,
   UserDbHandlerService,
@@ -13,11 +14,11 @@ export class UserService implements IUserService {
   // UserService MAY NOT injectAccountAndCatererService
   constructor(
     private readonly userDbHandler: UserDbHandlerService,
-    private readonly jwtHandler: JwtHandlerService,
     private readonly cryptoUtility: CryptoUtilityService,
+    private readonly authService: AuthService,
   ) {}
   async create(args: ICreateUserArgs): Promise<IGetAuthAndRefreshTokens> {
-    // @TODO - Add check on email
+    // Enforce unique email constraint
     const existingUser = await this.userDbHandler.retrieveByEmail(args.email);
     if (existingUser) {
       const errMsg =
@@ -27,8 +28,11 @@ export class UserService implements IUserService {
       throw new ConflictException(errMsg);
     }
 
+    // Create system-defined user attributes
     const salt = this.cryptoUtility.generateSalt();
     const hashedPassword = await this.cryptoUtility.hash(args.password, salt);
+
+    // Create user
     const dbHandlerArgs: ICreateUserDbQueryBuilderArgs = {
       email: args.email,
       firstName: args.firstName,
@@ -41,10 +45,12 @@ export class UserService implements IUserService {
     }
 
     const user = await this.userDbHandler.create(dbHandlerArgs);
-    const tokens = await this.jwtHandler.signAuthAndRefreshTokens({
-      sub: user.id,
-    });
 
+    // Await resolution - important for stack trace
+    const tokens = await this.authService.login({
+      id: user.id,
+      salt: user.salt,
+    });
     return tokens;
   }
 }
