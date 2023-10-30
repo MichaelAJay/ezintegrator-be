@@ -1,8 +1,6 @@
+import { INutshellCredentials } from '../nutshell-credentials.interface';
+
 export interface INutshellApiClientConfigurationService {
-  generateClient(): Promise<any>;
-  getApiForUsername(): any;
-  selectDomain(): any;
-  isGetApiForUsernameResponseValid(): any;
-  getBasicAuthValue(): any;
-  getUsernameAndApiKeyForAcct(): any;
+  generateClient(credentials: INutshellCredentials): Promise<any>;
+  getApiForUsername(username: string, basicAuth: string): any;
 }

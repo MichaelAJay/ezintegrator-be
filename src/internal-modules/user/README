@@ -1,0 +1,1 @@
+UserModule MAY NOT import AccountAndCatererModule or inject AccountAndCatererService

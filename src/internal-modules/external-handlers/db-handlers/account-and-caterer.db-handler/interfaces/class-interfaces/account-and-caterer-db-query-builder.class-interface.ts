@@ -1,1 +1,30 @@
-export interface IAccountAndCatererDbQueryBuilder {}
+import { Prisma } from '@prisma/client';
+import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
+
+export interface IAccountAndCatererDbQueryBuilder {
+  // Account management
+  buildCreateAccountQuery(
+    args: IBuildCreateAccountQueryArgs,
+  ): Prisma.AccountCreateArgs;
+  buildRetrieveAccountQuery(accountId: string): any;
+  buildUpdateAccountQuery(accountId: string, updates: Record<string, any>): any;
+  // Account Event management
+  buildAddEventProcessQuery(accountId: string, process: any): any;
+  buildRetrieveAccountEventProcessesQuery(accountId: string): any;
+  // Account CRM management
+  buildAddAccountCrmQuery(accountId: string, crmDetails: any): any;
+  buildUpdateAccountCrmQuery(accountId: string, crmDetails: any): any;
+  // Account Secret management
+  buildUpsertAccountSecretReferenceQuery(
+    accountId: string,
+    secretReferenceDetails: any,
+  ): any;
+  buildRetrieveSecretReferenceQuery(
+    accountId: string,
+    secretReferenceDetails: any,
+  ): any;
+  // Account Caterer management
+  buildCreateCatererQuery(accountId: string, catererDetails: any): any;
+  buildRetrieveCatererQuery(args: any): any;
+  buildAddCatererPointOfContactQuery(args: any): any;
+}
