@@ -12,7 +12,7 @@ describe('SecretManagerService', () => {
       providers: [
         SecretManagerService,
         {
-          provide: SecretManagerServiceClient,
+          provide: 'SecretManagerServiceClient',
           useValue: mockSecretManagerServiceClient,
         },
       ],
