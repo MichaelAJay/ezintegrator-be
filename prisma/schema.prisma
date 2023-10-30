@@ -11,13 +11,15 @@ datasource db {
 }
 
 model Account {
-  id           String                @id @default(uuid())
-  name         String
-  contactEmail String
-  caterers     Caterer[]
-  users        User[]
-  crm          AccountCrm?
-  processes    AccountEventProcess[]
+  id               String                   @id @default(uuid())
+  name             String
+  ownerEmail       String
+  contactEmail     String
+  caterers         Caterer[]
+  users            User[]
+  crm              AccountCrm?
+  processes        AccountEventProcess[]
+  secretReferences AccountSecretReference[]
 }
 
 model AccountEventProcess {
@@ -41,11 +43,31 @@ enum EventProcess {
 }
 
 model AccountCrm {
-  accountId   String  @id
-  crmId       String
-  credentials Json?
-  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  crm         Crm     @relation(fields: [crmId], references: [id])
+  accountId               String  @id
+  crmId                   String
+  nonSensitiveCredentials Json?
+  isConfigured            Boolean @default(false)
+  account                 Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  crm                     Crm     @relation(fields: [crmId], references: [id])
+}
+
+model AccountSecretReference {
+  secretName    String                           @id @default(uuid())
+  accountId     String
+  referenceType AccountSecretReferenceTargetType
+  secretType    AccountSecretReferenceSecretType
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  @@index([accountId], type: BTree)
+}
+
+enum AccountSecretReferenceTargetType {
+  CRM
+}
+
+enum AccountSecretReferenceSecretType {
+  API_KEY
 }
 
 model Caterer {
