@@ -222,6 +222,7 @@ model User {
   firstName      String
   lastName       String?
   hashedPassword String
+  hashedRt       String?
   salt           String
   accountId      String
   account        Account         @relation(fields: [accountId], references: [id])

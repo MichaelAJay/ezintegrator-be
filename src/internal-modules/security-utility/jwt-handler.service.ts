@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getEnvironmentVariable } from 'src/utility';
-import { IAuthTokenClaims, IJwtHandler } from '.';
+import { IAuthTokenClaims, IGetAuthAndRefreshTokens, IJwtHandler } from '.';
 import { validateAuthTokenPayload } from './schemas-and-validators/auth-token.schema-and-validator';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class JwtHandlerService implements IJwtHandler {
 
   async signAuthAndRefreshTokens(
     payload: Omit<IAuthTokenClaims, 'iss' | 'exp'>,
-  ) {
+  ): Promise<IGetAuthAndRefreshTokens> {
     const authTokenPromise = this.signAuthToken(payload);
     const refreshTokenPromise = this.signRefreshToken(payload);
     const [at, rt] = await Promise.all([authTokenPromise, refreshTokenPromise]);

@@ -1,6 +1,10 @@
+import { IGetAuthAndRefreshTokens } from '..';
 import { IAuthTokenClaims } from '../auth-token-claims.interface';
 
 export interface IJwtHandler {
+  signAuthAndRefreshTokens(
+    payload: Omit<IAuthTokenClaims, 'iss' | 'exp'>,
+  ): Promise<IGetAuthAndRefreshTokens>;
   signAuthToken(
     payload: Omit<IAuthTokenClaims, 'iss' | 'exp'>,
   ): Promise<string>;
