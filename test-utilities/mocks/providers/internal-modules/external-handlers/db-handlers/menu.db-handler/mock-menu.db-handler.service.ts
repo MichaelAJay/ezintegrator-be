@@ -1,3 +1,2 @@
-import { IMenuDbHandler } from 'src/internal-modules';
-
-export class MockMenuDbHandler implements IMenuDbHandler {}
+import { IMenuDbHandler } from '../../../../../../../src/internal-modules/external-handlers/db-handlers/menu.db-handler';
+export const mockMenuDbHandler: IMenuDbHandler = {};

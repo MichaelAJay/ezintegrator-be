@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { getEnvironmentVariable } from 'src/utility';
+import { getEnvironmentVariable } from '../../utility';
 import { IAuthTokenClaims, IGetAuthAndRefreshTokens, IJwtHandler } from '.';
 import { validateAuthTokenPayload } from './schemas-and-validators/auth-token.schema-and-validator';
 

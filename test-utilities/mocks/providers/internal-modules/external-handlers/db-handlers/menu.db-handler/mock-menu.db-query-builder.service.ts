@@ -1,3 +1,3 @@
-import { IMenuDbQueryBuilder } from 'src/internal-modules';
+import { IMenuDbQueryBuilder } from '../../../../../../../src/internal-modules/external-handlers/db-handlers/menu.db-handler';
 
-export class MockMenuDbQueryBuilder implements IMenuDbQueryBuilder {}
+export const mockMenuDbQueryBuilder: IMenuDbQueryBuilder = {};

@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import { validateWithAjv } from 'src/utility';
-import { ajv } from 'src/utility/singletons';
+import { validateWithAjv } from '../../../../../utility';
+import { ajv } from '../../../../../utility/singletons';
 import { IGetApiForUsernameNutshellResponse } from '../../interfaces/nutshell-responses';
 
 const getApiForUsernameNutshellApiResponseSchema: JSONSchemaType<IGetApiForUsernameNutshellResponse> =

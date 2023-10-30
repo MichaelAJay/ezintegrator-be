@@ -1,11 +1,11 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
+import { SecretManagerService } from '../../../external-modules/secret-manager/secret-manager.service';
 import {
   INutshellApiClientConfigurationService,
   INutshellCredentials,
 } from '.';
 import * as jayson from 'jayson/promise';
-import { generateBasicAuth } from 'src/utility';
+import { generateBasicAuth } from '../../../utility';
 import * as Sentry from '@sentry/node';
 import { validateGetApiForUsernameNutshellResponse } from './validation/nutshell-api-responses';
 import { NutshellApiCacheService } from './nutshell-api-cache.service';

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DbClientService } from '../../../../external-modules';
 import {
-  MockAccountAndCatererDbQueryBuilder,
+  mockAccountAndCatererDbQueryBuilder,
   MockDbClient,
 } from '../../../../../test-utilities';
 import {
@@ -24,7 +24,7 @@ describe('AccountAndCatererDbHandlerService', () => {
         },
         {
           provide: AccountAndCatererDbQueryBuilderService,
-          useValue: MockAccountAndCatererDbQueryBuilder,
+          useValue: mockAccountAndCatererDbQueryBuilder,
         },
       ],
     }).compile();

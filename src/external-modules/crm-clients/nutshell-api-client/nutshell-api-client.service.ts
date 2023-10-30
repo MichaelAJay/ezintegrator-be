@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FullAccountModel } from 'src/external-modules/db-client';
+import { FullAccountModel } from '../../../external-modules/db-client';
 import { NUTSHELL_API_METHODS } from './api-methods';
 import { INutshellApiClientService, INutshellCredentials } from './interfaces';
 import { NutshellApiCacheService } from './nutshell-api-cache.service';

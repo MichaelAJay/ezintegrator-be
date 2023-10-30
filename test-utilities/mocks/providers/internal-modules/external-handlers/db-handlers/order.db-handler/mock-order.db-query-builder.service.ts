@@ -1,3 +1,3 @@
-import { IOrderDbQueryBuilder } from 'src/internal-modules';
+import { IOrderDbQueryBuilder } from '../../../../../../../src/internal-modules/external-handlers/db-handlers/order.db-handler';
 
-export class MockOrderDbQueryBuilder implements IOrderDbQueryBuilder {}
+export const mockOrderDbQueryBuilder: IOrderDbQueryBuilder = {};

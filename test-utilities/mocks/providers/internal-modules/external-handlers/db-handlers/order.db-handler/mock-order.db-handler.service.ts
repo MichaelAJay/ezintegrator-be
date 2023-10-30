@@ -1,3 +1,3 @@
-import { IOrderDbHandler } from 'src/internal-modules';
+import { IOrderDbHandler } from '../../../../../../../src/internal-modules/external-handlers/db-handlers/order.db-handler';
 
-export class MockOrderDbHandler implements IOrderDbHandler {}
+export const mockOrderDbHandler: IOrderDbHandler = {};

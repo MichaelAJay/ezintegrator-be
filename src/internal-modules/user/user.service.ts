@@ -6,7 +6,6 @@ import {
 } from '../external-handlers/db-handlers/user.db-handler';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
-import { JwtHandlerService } from '../security-utility/jwt-handler.service';
 import { ICreateUserArgs, IUserService } from './interfaces';
 
 @Injectable()

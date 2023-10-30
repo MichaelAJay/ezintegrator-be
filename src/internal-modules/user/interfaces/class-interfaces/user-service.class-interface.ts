@@ -1,4 +1,4 @@
-import { IGetAuthAndRefreshTokens } from 'src/internal-modules/security-utility';
+import { IGetAuthAndRefreshTokens } from '../../../../internal-modules/security-utility';
 import { ICreateUserArgs } from '../args';
 
 export interface IUserService {

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DbClientService } from '../../../../external-modules';
 import {
-  MockOrderDbQueryBuilder,
+  mockOrderDbQueryBuilder,
   MockDbClient,
 } from '../../../../../test-utilities';
 import { OrderDbHandlerService, OrderDbQueryBuilderService } from '.';
@@ -21,7 +21,7 @@ describe('OrderDbHandlerService', () => {
         },
         {
           provide: OrderDbQueryBuilderService,
-          useValue: MockOrderDbQueryBuilder,
+          useValue: mockOrderDbQueryBuilder,
         },
       ],
     }).compile();
