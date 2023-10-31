@@ -12,7 +12,7 @@ export class AccountAndCatererDbHandlerService
     private readonly queryBuilder: AccountAndCatererDbQueryBuilderService,
   ) {}
   // Account Management
-  async createAccount(args: IBuildCreateAccountQueryArgs): Promise<any> {
+  async createAccount(args: IBuildCreateAccountQueryArgs) {
     const query = this.queryBuilder.buildCreateAccountQuery(args);
     return this.dbClient.account.create(query);
   }
