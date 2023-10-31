@@ -4,11 +4,19 @@ import { pbkdf2, randomBytes } from 'crypto';
 
 @Injectable()
 export class CryptoUtilityService implements ICryptoUtility {
+  async generateSaltAndHashValue(
+    value: string,
+  ): Promise<{ hashedValue: string; salt: string }> {
+    const salt = this.generateSalt();
+    const hashedValue = await this.hash(value, salt);
+    return { hashedValue, salt };
+  }
+
   generateSalt(): string {
     return randomBytes(16).toString('hex');
   }
 
-  hash(value: string, salt: string): Promise<string> {
+  async hash(value: string, salt: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const iterations = 10000;
       const keylen = 64;

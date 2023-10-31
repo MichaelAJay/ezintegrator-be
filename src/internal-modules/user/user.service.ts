@@ -28,20 +28,15 @@ export class UserService implements IUserService {
     }
 
     // Create system-defined user attributes
-    const salt = this.cryptoUtility.generateSalt();
-    const hashedPassword = await this.cryptoUtility.hash(args.password, salt);
+    const { hashedValue: hashedPassword, salt } =
+      await this.cryptoUtility.generateSaltAndHashValue(args.password);
 
     // Create user
     const dbHandlerArgs: ICreateUserDbQueryBuilderArgs = {
-      email: args.email,
-      firstName: args.firstName,
+      ...args,
       hashedPassword,
       salt,
-      accountId: args.accountId,
     };
-    if (args.lastName) {
-      dbHandlerArgs.lastName = args.lastName;
-    }
 
     const user = await this.userDbHandler.create(dbHandlerArgs);
 

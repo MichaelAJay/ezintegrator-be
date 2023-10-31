@@ -6,7 +6,7 @@ import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handl
 import { UserService } from '../user/user.service';
 import { AccountAndCatererService } from './account-and-caterer.service';
 import { ICreateAccountAndUserArgs } from './interfaces';
-import { mockLoginReturn } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
+import { mockReturnLogin } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
 
 describe('AccountAndCatererService', () => {
   let service: AccountAndCatererService;
@@ -125,7 +125,7 @@ describe('AccountAndCatererService', () => {
       await expect(service.createAccount(input)).rejects.toThrow(MOCK_ERROR);
     });
     it('returns tokens to immediately log user in', async () => {
-      const mockResolvedValue = mockLoginReturn();
+      const mockResolvedValue = mockReturnLogin();
       const mockCreateAccountReturn = mockReturnCreateAccount(
         input.accountName,
         input.email,
