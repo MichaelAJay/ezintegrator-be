@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotImplementedException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
@@ -42,11 +46,17 @@ export class AuthService implements IAuthService {
     if (!user) {
       throw new UnauthorizedException();
     }
+
+    if (!user.hashedRt) {
+      throw new UnauthorizedException('LOGIN_REQUIRED');
+    }
+
     if (
-      !(
-        user.hashedRt &&
-        this.cryptoHandler.validateSaltedHash(token, user.hashedRt, user.salt)
-      )
+      !(await this.cryptoHandler.validateSaltedHash(
+        token,
+        user.hashedRt,
+        user.salt,
+      ))
     ) {
       throw new UnauthorizedException();
     }
@@ -66,6 +76,6 @@ export class AuthService implements IAuthService {
   }
 
   async logout(userId: string): Promise<{ success: boolean }> {
-    throw new Error('Method not implemented.');
+    throw new NotImplementedException('Method not implemented.');
   }
 }

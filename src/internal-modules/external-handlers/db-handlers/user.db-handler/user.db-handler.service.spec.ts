@@ -6,6 +6,7 @@ import {
 } from '../../../../../test-utilities';
 import { UserDbHandlerService, UserDbQueryBuilderService } from '.';
 
+// Skipping tests - too simple as of 31 Oct 2023
 describe('UserDbHandlerService', () => {
   let service: UserDbHandlerService;
   let dbClient: DbClientService;
