@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { MockJwtService } from '../../../test-utilities';
+import { mockJwtService } from '../../../test-utilities';
 import { JwtHandlerService } from './jwt-handler.service';
 
 describe('JwtHandlerService', () => {
@@ -11,7 +11,7 @@ describe('JwtHandlerService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         JwtHandlerService,
-        { provide: JwtService, useValue: MockJwtService },
+        { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();
 
