@@ -2,6 +2,7 @@ import { NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   mockReturnRetrieveUserByEmail,
+  mockReturnRetrieveUserById,
   mockReturnUpdateUser,
 } from '../../../test-utilities/mocks/returns/internal-modules/external-handlers/db-handlers/user.db-handler.returns';
 import { mockUserDbHandler } from '../../../test-utilities/mocks/providers/internal-modules/external-handlers/db-handlers/user.db-handler';
@@ -15,6 +16,7 @@ import { JwtHandlerService } from '../security-utility/jwt-handler.service';
 import { AuthService } from './auth.service';
 import { ILoginArgs } from './interfaces';
 import { mockReturnLogin } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
+import { mockReturnJwtHandlerVerifyWithSecret } from '../../../test-utilities/mocks/returns/internal-modules/security-utility/jwt-handler-service.returns';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -200,35 +202,256 @@ describe('AuthService', () => {
    * 1) Try to consolidate some tests
    */
   describe('refresh unit tests', () => {
-    it('calls jwtHandler.verifyWithSecret with the correct args', async () => {});
+    const MOCK_TOKEN = 'MOCK_TOKEN';
+    const SHORTCIRCUIT_ERROR = new Error('SHORT CIRCUIT');
+    it('calls jwtHandler.verifyWithSecret once with the correct args', async () => {
+      const spy = jest
+        .spyOn(jwtHandler, 'verifyWithSecret')
+        .mockRejectedValue(SHORTCIRCUIT_ERROR);
+
+      // Background test: Handle shortcut error
+      await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow();
+
+      // Primary test
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(MOCK_TOKEN);
+    });
     describe('jwtHandler.verifyWithSecret resolves', () => {
-      it('calls userDbHandler.retrieveById with the correct args', async () => {});
+      const MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION =
+        mockReturnJwtHandlerVerifyWithSecret();
+      it('calls userDbHandler.retrieveById once with the correct args', async () => {
+        jest
+          .spyOn(jwtHandler, 'verifyWithSecret')
+          .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+        const spy = jest
+          .spyOn(userDbHandler, 'retrieveById')
+          .mockRejectedValue(SHORTCIRCUIT_ERROR);
+
+        // Background test: Handle shortcut error
+        await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow();
+
+        // Primary test
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(
+          MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION.sub,
+        );
+      });
       describe('userDbHandler.retrieveById resolves to a user record with non-null hashedRt', () => {
-        it('calls cryptoService.validateSaltedHash with the correct args', async () => {});
+        const MOCK_USER_ID = 'MOCK_USER_ID';
+        const MOCK_RETRIEVED_USER = mockReturnRetrieveUserById(
+          MOCK_USER_ID,
+          false,
+        );
+        it('calls cryptoService.validateSaltedHash with the correct args', async () => {
+          jest
+            .spyOn(jwtHandler, 'verifyWithSecret')
+            .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+          jest
+            .spyOn(userDbHandler, 'retrieveById')
+            .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+          const spy = jest
+            .spyOn(cryptoHandler, 'validateSaltedHash')
+            .mockRejectedValue(SHORTCIRCUIT_ERROR);
+
+          // Background test: handle shortcircuit error
+          await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow();
+
+          // Primary tests
+          expect(spy).toHaveBeenCalledTimes(1);
+          expect(spy).toHaveBeenCalledWith(
+            MOCK_TOKEN,
+            MOCK_RETRIEVED_USER?.hashedRt,
+            MOCK_RETRIEVED_USER?.salt,
+          );
+        });
         describe('cryptoService.validateSaltedHash resolves to true', () => {
-          it('calls authService.login with the correct args', async () => {});
+          it('calls authService.login once with the correct args', async () => {
+            jest
+              .spyOn(jwtHandler, 'verifyWithSecret')
+              .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+            jest
+              .spyOn(userDbHandler, 'retrieveById')
+              .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+            jest
+              .spyOn(cryptoHandler, 'validateSaltedHash')
+              .mockResolvedValue(true);
+
+            const spy = jest
+              .spyOn(service, 'login')
+              .mockResolvedValue(mockReturnLogin());
+
+            await service.refresh(MOCK_TOKEN);
+
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(spy).toHaveBeenCalledWith(MOCK_RETRIEVED_USER);
+          });
           describe('authService.login resolves', () => {
-            it('returns resolved promise value', async () => {});
+            it('returns resolved promise value', async () => {
+              jest
+                .spyOn(jwtHandler, 'verifyWithSecret')
+                .mockResolvedValue(
+                  MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION,
+                );
+
+              jest
+                .spyOn(userDbHandler, 'retrieveById')
+                .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+              jest
+                .spyOn(cryptoHandler, 'validateSaltedHash')
+                .mockResolvedValue(true);
+
+              const EXPECTED_RETURN = mockReturnLogin();
+              jest.spyOn(service, 'login').mockResolvedValue(EXPECTED_RETURN);
+
+              expect(await service.refresh(MOCK_TOKEN)).toEqual(
+                EXPECTED_RETURN,
+              );
+            });
           });
           describe('authService.login rejects', () => {
-            it('propagates error', async () => {});
+            it('propagates error', async () => {
+              jest
+                .spyOn(jwtHandler, 'verifyWithSecret')
+                .mockResolvedValue(
+                  MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION,
+                );
+
+              jest
+                .spyOn(userDbHandler, 'retrieveById')
+                .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+              jest
+                .spyOn(cryptoHandler, 'validateSaltedHash')
+                .mockResolvedValue(true);
+
+              const MOCK_ERROR = new Error('ERROR UNDER TEST');
+              jest.spyOn(service, 'login').mockRejectedValue(MOCK_ERROR);
+
+              await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(
+                MOCK_ERROR,
+              );
+            });
           });
         });
         describe('cryptoHandler.validateSaltedHash rejects or resolves to false', () => {
-          it('propagates error if cryptoHandler.validateSaltedHash rejects', async () => {});
-          it('throws UnauthorizedException if crytpoHandler.validateSaltedHash resolves to false', async () => {});
+          it('propagates error if cryptoHandler.validateSaltedHash rejects and further methods are not called', async () => {
+            // Further methods include authService.login
+            jest
+              .spyOn(jwtHandler, 'verifyWithSecret')
+              .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+            jest
+              .spyOn(userDbHandler, 'retrieveById')
+              .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+            const MOCK_ERROR = new Error('ERROR UNDER TEST');
+            jest
+              .spyOn(cryptoHandler, 'validateSaltedHash')
+              .mockRejectedValue(MOCK_ERROR);
+
+            await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(
+              MOCK_ERROR,
+            );
+            expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+          });
+          it('throws UnauthorizedException if crytpoHandler.validateSaltedHash resolves to false and further methods are not called', async () => {
+            // Further methods include authService.login
+            jest
+              .spyOn(jwtHandler, 'verifyWithSecret')
+              .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+            jest
+              .spyOn(userDbHandler, 'retrieveById')
+              .mockResolvedValue(MOCK_RETRIEVED_USER);
+
+            jest
+              .spyOn(cryptoHandler, 'validateSaltedHash')
+              .mockResolvedValue(false);
+
+            await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(
+              UnauthorizedException,
+            );
+            expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+          });
         });
       });
       describe('userDbHandler.retrieveById rejects, resolves to null, or resolves to a record without hashedRt', () => {
-        it('propagates error if userDbHandler.retrieveById rejects', async () => {});
-        it('throws UnauthorizedException if userDbHandler.retrieveById returns null', async () => {});
-        it('throws UnauthorizedException if userDbHandler.retrieveById returns a record with null hashedRt', async () => {});
-        it('does not call cryptoHandler.validateSaltedHash or authService.login', async () => {});
+        it('propagates error if userDbHandler.retrieveById rejects and further methods are not called', async () => {
+          // Further methods include authService.login
+          jest
+            .spyOn(jwtHandler, 'verifyWithSecret')
+            .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+          const MOCK_ERROR = new Error('ERROR UNDER TEST');
+          jest
+            .spyOn(userDbHandler, 'retrieveById')
+            .mockRejectedValue(MOCK_ERROR);
+
+          await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(MOCK_ERROR);
+          expect(
+            jest.spyOn(cryptoHandler, 'validateSaltedHash'),
+          ).not.toHaveBeenCalled();
+          expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+        });
+        it('throws UnauthorizedException if userDbHandler.retrieveById returns null and further methods are not called', async () => {
+          // Further methods include authService.login
+          jest
+            .spyOn(jwtHandler, 'verifyWithSecret')
+            .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+          jest.spyOn(userDbHandler, 'retrieveById').mockResolvedValue(null);
+
+          await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(
+            UnauthorizedException,
+          );
+          expect(
+            jest.spyOn(cryptoHandler, 'validateSaltedHash'),
+          ).not.toHaveBeenCalled();
+          expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+        });
+        it('throws UnauthorizedException if userDbHandler.retrieveById returns a record with null hashedRt and further methods are not called', async () => {
+          // Further methods include authService.login
+          jest
+            .spyOn(jwtHandler, 'verifyWithSecret')
+            .mockResolvedValue(MOCK_JWTHANDLER_VERIFY_WITH_SECRET_RESOLUTION);
+
+          const MOCK_USER = mockReturnRetrieveUserById('MOCK_USER_ID', false);
+          (MOCK_USER as any).hashedRt = null;
+          jest.spyOn(userDbHandler, 'retrieveById').mockResolvedValue(null);
+
+          await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(
+            UnauthorizedException,
+          );
+          expect(
+            jest.spyOn(cryptoHandler, 'validateSaltedHash'),
+          ).not.toHaveBeenCalled();
+          expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+        });
       });
     });
     describe('jwtHandler.verifyWithSecret rejects', () => {
-      it('propagates thrown error from jwthandler.verifyWithSecret', async () => {});
-      it('does not call userDbHandler.retrieveById, cryptoHandler.validateSaltedHash, or authService.login', async () => {});
+      it('propagates thrown error from jwthandler.verifyWithSecret and does not call remaining methods', async () => {
+        // Remaining methods include userDbHandler.retrieveById, cryptoHandler.validateSaltedHash, or authService.login
+        const MOCK_ERROR = new Error('ERROR UNDER TEST');
+        jest
+          .spyOn(jwtHandler, 'verifyWithSecret')
+          .mockRejectedValue(MOCK_ERROR);
+
+        await expect(service.refresh(MOCK_TOKEN)).rejects.toThrow(MOCK_ERROR);
+        expect(
+          jest.spyOn(userDbHandler, 'retrieveById'),
+        ).not.toHaveBeenCalled();
+        expect(
+          jest.spyOn(cryptoHandler, 'validateSaltedHash'),
+        ).not.toHaveBeenCalled();
+        expect(jest.spyOn(service, 'login')).not.toHaveBeenCalled();
+      });
     });
   });
 
