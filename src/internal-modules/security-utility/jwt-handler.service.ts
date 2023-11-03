@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { getEnvironmentVariable } from '../../utility';
 import { IAuthTokenClaims, IGetAuthAndRefreshTokens, IJwtHandler } from '.';
 import { validateAuthTokenPayload } from './schemas-and-validators/auth-token.schema-and-validator';
+import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class JwtHandlerService implements IJwtHandler {
@@ -38,33 +39,47 @@ export class JwtHandlerService implements IJwtHandler {
     expiresIn: string,
     secret: string,
   ) {
-    return this.jwtService.signAsync(
-      { ...payload, iss: 'SELF' },
-      { secret, expiresIn },
-    );
+    try {
+      const signedToken = await this.jwtService.signAsync(
+        { ...payload, iss: 'SELF' },
+        { secret, expiresIn },
+      );
+      return signedToken;
+    } catch (err) {
+      Sentry.captureException(err);
+      throw err;
+    }
   }
 
   async verifyWithSecret(
     token: string,
     secret = getEnvironmentVariable('INTERNAL_SIGNING_SECRET'),
   ): Promise<IAuthTokenClaims> {
+    // Throws JsonWebTokenError: invalid signature if secret does not match signing secret
     const payload = await this.jwtService.verifyAsync(token, {
       secret,
     });
 
     // Validate payload
     if (!validateAuthTokenPayload(payload)) {
-      throw new Error('Error here');
+      throw new Error('Invalid token');
     }
 
     this.verifyExpiration(payload.exp);
     return payload;
   }
 
-  verifyExpiration(exp: number) {
-    if (Date.now() / 1000 > exp) {
+  verifyExpiration(expInSeconds: number) {
+    if (Date.now() > expInSeconds * 1000) {
       throw new Error('Access token expired');
     }
     return true;
   }
 }
+
+/**
+ * What does the class do?
+ * It utilizes the @nestjs/jwt package (which utilizes jsonwebtoken) to:
+ * 1) take JWT payload input and sign tokens
+ * 2) verify signed tokens and return JWT payloads
+ */
