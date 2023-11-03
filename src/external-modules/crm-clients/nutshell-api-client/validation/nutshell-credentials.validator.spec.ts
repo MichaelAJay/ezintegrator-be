@@ -13,7 +13,7 @@ describe('validateNutshellCredentials unit tests', () => {
     });
   });
   describe('invalid data', () => {
-    it('throws error with message "Data failed validation"', async () => {
+    it('returns false', async () => {
       const invalidResponse = {
         userName: 'NOTE CASING',
       };

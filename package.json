@@ -21,6 +21,7 @@
     "test:target": "npx jest --testPathPattern=internal-modules/security-utility/jwt-handler.service.*.spec.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "^9.1.0",
     "@google-cloud/secret-manager": "^5.0.1",
     "@nestjs/cache-manager": "^2.1.0",
     "@nestjs/common": "^10.0.0",
