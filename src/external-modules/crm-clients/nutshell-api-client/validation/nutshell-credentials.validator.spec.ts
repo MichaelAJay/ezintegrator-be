@@ -17,9 +17,8 @@ describe('validateNutshellCredentials unit tests', () => {
       const invalidResponse = {
         userName: 'NOTE CASING',
       };
-      expect(() => {
-        validateNutshellCredentials(invalidResponse);
-      }).toThrow('Data failed validation');
+      const result = validateNutshellCredentials(invalidResponse);
+      expect(result).toBe(false);
     });
   });
 });

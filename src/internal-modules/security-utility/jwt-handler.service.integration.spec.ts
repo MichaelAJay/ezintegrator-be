@@ -112,7 +112,7 @@ describe('JwtHandlerService', () => {
       );
 
       await expect(service.verifyWithSecret(INVALID_TOKEN)).rejects.toThrow(
-        'Data failed validation',
+        'Invalid token',
       );
     });
   });
