@@ -6,5 +6,6 @@ import { AccountAndCatererService } from './account-and-caterer.service';
 @Module({
   imports: [AccountAndCatererDbHandlerModule, UserModule],
   providers: [AccountAndCatererService],
+  exports: [AccountAndCatererService],
 })
 export class AccountAndCatererModule {}

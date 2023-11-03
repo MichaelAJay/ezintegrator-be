@@ -1,3 +1,11 @@
-import Ajv from 'ajv';
+import Ajv, { FormatDefinition } from 'ajv';
 
-export const ajv = new Ajv();
+const emailFormat: FormatDefinition<string> = {
+  validate: (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  },
+};
+
+export const ajv = new Ajv({ allErrors: true });
+ajv.addFormat('email', emailFormat);

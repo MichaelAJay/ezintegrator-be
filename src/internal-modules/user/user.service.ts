@@ -31,10 +31,15 @@ export class UserService implements IUserService {
 
     // Create user
     const dbHandlerArgs: ICreateUserDbQueryBuilderArgs = {
-      ...args,
+      email: args.email,
+      firstName: args.firstName,
       hashedPassword,
       salt,
+      accountId: args.accountId,
     };
+    if (args.lastName) {
+      dbHandlerArgs.lastName = args.lastName;
+    }
 
     const user = await this.userDbHandler.create(dbHandlerArgs);
 
