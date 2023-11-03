@@ -1,5 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtHandlerService } from 'src/internal-modules/security-utility/jwt-handler.service';
+
 import { GuardService } from '../guard/guard.service';
 
 @Injectable()
@@ -7,6 +9,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly guardService: GuardService,
+    private readonly jwtHandler: JwtHandlerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -20,6 +23,10 @@ export class AuthGuard implements CanActivate {
       }
 
       const req = context.switchToHttp().getRequest();
+      const token = this.guardService.getCookie(req, 'access_token');
+      const payload = await this.jwtHandler.verifyWithSecret(token);
+
+      req.userId = payload.sub;
 
       return true;
     } catch (err) {

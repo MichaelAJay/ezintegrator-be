@@ -4,6 +4,7 @@ import {
   Controller,
   Patch,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -11,6 +12,7 @@ import { AccountAndCatererService } from 'src/internal-modules/account-and-cater
 import { FastifyReply } from 'fastify';
 import { getEnvironmentVariable } from 'src/utility';
 import { createAccountAndUserApiValidator } from './validation/create-account-and-user.post.validator';
+import { AuthenticatedRequest } from '../types';
 
 @Controller('account')
 export class AccountController {
@@ -45,7 +47,12 @@ export class AccountController {
   }
 
   @Patch('secret')
-  async addAccountSecret(@Body() body: any, @Res() res: FastifyReply) {
+  async addAccountSecret(
+    @Body() body: any,
+    @Req() req: AuthenticatedRequest,
+    @Res() res: FastifyReply,
+  ) {
+    console.log(body);
     res.status(200).send();
   }
 }

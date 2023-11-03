@@ -1,3 +1,3 @@
 export interface IGuardServiceProvider {
-  getCookie(name: string): string;
+  getCookie(req: any, name: string): string;
 }
