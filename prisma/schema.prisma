@@ -13,6 +13,7 @@ datasource db {
 model Account {
   id               String                   @id @default(uuid())
   name             String
+  status           AccountStatus            @default(PENDING)
   ownerEmail       String
   contactEmail     String
   caterers         Caterer[]
@@ -20,6 +21,12 @@ model Account {
   crm              AccountCrm?
   processes        AccountEventProcess[]
   secretReferences AccountSecretReference[]
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
 }
 
 model AccountEventProcess {
