@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-handler';
+import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.module';
 import { SecurityUtilityModule } from '../security-utility';
 import { UserService } from './user.service';
 

@@ -1,9 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import {
-  ICreateUserDbQueryBuilderArgs,
-  UserDbHandlerService,
-} from '../external-handlers/db-handlers/user.db-handler';
+import { ICreateUserDbQueryBuilderArgs } from '../external-handlers/db-handlers/user.db-handler';
+import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
 import { ICreateUserArgs, IUserService } from './interfaces';

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DbClientModule } from '../../../../external-modules';
-import { UserDbHandlerService, UserDbQueryBuilderService } from '.';
+import { UserDbHandlerService } from './user.db-handler.service';
+import { UserDbQueryBuilderService } from './user.db-query-builder.service';
 
 @Module({
   imports: [DbClientModule],
