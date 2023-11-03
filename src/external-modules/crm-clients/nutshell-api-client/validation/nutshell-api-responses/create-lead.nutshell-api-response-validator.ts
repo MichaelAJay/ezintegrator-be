@@ -1,5 +1,4 @@
 import { JSONSchemaType } from 'ajv';
-import { validateWithAjv } from '../../../../../utility';
 import { ajv } from '../../../../../utility/singletons';
 import { NutshellApiResponseRequiredFields_CreateLead } from '../..';
 
@@ -28,9 +27,6 @@ const createLeadNutshellApiResponseValidationFunction = ajv.compile(
 export function validateCreateLeadNutshellResponse(
   data: unknown,
 ): data is NutshellApiResponseRequiredFields_CreateLead {
-  return validateWithAjv<NutshellApiResponseRequiredFields_CreateLead>(
-    data,
-    'NutshellApiResponseRequiredFields_CreateLead',
-    createLeadNutshellApiResponseValidationFunction,
-  );
+  const isValid = createLeadNutshellApiResponseValidationFunction(data);
+  return isValid;
 }

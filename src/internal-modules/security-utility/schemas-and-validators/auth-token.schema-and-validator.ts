@@ -1,5 +1,4 @@
 import { JSONSchemaType } from 'ajv';
-import { validateWithAjv } from '../../../utility';
 import { ajv } from '../../../utility/singletons';
 import { IAuthTokenClaims } from '../interfaces';
 
@@ -18,5 +17,6 @@ const authTokenPayloadValidator = ajv.compile(authTokenPayloadSchema);
 export function validateAuthTokenPayload(
   data: unknown,
 ): data is IAuthTokenClaims {
-  return validateWithAjv(data, 'IAuthTokenClaims', authTokenPayloadValidator);
+  const isValid = authTokenPayloadValidator(data);
+  return isValid;
 }

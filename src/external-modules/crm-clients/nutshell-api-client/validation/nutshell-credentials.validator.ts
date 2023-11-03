@@ -1,5 +1,4 @@
 import { JSONSchemaType } from 'ajv';
-import { validateWithAjv } from '../../../../utility';
 import { ajv } from '../../../../utility/singletons/ajv.singleton';
 import { INutshellCredentials } from '../interfaces';
 
@@ -19,9 +18,6 @@ export const nutshellCredentialsSchemaValidationFunction = ajv.compile(
 export function validateNutshellCredentials(
   data: unknown,
 ): data is INutshellCredentials {
-  return validateWithAjv<INutshellCredentials>(
-    data,
-    'INutshellCredentials',
-    nutshellCredentialsSchemaValidationFunction,
-  );
+  const isValid = nutshellCredentialsSchemaValidationFunction(data);
+  return isValid;
 }
