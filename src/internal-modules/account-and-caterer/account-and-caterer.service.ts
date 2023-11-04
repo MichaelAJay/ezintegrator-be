@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
@@ -16,13 +15,11 @@ import {
 } from './interfaces';
 import * as Sentry from '@sentry/node';
 import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
-import { retrieveSafeUserByIdWithAccountOwnerValidator } from '../external-handlers/db-handlers/user.db-handler/validators/retrieve-by-id.schemas-and-validators';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
 import {
   AccountSecretReferenceSecretTypeValues,
   AccountSecretReferenceTargetTypeValues,
 } from 'src/external-modules';
-import { validateRetrievedAccountOwnerWithUser } from '../external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-owner-with-user.schema-and-validator';
 
 @Injectable()
 export class AccountAndCatererService implements IAccountAndCatererService {
@@ -99,17 +96,50 @@ export class AccountAndCatererService implements IAccountAndCatererService {
       );
     }
 
-    // Working as intended to here
-    // const secretReference =
-    //   await this.accountAndCatererDbHandler.upsertAccountSecretReference(
-    //     accountId,
-    //     referenceType,
-    //     secretType,
-    //   );
-    // await this.secretManagerService.upsertSecretVersion(
-    //   secretReference.secretName,
-    //   secretPayload,
-    // );
+    const referenceId = '';
+
+    const secretReference =
+      await this.accountAndCatererDbHandler.upsertAccountSecretReference(
+        accountId,
+        referenceType,
+        referenceId,
+        secretType,
+      );
+    await this.secretManagerService.upsertSecretVersion(
+      secretReference.secretName,
+      secretPayload,
+    );
     return { success: true };
+  }
+
+  // This may need to handle 1:M too in the future
+  async getReferenceIdForAccountReferenceType(
+    accountId: string,
+    referenceType: AccountSecretReferenceTargetTypeValues,
+  ) {
+    /**
+     * User story:
+     * A user wants to add a secret of referenceType "Crm" to their record
+     * This operation should complete successfully if the associated account has a record of type "referenceType"
+     * This oepration should fail otherwise
+     */
+    let referenceId = '';
+    switch (referenceType) {
+      case 'CRM':
+        const accountCrm =
+          await this.accountAndCatererDbHandler.retrieveAccountCrm(accountId);
+        if (!accountCrm) {
+          throw new UnprocessableEntityException(
+            "The provided account hasn't configured a CRM yet.",
+          );
+        }
+        referenceId = accountCrm.crmId;
+        break;
+      default:
+        throw new UnprocessableEntityException(
+          `The user\'s associated account does not have the ${referenceType} configured yet.  Please do that first.`,
+        );
+    }
+    return referenceId;
   }
 }

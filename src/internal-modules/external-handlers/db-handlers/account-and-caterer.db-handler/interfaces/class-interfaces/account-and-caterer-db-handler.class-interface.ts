@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import {
   AccountSecretReferenceTargetTypeValues,
   AccountSecretReferenceSecretTypeValues,
@@ -23,11 +24,18 @@ export interface IAccountAndCatererDbHandler {
 
   // Account Crm management
   addAccountCrm(args: any): Promise<any>;
+  retrieveAccountCrm(accountId: string): Promise<{
+    accountId: string;
+    crmId: string;
+    nonSensitiveCredentials: Prisma.JsonValue;
+    isConfigured: boolean;
+  } | null>;
 
   // Account Secret Reference management
   upsertAccountSecretReference(
     accountId: string,
     referenceType: AccountSecretReferenceTargetTypeValues,
+    referenceId: string,
     secretType: AccountSecretReferenceSecretTypeValues,
   ): Promise<any>;
   retrieveAccountSecretReference(args: any): Promise<any>;

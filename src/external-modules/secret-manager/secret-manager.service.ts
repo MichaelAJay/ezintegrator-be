@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ISecretManagerProvider } from '.';
 import * as Sentry from '@sentry/node';
+import { getEnvironmentVariable } from 'src/utility';
 
 @Injectable()
 export class SecretManagerService implements ISecretManagerProvider {
@@ -15,7 +16,7 @@ export class SecretManagerService implements ISecretManagerProvider {
     @Inject('SecretManagerServiceClient')
     private readonly client: SecretManagerServiceClient,
   ) {
-    this.projectName = 'REPLACE';
+    this.projectName = getEnvironmentVariable('GCP_PROJECT');
   }
 
   async upsertSecretVersion(secretId: string, secretPayload: string | Buffer) {

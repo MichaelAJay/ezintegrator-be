@@ -69,16 +69,27 @@ export class AccountAndCatererDbQueryBuilderService
     throw new Error('Method not implemented.');
   }
 
+  buildRetrieveAccountCrmQuery(
+    accountId: string,
+  ): Prisma.AccountCrmFindUniqueArgs {
+    const query: Prisma.AccountCrmFindUniqueArgs = {
+      where: { accountId },
+    };
+    return query;
+  }
+
   // Account Secret management
   buildUpsertAccountSecretReferenceQuery(
     accountId: string,
     referenceType: AccountSecretReferenceTargetTypeValues,
+    referenceId: string,
     secretType: AccountSecretReferenceSecretTypeValues,
   ): Prisma.AccountSecretReferenceCreateArgs {
     const query: Prisma.AccountSecretReferenceCreateArgs = {
       data: {
         accountId,
         referenceType,
+        referenceId,
         secretType,
       },
     };

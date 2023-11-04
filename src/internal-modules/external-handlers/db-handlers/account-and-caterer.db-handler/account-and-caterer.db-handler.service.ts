@@ -67,6 +67,15 @@ export class AccountAndCatererDbHandlerService
     // The Add Account CRM process enables the requester to create the AccountCrm record
     // This should NOT handle business logic of whether or not any credentials are included - that should be at the service level - whatever calls this
   }
+  async retrieveAccountCrm(accountId: string): Promise<{
+    accountId: string;
+    crmId: string;
+    nonSensitiveCredentials: Prisma.JsonValue;
+    isConfigured: boolean;
+  } | null> {
+    const query = this.queryBuilder.buildRetrieveAccountCrmQuery(accountId);
+    return this.dbClient.accountCrm.findUnique(query);
+  }
 
   async updateAccountCrmQuery(
     accountId: string,
@@ -76,14 +85,19 @@ export class AccountAndCatererDbHandlerService
   }
 
   // Account Secret Reference management
+
+  // referenceId MUST enforce referential constraint at the APPLICATION-level
+  // Exp:  If referenceType is "CRM", then referenceId must be a valid id from the "Crm" table
   async upsertAccountSecretReference(
     accountId: string,
     referenceType: AccountSecretReferenceTargetTypeValues,
+    referenceId: string,
     secretType: AccountSecretReferenceSecretTypeValues,
   ): Promise<AccountSecretReference> {
     const query = this.queryBuilder.buildUpsertAccountSecretReferenceQuery(
       accountId,
       referenceType,
+      referenceId,
       secretType,
     );
     const result = await this.dbClient.accountSecretReference.create(query);

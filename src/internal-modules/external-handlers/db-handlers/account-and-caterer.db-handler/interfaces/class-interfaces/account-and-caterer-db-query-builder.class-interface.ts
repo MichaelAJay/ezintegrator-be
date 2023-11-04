@@ -27,10 +27,14 @@ export interface IAccountAndCatererDbQueryBuilder {
   // Account CRM management
   buildAddAccountCrmQuery(accountId: string, crmDetails: any): any;
   buildUpdateAccountCrmQuery(accountId: string, crmDetails: any): any;
+  buildRetrieveAccountCrmQuery(
+    accountId: string,
+  ): Prisma.AccountCrmFindUniqueArgs;
   // Account Secret management
   buildUpsertAccountSecretReferenceQuery(
     accountId: string,
     referenceType: AccountSecretReferenceTargetTypeValues,
+    referenceId: string,
     secretType: AccountSecretReferenceSecretTypeValues,
   ): Prisma.AccountSecretReferenceCreateArgs;
   buildRetrieveSecretReferenceQuery(

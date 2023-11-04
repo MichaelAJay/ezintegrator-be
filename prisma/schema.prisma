@@ -89,6 +89,7 @@ model AccountSecretReference {
   secretName    String                           @id @default(uuid())
   accountId     String
   referenceType AccountSecretReferenceTargetType
+  referenceId   String
   secretType    AccountSecretReferenceSecretType
 
   account Account @relation(fields: [accountId], references: [id])
