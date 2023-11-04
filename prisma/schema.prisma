@@ -44,7 +44,7 @@ model User {
   accountId      String
   account        Account         @relation(fields: [accountId], references: [id])
   archivedOrders ArchivedOrder[]
-  accountOwner   AccountOwner[]
+  ownedAccounts  AccountOwner[]
 
   @@unique([email])
   @@index([email], type: BTree)

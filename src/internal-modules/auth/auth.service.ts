@@ -3,6 +3,7 @@ import {
   NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { AccountAndCatererDbHandlerModule } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
@@ -65,9 +66,10 @@ export class AuthService implements IAuthService {
   }
 
   // Signs auth and refresh tokens, hashes refresh token, & saves refresh token on user record
-  async login(user: { id: string; salt: string }) {
+  async login(user: { id: string; salt: string; accountId: string }) {
     const tokens = await this.jwtHandler.signAuthAndRefreshTokens({
       sub: user.id,
+      acct: user.accountId,
     });
 
     const hashedRt = await this.cryptoHandler.hash(tokens.rt, user.salt);

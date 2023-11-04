@@ -1,4 +1,8 @@
 import { Prisma } from '@prisma/client';
+import {
+  AccountSecretReferenceTargetTypeValues,
+  AccountSecretReferenceSecretTypeValues,
+} from 'src/external-modules';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbQueryBuilder {
@@ -11,7 +15,12 @@ export interface IAccountAndCatererDbQueryBuilder {
   buildCreateAccountUserQuery(
     accountId: string,
     userId: string,
+    include?: Prisma.AccountOwnerInclude,
   ): Prisma.AccountOwnerCreateArgs;
+  buildRetrieveAccountAndOwnerPair(
+    accountId: string,
+    ownerId: string,
+  ): Prisma.AccountOwnerFindUniqueArgs;
   // Account Event management
   buildAddEventProcessQuery(accountId: string, process: any): any;
   buildRetrieveAccountEventProcessesQuery(accountId: string): any;
@@ -21,8 +30,9 @@ export interface IAccountAndCatererDbQueryBuilder {
   // Account Secret management
   buildUpsertAccountSecretReferenceQuery(
     accountId: string,
-    secretReferenceDetails: any,
-  ): any;
+    referenceType: AccountSecretReferenceTargetTypeValues,
+    secretType: AccountSecretReferenceSecretTypeValues,
+  ): Prisma.AccountSecretReferenceCreateArgs;
   buildRetrieveSecretReferenceQuery(
     accountId: string,
     secretReferenceDetails: any,

@@ -1,3 +1,7 @@
+import {
+  AccountSecretReferenceTargetTypeValues,
+  AccountSecretReferenceSecretTypeValues,
+} from 'src/external-modules';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -21,7 +25,11 @@ export interface IAccountAndCatererDbHandler {
   addAccountCrm(args: any): Promise<any>;
 
   // Account Secret Reference management
-  upsertAccountSecretReference(args: any): Promise<any>;
+  upsertAccountSecretReference(
+    accountId: string,
+    referenceType: AccountSecretReferenceTargetTypeValues,
+    secretType: AccountSecretReferenceSecretTypeValues,
+  ): Promise<any>;
   retrieveAccountSecretReference(args: any): Promise<any>;
 
   // Caterer management

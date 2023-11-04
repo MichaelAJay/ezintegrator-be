@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { DbClientService } from '../../../../external-modules';
+import {
+  AccountSecretReferenceSecretTypeValues,
+  AccountSecretReferenceTargetTypeValues,
+  DbClientService,
+} from '../../../../external-modules';
 import { AccountAndCatererDbQueryBuilderService } from './account-and-caterer.db-query-builder.service';
 import { IAccountAndCatererDbHandler, IBuildCreateAccountQueryArgs } from '.';
+import { AccountSecretReference, Prisma } from '@prisma/client';
 
 @Injectable()
 export class AccountAndCatererDbHandlerService
@@ -35,6 +40,19 @@ export class AccountAndCatererDbHandlerService
 
   async unassignAccountToOwner(accountId: string, ownerId: string) {}
 
+  async retrieveAccountAndOwnerPair(
+    accountId: string,
+    ownerId: string,
+    include?: Prisma.AccountOwnerInclude,
+  ) {
+    const query = this.queryBuilder.buildRetrieveAccountAndOwnerPair(
+      accountId,
+      ownerId,
+      include,
+    );
+    return this.dbClient.accountOwner.findUnique(query);
+  }
+
   // Account Event Process management
   async addAccountEventProcess(args: any): Promise<any> {
     throw new Error('Method not implemented.');
@@ -58,8 +76,18 @@ export class AccountAndCatererDbHandlerService
   }
 
   // Account Secret Reference management
-  async upsertAccountSecretReference(args: any): Promise<any> {
-    throw new Error('Method not implemented.');
+  async upsertAccountSecretReference(
+    accountId: string,
+    referenceType: AccountSecretReferenceTargetTypeValues,
+    secretType: AccountSecretReferenceSecretTypeValues,
+  ): Promise<AccountSecretReference> {
+    const query = this.queryBuilder.buildUpsertAccountSecretReferenceQuery(
+      accountId,
+      referenceType,
+      secretType,
+    );
+    const result = await this.dbClient.accountSecretReference.create(query);
+    return result;
   }
 
   async retrieveAccountSecretReference(args: any): Promise<any> {}

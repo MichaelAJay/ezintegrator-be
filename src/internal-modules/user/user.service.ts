@@ -49,6 +49,7 @@ export class UserService implements IUserService {
     const tokens = await this.authService.login({
       id: user.id,
       salt: user.salt,
+      accountId: user.accountId,
     });
     return { userId: user.id, tokens };
   }

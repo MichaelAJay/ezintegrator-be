@@ -8,8 +8,9 @@ const authTokenPayloadSchema: JSONSchemaType<IAuthTokenClaims> = {
     iss: { type: 'string' },
     sub: { type: 'string' },
     exp: { type: 'integer' },
+    acct: { type: 'string' },
   },
-  required: ['iss', 'sub'],
+  required: ['iss', 'sub', 'acct'],
   additionalProperties: true,
 };
 

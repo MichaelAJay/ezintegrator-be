@@ -12,8 +12,18 @@ export class UserDbQueryBuilderService implements IUserDbQueryBuilder {
     return { data: args };
   }
 
-  buildFindUniqueByIdQuery(id: string): Prisma.UserFindUniqueArgs {
-    return { where: { id } };
+  // Always excludes hashedPassword, hashedRt, and salt - these would never be needed if id is already available
+  buildFindUniqueByIdQuery<T extends Prisma.UserInclude | null>(
+    id: string,
+    include?: T,
+  ): Prisma.UserFindUniqueArgs {
+    const query: Prisma.UserFindUniqueArgs = {
+      where: { id },
+    };
+    if (include) {
+      query.include = include;
+    }
+    return query;
   }
 
   buildFindUniqueByEmailQuery(email: string): Prisma.UserFindUniqueArgs {

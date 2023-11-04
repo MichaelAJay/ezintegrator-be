@@ -49,18 +49,20 @@ export class AccountController {
 
   @Patch('secret')
   async upsertAccountSecret(
-    @Body() body: any,
+    @Body() body: unknown,
     @Req() req: AuthenticatedRequest,
     @Res() res: FastifyReply,
   ) {
     if (!upsertAccountSecretApiValidator(body)) {
-      throw new BadRequestException(createAccountAndUserApiValidator.errors);
+      throw new BadRequestException(upsertAccountSecretApiValidator.errors);
     }
-    await this.accountAndCatererService.upsertSecret(
+    const user = await this.accountAndCatererService.upsertSecret(
       req.userId,
-      body.name,
+      req.accountId,
+      body.referenceType,
+      body.secretType,
       body.value,
     );
-    res.status(200).send();
+    res.status(200).send(user);
   }
 }

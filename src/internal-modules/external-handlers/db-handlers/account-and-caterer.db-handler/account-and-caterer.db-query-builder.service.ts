@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import {
+  AccountSecretReferenceSecretTypeValues,
+  AccountSecretReferenceTargetTypeValues,
+} from 'src/external-modules';
+import {
   IAccountAndCatererDbQueryBuilder,
   IBuildCreateAccountQueryArgs,
 } from '.';
@@ -34,6 +38,19 @@ export class AccountAndCatererDbQueryBuilderService
     };
     return query;
   }
+  buildRetrieveAccountAndOwnerPair(
+    accountId: string,
+    ownerId: string,
+    include?: Prisma.AccountOwnerInclude,
+  ): Prisma.AccountOwnerFindUniqueArgs {
+    const query: Prisma.AccountOwnerFindUniqueArgs = {
+      where: { accountId_ownerId: { accountId, ownerId } },
+    };
+    if (include) {
+      query.include = include;
+    }
+    return query;
+  }
 
   // Account Event management
   buildAddEventProcessQuery(accountId: string, process: any) {
@@ -55,9 +72,17 @@ export class AccountAndCatererDbQueryBuilderService
   // Account Secret management
   buildUpsertAccountSecretReferenceQuery(
     accountId: string,
-    secretReferenceDetails: any,
-  ) {
-    throw new Error('Method not implemented.');
+    referenceType: AccountSecretReferenceTargetTypeValues,
+    secretType: AccountSecretReferenceSecretTypeValues,
+  ): Prisma.AccountSecretReferenceCreateArgs {
+    const query: Prisma.AccountSecretReferenceCreateArgs = {
+      data: {
+        accountId,
+        referenceType,
+        secretType,
+      },
+    };
+    return query;
   }
   buildRetrieveSecretReferenceQuery(
     accountId: string,
