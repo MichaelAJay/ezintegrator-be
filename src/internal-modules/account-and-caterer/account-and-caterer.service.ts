@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
 import { IBuildCreateAccountQueryArgs } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
@@ -14,6 +15,7 @@ export class AccountAndCatererService implements IAccountAndCatererService {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly userService: UserService,
+    private readonly secretManagerService: SecretManagerService,
   ) {}
 
   async createAccount(
@@ -43,5 +45,18 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     const tokens = await this.userService.create(createUserArgs);
 
     return tokens;
+  }
+
+  async upsertSecret(
+    userId: string,
+    secretName: string,
+    secretPayload: string | Buffer,
+  ) {
+    const secretId = 'UUID';
+
+    await this.secretManagerService.upsertSecretVersion(
+      secretId,
+      secretPayload,
+    );
   }
 }

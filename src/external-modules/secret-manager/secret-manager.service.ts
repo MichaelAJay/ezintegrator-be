@@ -18,7 +18,7 @@ export class SecretManagerService implements ISecretManagerProvider {
     this.projectName = 'REPLACE';
   }
 
-  async upsertSecretVersion(secretId: string, secretPayload: Buffer) {
+  async upsertSecretVersion(secretId: string, secretPayload: string | Buffer) {
     try {
       // Add secret version (assumes already versioned)
       await this.addSecretVersion(secretId, secretPayload);
@@ -45,13 +45,25 @@ export class SecretManagerService implements ISecretManagerProvider {
     });
   }
 
-  async addSecretVersion(secretId: string, secretPayload: Buffer) {
-    await this.client.addSecretVersion({
-      parent: `projects/${this.projectName}/secrets/${secretId}`,
-      payload: {
-        data: secretPayload,
-      },
-    });
+  async addSecretVersion(secretId: string, secretPayload: string | Buffer) {
+    // Convert if string here
+    const payloadBuffer =
+      typeof secretPayload === 'string'
+        ? Buffer.from(secretPayload, 'utf8')
+        : secretPayload;
+    try {
+      await this.client.addSecretVersion({
+        parent: `projects/${this.projectName}/secrets/${secretId}`,
+        payload: {
+          data: payloadBuffer,
+        },
+      });
+    } catch (err) {
+      Sentry.captureException(err);
+      throw err;
+    } finally {
+      payloadBuffer.fill(0);
+    }
   }
 
   async getSecret(secretName: string) {

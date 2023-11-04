@@ -14,13 +14,15 @@ model Account {
   id               String                   @id @default(uuid())
   name             String
   status           AccountStatus            @default(PENDING)
-  ownerEmail       String
+  ownerId          String                   @unique()
   contactEmail     String
   caterers         Caterer[]
+  owner            User                     @relation(fields: [ownerId], references: [id], name: "Owner")
   users            User[]
   crm              AccountCrm?
   processes        AccountEventProcess[]
   secretReferences AccountSecretReference[]
+  userId           String
 }
 
 enum AccountStatus {
@@ -234,6 +236,7 @@ model User {
   accountId      String
   account        Account         @relation(fields: [accountId], references: [id])
   archivedOrders ArchivedOrder[]
+  ownedAccount   Account         @relation(name: "Owner")
 
   @@unique([email])
   @@index([email], type: BTree)
