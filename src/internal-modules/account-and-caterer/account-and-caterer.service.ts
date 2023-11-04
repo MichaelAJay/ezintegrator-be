@@ -18,6 +18,8 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     private readonly secretManagerService: SecretManagerService,
   ) {}
 
+  // Special note:  The accountOwner relation is CRUCIAL to get right.  If any part of this fails, I have to manually roll everything back, because
+  // it can't be done in a transaction
   async createAccount(
     args: ICreateAccountAndUserArgs,
   ): Promise<IGetAuthAndRefreshTokens> {
@@ -42,7 +44,7 @@ export class AccountAndCatererService implements IAccountAndCatererService {
       createUserArgs.lastName = args.lastName;
     }
     // Await created user resolution - important for stack trace
-    const tokens = await this.userService.create(createUserArgs);
+    const { userId, tokens } = await this.userService.create(createUserArgs);
 
     return tokens;
   }

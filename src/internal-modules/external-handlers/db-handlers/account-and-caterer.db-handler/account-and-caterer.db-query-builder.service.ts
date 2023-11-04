@@ -25,6 +25,15 @@ export class AccountAndCatererDbQueryBuilderService
   buildUpdateAccountQuery(accountId: string, updates: Record<string, any>) {
     throw new Error('Method not implemented.');
   }
+  buildCreateAccountUserQuery(
+    accountId: string,
+    userId: string,
+  ): Prisma.AccountOwnerCreateArgs {
+    const query: Prisma.AccountOwnerCreateArgs = {
+      data: { accountId, ownerId: userId },
+    };
+    return query;
+  }
 
   // Account Event management
   buildAddEventProcessQuery(accountId: string, process: any) {

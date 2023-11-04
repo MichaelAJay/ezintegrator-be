@@ -2,5 +2,7 @@ import { IGetAuthAndRefreshTokens } from '../../../../internal-modules/security-
 import { ICreateUserArgs } from '../args';
 
 export interface IUserService {
-  create(args: ICreateUserArgs): Promise<IGetAuthAndRefreshTokens>;
+  create(
+    args: ICreateUserArgs,
+  ): Promise<{ userId: string; tokens: IGetAuthAndRefreshTokens }>;
 }

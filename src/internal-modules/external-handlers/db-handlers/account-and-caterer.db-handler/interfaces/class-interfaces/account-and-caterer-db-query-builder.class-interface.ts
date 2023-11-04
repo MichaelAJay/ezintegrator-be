@@ -8,6 +8,10 @@ export interface IAccountAndCatererDbQueryBuilder {
   ): Prisma.AccountCreateArgs;
   buildRetrieveAccountQuery(accountId: string): any;
   buildUpdateAccountQuery(accountId: string, updates: Record<string, any>): any;
+  buildCreateAccountUserQuery(
+    accountId: string,
+    userId: string,
+  ): Prisma.AccountOwnerCreateArgs;
   // Account Event management
   buildAddEventProcessQuery(accountId: string, process: any): any;
   buildRetrieveAccountEventProcessesQuery(accountId: string): any;

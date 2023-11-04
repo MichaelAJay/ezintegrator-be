@@ -14,15 +14,40 @@ model Account {
   id               String                   @id @default(uuid())
   name             String
   status           AccountStatus            @default(PENDING)
-  ownerId          String                   @unique()
+  ownerEmail       String
   contactEmail     String
   caterers         Caterer[]
-  owner            User                     @relation(fields: [ownerId], references: [id], name: "Owner")
   users            User[]
   crm              AccountCrm?
   processes        AccountEventProcess[]
   secretReferences AccountSecretReference[]
-  userId           String
+  accountOwner     AccountOwner?
+}
+
+model AccountOwner {
+  accountId String  @unique()
+  ownerId   String
+  account   Account @relation(fields: [accountId], references: [id])
+  owner     User    @relation(fields: [ownerId], references: id)
+
+  @@id([accountId, ownerId])
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String
+  firstName      String
+  lastName       String?
+  hashedPassword String
+  hashedRt       String?
+  salt           String
+  accountId      String
+  account        Account         @relation(fields: [accountId], references: [id])
+  archivedOrders ArchivedOrder[]
+  accountOwner   AccountOwner[]
+
+  @@unique([email])
+  @@index([email], type: BTree)
 }
 
 enum AccountStatus {
@@ -223,23 +248,6 @@ model ArchivedOrderItem {
   orderId    String
   order      ArchivedOrder @relation(fields: [orderId], references: [id])
   MenuItem   MenuItem?     @relation(fields: [menuItemId], references: [id])
-}
-
-model User {
-  id             String          @id @default(uuid())
-  email          String
-  firstName      String
-  lastName       String?
-  hashedPassword String
-  hashedRt       String?
-  salt           String
-  accountId      String
-  account        Account         @relation(fields: [accountId], references: [id])
-  archivedOrders ArchivedOrder[]
-  ownedAccount   Account         @relation(name: "Owner")
-
-  @@unique([email])
-  @@index([email], type: BTree)
 }
 
 model Crm {

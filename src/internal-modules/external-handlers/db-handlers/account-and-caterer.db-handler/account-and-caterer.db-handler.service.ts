@@ -25,6 +25,16 @@ export class AccountAndCatererDbHandlerService
     throw new Error('Method not implemented.');
   }
 
+  async assignAccountToOwner(accountId: string, ownerId: string) {
+    const query = this.queryBuilder.buildCreateAccountUserQuery(
+      accountId,
+      ownerId,
+    );
+    return this.dbClient.accountOwner.create(query);
+  }
+
+  async unassignAccountToOwner(accountId: string, ownerId: string) {}
+
   // Account Event Process management
   async addAccountEventProcess(args: any): Promise<any> {
     throw new Error('Method not implemented.');

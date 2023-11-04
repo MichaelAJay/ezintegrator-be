@@ -14,7 +14,9 @@ export class UserService implements IUserService {
     private readonly cryptoUtility: CryptoUtilityService,
     private readonly authService: AuthService,
   ) {}
-  async create(args: ICreateUserArgs): Promise<IGetAuthAndRefreshTokens> {
+  async create(
+    args: ICreateUserArgs,
+  ): Promise<{ userId: string; tokens: IGetAuthAndRefreshTokens }> {
     // Enforce unique email constraint
     const existingUser = await this.userDbHandler.retrieveByEmail(args.email);
     if (existingUser) {
@@ -48,6 +50,6 @@ export class UserService implements IUserService {
       id: user.id,
       salt: user.salt,
     });
-    return tokens;
+    return { userId: user.id, tokens };
   }
 }
