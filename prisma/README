@@ -1,15 +1,7 @@
-AccountCRM - should it include credentials?
-That way the AccountCRM table doesn't get a ton of unused data
+Topic: AccountSecretReference.referenceId referential integrity
+Each value in AccountSecretReferenceTargetType enum should correspond to a table of type Account*
+For each record in AccountSecretReference, the referenceId should match a record from the Account* table.
 
-For example, in Nutshell maybe I need username/apikey
-In Freshdesk, I need ... I dunno.  I dunno.
-
-The way that OrderTarget works:
-An orderTarget has a targetType.
-Take, for example, targetType = CRM.
-Then target externalHostId would be a CRM ID, from the CRM relation.
-externalHostId should reference SOME record.
-- If targetType is CRM, then externalHostId is a CRM.id
-
-externalHostRecordType references some targetType recordType.
-For example, if targetType is CRM, then externalHostRecordType is a CRMRecordType
+Example:
+For AccountSecretReferenceTargetType = "CRM", there is a corresponding AccountCRM table.
+For a record in AccountSecretReference, for any record with referenceType = "CRM", referenceId MUST reference some record's PK from the Crm table.
