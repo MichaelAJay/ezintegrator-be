@@ -88,63 +88,28 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     secretType: AccountSecretReferenceSecretTypeValues,
     secretPayload: string | Buffer,
   ) {
-    const accountOwnerWithOwner =
-      await this.accountAndCatererDbHandler.retrieveAccountAndOwnerPair(
+    if (
+      !(await this.accountPermissionService.canUserEditSecretsForAccount(
         accountId,
         userId,
-        { owner: true },
-      );
-    if (!accountOwnerWithOwner) {
-      throw new NotFoundException(
-        'Record not found. This may occur when the requesting user is not permissioned to carry out the requested action.',
-      );
-    }
-
-    if (!validateRetrievedAccountOwnerWithUser(accountOwnerWithOwner)) {
-      console.error(validateRetrievedAccountOwnerWithUser.errors);
-      const err = new UnprocessableEntityException('Data failed validation');
-      Sentry.withScope((scope) => {
-        scope.setExtras({
-          failedValidator: 'validateRetrievedAccountOwnerWithUser',
-          data: JSON.stringify(accountOwnerWithOwner),
-        });
-        Sentry.captureException(err);
-      });
-      throw err;
-    }
-
-    const user = accountOwnerWithOwner.owner;
-
-    if (
-      !this.accountPermissionService.canUserEditSecretsForAccount(
-        accountOwnerWithOwner,
-        accountId,
-      )
+      ))
     ) {
-      const err = new UnauthorizedException(
-        'User may not edit secrets for the account',
+      throw new NotFoundException(
+        'Permission not found.  This may occur if the requesting user does not have permission to fulfill the given request.',
       );
-      Sentry.withScope((scope) => {
-        scope.setExtras({ accountId, userId });
-        Sentry.captureException(err);
-      });
-      throw err;
     }
-    return user;
-    // Working as intended to here
 
+    // Working as intended to here
     // const secretReference =
     //   await this.accountAndCatererDbHandler.upsertAccountSecretReference(
     //     accountId,
     //     referenceType,
     //     secretType,
     //   );
-
     // await this.secretManagerService.upsertSecretVersion(
     //   secretReference.secretName,
     //   secretPayload,
     // );
-
-    // return { success: true };
+    return { success: true };
   }
 }
