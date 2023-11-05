@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IBuildCreateAccountQueryArgs } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
@@ -9,12 +9,17 @@ import {
   ICreateAccountAndUserArgs,
 } from './interfaces';
 import * as Sentry from '@sentry/node';
+import { AccountIntegrationType } from './types';
+import { CrmIntegrationDbHandlerService } from '../external-handlers/db-handlers/integrations/crm-integration.db-handler/crm-integration.db-handler.service';
+import { getIntegrationConfigurationTemplate } from './utility/get-integration-configuration-template.utility-function';
+import { IAccountIntegrationFieldConfigurationJson } from './interfaces/account-integration-fields.json-interface';
 
 @Injectable()
 export class AccountAndCatererService implements IAccountAndCatererService {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly userService: UserService,
+    private readonly crmIntegrationDbHandler: CrmIntegrationDbHandlerService,
   ) {}
 
   // Special note:  The accountOwner relation is CRUCIAL to get right.  If any part of this fails, I have to manually roll everything back, because
@@ -62,5 +67,31 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     }
 
     return tokens;
+  }
+
+  // Integrations
+  async getAccountIntegrations() {}
+
+  async getAccountIntegrationConfigurationRequirements(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ): Promise<IAccountIntegrationFieldConfigurationJson[]> {
+    let configurationRequirements: IAccountIntegrationFieldConfigurationJson[] =
+      [];
+    switch (integrationType) {
+      case 'CRM':
+        const crm = await this.crmIntegrationDbHandler.retrieveCrm(
+          integrationId,
+        );
+        configurationRequirements = getIntegrationConfigurationTemplate(
+          crm.configuration,
+        );
+        break;
+      default:
+        throw new NotFoundException(
+          'No configuration requirements found for the provided integration type.',
+        );
+    }
+    return configurationRequirements;
   }
 }

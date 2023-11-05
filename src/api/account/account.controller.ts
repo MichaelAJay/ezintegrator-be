@@ -14,9 +14,10 @@ import { getEnvironmentVariable } from 'src/utility';
 import { createAccountAndUserApiValidator } from './validation/create-account-and-user.post.validator';
 import { AuthenticatedRequest } from '../types';
 import { addSecretRequestPayloadValidator } from './validation/add-secret.schema-and-validator';
+import { IAccountController } from './interfaces';
 
 @Controller('account')
-export class AccountController {
+export class AccountController implements IAccountController {
   constructor(
     private readonly accountAndCatererService: AccountAndCatererService,
   ) {}

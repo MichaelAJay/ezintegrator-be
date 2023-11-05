@@ -6,6 +6,7 @@ import { AccountApiModule } from './api/account/account.module';
 import { AuthApiModule } from './api/auth/auth.module';
 import { AuthGuard } from './api/guards/auth/auth.guard';
 import { GuardService } from './api/guards/guard/guard.service';
+import { IntegrationApiModule } from './api/integration/integration.module';
 import { SecurityUtilityModule } from './internal-modules/security-utility';
 
 @Module({
@@ -14,6 +15,7 @@ import { SecurityUtilityModule } from './internal-modules/security-utility';
     ConfigModule.forRoot(),
     AccountApiModule,
     AuthApiModule,
+    IntegrationApiModule,
     SecurityUtilityModule,
   ],
   controllers: [],
