@@ -3,7 +3,6 @@ import {
   NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AccountAndCatererDbHandlerModule } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';

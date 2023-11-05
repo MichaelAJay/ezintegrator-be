@@ -1,3 +1,4 @@
+import { AccountCrm } from '@prisma/client';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -16,6 +17,11 @@ export interface IAccountAndCatererDbHandler {
   // Account Event Process management
   addAccountEventProcess(args: any): Promise<any>;
   retrieveAccountEventProcesses(args: any): Promise<any>;
+
+  // Account CRM management
+  addAccountCrm(args: any): Promise<any>;
+  retrieveAccountCrms(accountId: string): Promise<AccountCrm[]>;
+  retrieveAccountCrmById(accountCrmId: string): Promise<AccountCrm | null>;
 
   // Caterer management
   createCaterer(args: any): Promise<any>;

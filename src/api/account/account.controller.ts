@@ -13,6 +13,7 @@ import { FastifyReply } from 'fastify';
 import { getEnvironmentVariable } from 'src/utility';
 import { createAccountAndUserApiValidator } from './validation/create-account-and-user.post.validator';
 import { AuthenticatedRequest } from '../types';
+import { addSecretRequestPayloadValidator } from './validation/add-secret.schema-and-validator';
 
 @Controller('account')
 export class AccountController {
@@ -52,7 +53,19 @@ export class AccountController {
     @Req() req: AuthenticatedRequest,
     @Res() res: FastifyReply,
   ) {
+    if (!addSecretRequestPayloadValidator(body)) {
+      throw new BadRequestException(addSecretRequestPayloadValidator.errors);
+    }
+
     // @TODO
     res.status(200).send();
   }
 }
+
+// If I'm going to use one method to create a secret, what does it need to include
+/**
+ * 1) The payload itself.  This is the string method
+ * 2) The Integration type - e.g. the "Crm" in "AccountCrmSecretReference"
+ * 3) The secret type - e.g. "Api-key"
+ * 4) The target - e.g. for integrationType = "CRM", targetId should be an AccountCrm.id
+ */

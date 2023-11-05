@@ -6,7 +6,7 @@ import {
 import { validateRetrievedAccountOwnerWithUser } from '../external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-owner-with-user.schema-and-validator';
 import { IAccountPermissionProvider } from './interfaces';
 import * as Sentry from '@sentry/node';
-import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
+import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 
 @Injectable()
 export class AccountPermissionService implements IAccountPermissionProvider {

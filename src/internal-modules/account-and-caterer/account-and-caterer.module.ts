@@ -16,6 +16,6 @@ import { AccountSecretService } from './account-secret.service';
     SecurityUtilityModule,
   ],
   providers: [AccountAndCatererService, AccountSecretService],
-  exports: [AccountAndCatererService],
+  exports: [AccountAndCatererService, AccountSecretService],
 })
 export class AccountAndCatererModule {}

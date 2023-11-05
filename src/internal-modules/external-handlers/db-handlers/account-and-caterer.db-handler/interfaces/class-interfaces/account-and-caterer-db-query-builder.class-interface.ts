@@ -26,6 +26,9 @@ export interface IAccountAndCatererDbQueryBuilder {
   buildRetrieveAccountCrmsQuery(
     accountId: string,
   ): Prisma.AccountCrmFindManyArgs;
+  buildRetrieveAccountCrmQuery(
+    accountCrmId: string,
+  ): Prisma.AccountCrmFindUniqueArgs;
   // Account Caterer management
   buildCreateCatererQuery(accountId: string, catererDetails: any): any;
   buildRetrieveCatererQuery(args: any): any;

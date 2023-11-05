@@ -74,6 +74,15 @@ export class AccountAndCatererDbQueryBuilderService
     return query;
   }
 
+  buildRetrieveAccountCrmQuery(
+    accountCrmId: string,
+  ): Prisma.AccountCrmFindUniqueArgs {
+    const query: Prisma.AccountCrmFindUniqueArgs = {
+      where: { id: accountCrmId },
+    };
+    return query;
+  }
+
   // Account Caterer management
   buildCreateCatererQuery(accountId: string, catererDetails: any) {
     throw new Error('Method not implemented.');

@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AccountSecretReferenceSecretTypeValues,
-  DbClientService,
-} from '../../../../external-modules';
+import { DbClientService } from '../../../../external-modules';
 import { AccountAndCatererDbQueryBuilderService } from './account-and-caterer.db-query-builder.service';
 import { IAccountAndCatererDbHandler, IBuildCreateAccountQueryArgs } from '.';
 import { AccountCrm, Prisma } from '@prisma/client';
@@ -69,6 +66,12 @@ export class AccountAndCatererDbHandlerService
   async retrieveAccountCrms(accountId: string): Promise<AccountCrm[]> {
     const query = this.queryBuilder.buildRetrieveAccountCrmsQuery(accountId);
     return this.dbClient.accountCrm.findMany(query);
+  }
+  async retrieveAccountCrmById(
+    accountCrmId: string,
+  ): Promise<AccountCrm | null> {
+    const query = this.queryBuilder.buildRetrieveAccountCrmQuery(accountCrmId);
+    return this.dbClient.accountCrm.findUnique(query);
   }
 
   async updateAccountCrmQuery(

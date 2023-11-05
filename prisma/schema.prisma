@@ -76,20 +76,20 @@ enum EventProcess {
 }
 
 model AccountCrm {
-  id                      String             @id @default(uuid())
+  id                      String                      @id @default(uuid())
   accountId               String
   crmId                   String
   nonSensitiveCredentials Json?
-  isConfigured            Boolean            @default(false)
-  account                 Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  crm                     Crm                @relation(fields: [crmId], references: [id])
-  secrets                 AccountCrmSecret[]
+  isConfigured            Boolean                     @default(false)
+  account                 Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  crm                     Crm                         @relation(fields: [crmId], references: [id])
+  crmSecretRefs           AccountCrmSecretReference[]
 
   @@unique([accountId, crmId])
   @@index([accountId], type: BTree)
 }
 
-model AccountCrmSecret {
+model AccountCrmSecretReference {
   secretName   String                           @id @default(uuid())
   type         AccountSecretReferenceSecretType
   accountCrmId String
@@ -250,9 +250,10 @@ model ArchivedOrderItem {
 }
 
 model Crm {
-  id          String       @id @default(uuid())
-  name        CrmName      @unique()
-  accountCrms AccountCrm[]
+  id            String       @id @default(uuid())
+  name          CrmName      @unique()
+  configuration Json
+  accountCrms   AccountCrm[]
 }
 
 enum CrmName {
