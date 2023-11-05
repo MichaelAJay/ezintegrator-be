@@ -1,8 +1,3 @@
-import { Prisma } from '@prisma/client';
-import {
-  AccountSecretReferenceTargetTypeValues,
-  AccountSecretReferenceSecretTypeValues,
-} from 'src/external-modules';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -21,24 +16,6 @@ export interface IAccountAndCatererDbHandler {
   // Account Event Process management
   addAccountEventProcess(args: any): Promise<any>;
   retrieveAccountEventProcesses(args: any): Promise<any>;
-
-  // Account Crm management
-  addAccountCrm(args: any): Promise<any>;
-  retrieveAccountCrm(accountId: string): Promise<{
-    accountId: string;
-    crmId: string;
-    nonSensitiveCredentials: Prisma.JsonValue;
-    isConfigured: boolean;
-  } | null>;
-
-  // Account Secret Reference management
-  upsertAccountSecretReference(
-    accountId: string,
-    referenceType: AccountSecretReferenceTargetTypeValues,
-    referenceId: string,
-    secretType: AccountSecretReferenceSecretTypeValues,
-  ): Promise<any>;
-  retrieveAccountSecretReference(args: any): Promise<any>;
 
   // Caterer management
   createCaterer(args: any): Promise<any>;

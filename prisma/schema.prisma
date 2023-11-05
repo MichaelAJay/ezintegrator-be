@@ -11,17 +11,16 @@ datasource db {
 }
 
 model Account {
-  id               String                   @id @default(uuid())
-  name             String
-  status           AccountStatus            @default(PENDING)
-  ownerEmail       String
-  contactEmail     String
-  caterers         Caterer[]
-  users            User[]
-  crm              AccountCrm?
-  processes        AccountEventProcess[]
-  secretReferences AccountSecretReference[]
-  accountOwner     AccountOwner?
+  id           String                @id @default(uuid())
+  name         String
+  status       AccountStatus         @default(PENDING)
+  ownerEmail   String
+  contactEmail String
+  caterers     Caterer[]
+  users        User[]
+  crms         AccountCrm[]
+  processes    AccountEventProcess[]
+  accountOwner AccountOwner?
 }
 
 model AccountOwner {
@@ -77,28 +76,27 @@ enum EventProcess {
 }
 
 model AccountCrm {
-  accountId               String  @id
+  id                      String             @id @default(uuid())
+  accountId               String
   crmId                   String
   nonSensitiveCredentials Json?
-  isConfigured            Boolean @default(false)
-  account                 Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  crm                     Crm     @relation(fields: [crmId], references: [id])
-}
+  isConfigured            Boolean            @default(false)
+  account                 Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  crm                     Crm                @relation(fields: [crmId], references: [id])
+  secrets                 AccountCrmSecret[]
 
-model AccountSecretReference {
-  secretName    String                           @id @default(uuid())
-  accountId     String
-  referenceType AccountSecretReferenceTargetType
-  referenceId   String // VERY IMPORTANT:  Application MUST enforce referential integrity.  See section in README from same directory
-  secretType    AccountSecretReferenceSecretType
-
-  account Account @relation(fields: [accountId], references: [id])
-
+  @@unique([accountId, crmId])
   @@index([accountId], type: BTree)
 }
 
-enum AccountSecretReferenceTargetType {
-  CRM
+model AccountCrmSecret {
+  secretName   String                           @id @default(uuid())
+  type         AccountSecretReferenceSecretType
+  accountCrmId String
+  accountCrm   AccountCrm                       @relation(fields: [accountCrmId], references: [id])
+
+  @@unique([type, accountCrmId])
+  @@index([accountCrmId], type: BTree)
 }
 
 enum AccountSecretReferenceSecretType {
