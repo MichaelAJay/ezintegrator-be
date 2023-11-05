@@ -13,7 +13,6 @@ import { FastifyReply } from 'fastify';
 import { getEnvironmentVariable } from 'src/utility';
 import { createAccountAndUserApiValidator } from './validation/create-account-and-user.post.validator';
 import { AuthenticatedRequest } from '../types';
-import { upsertAccountSecretApiValidator } from './validation/upsert-secret.validator';
 
 @Controller('account')
 export class AccountController {
@@ -53,16 +52,7 @@ export class AccountController {
     @Req() req: AuthenticatedRequest,
     @Res() res: FastifyReply,
   ) {
-    if (!upsertAccountSecretApiValidator(body)) {
-      throw new BadRequestException(upsertAccountSecretApiValidator.errors);
-    }
-    const user = await this.accountAndCatererService.upsertSecret(
-      req.userId,
-      req.accountId,
-      body.referenceType,
-      body.secretType,
-      body.value,
-    );
-    res.status(200).send(user);
+    // @TODO
+    res.status(200).send();
   }
 }

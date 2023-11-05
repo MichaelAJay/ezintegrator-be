@@ -1,8 +1,4 @@
 import { Prisma } from '@prisma/client';
-import {
-  AccountSecretReferenceTargetTypeValues,
-  AccountSecretReferenceSecretTypeValues,
-} from 'src/external-modules';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbQueryBuilder {
@@ -27,20 +23,9 @@ export interface IAccountAndCatererDbQueryBuilder {
   // Account CRM management
   buildAddAccountCrmQuery(accountId: string, crmDetails: any): any;
   buildUpdateAccountCrmQuery(accountId: string, crmDetails: any): any;
-  buildRetrieveAccountCrmQuery(
+  buildRetrieveAccountCrmsQuery(
     accountId: string,
-  ): Prisma.AccountCrmFindUniqueArgs;
-  // Account Secret management
-  buildUpsertAccountSecretReferenceQuery(
-    accountId: string,
-    referenceType: AccountSecretReferenceTargetTypeValues,
-    referenceId: string,
-    secretType: AccountSecretReferenceSecretTypeValues,
-  ): Prisma.AccountSecretReferenceCreateArgs;
-  buildRetrieveSecretReferenceQuery(
-    accountId: string,
-    secretReferenceDetails: any,
-  ): any;
+  ): Prisma.AccountCrmFindManyArgs;
   // Account Caterer management
   buildCreateCatererQuery(accountId: string, catererDetails: any): any;
   buildRetrieveCatererQuery(args: any): any;

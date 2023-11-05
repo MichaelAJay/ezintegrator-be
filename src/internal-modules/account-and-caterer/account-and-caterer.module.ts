@@ -5,6 +5,7 @@ import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-ha
 import { SecurityUtilityModule } from '../security-utility';
 import { UserModule } from '../user/user.module';
 import { AccountAndCatererService } from './account-and-caterer.service';
+import { AccountSecretService } from './account-secret.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { AccountAndCatererService } from './account-and-caterer.service';
     SecretManagerModule,
     SecurityUtilityModule,
   ],
-  providers: [AccountAndCatererService],
+  providers: [AccountAndCatererService, AccountSecretService],
   exports: [AccountAndCatererService],
 })
 export class AccountAndCatererModule {}

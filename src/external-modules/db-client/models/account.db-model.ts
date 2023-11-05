@@ -3,7 +3,6 @@ import {
   AccountCrm,
   AccountEventProcess,
   AccountSecretReferenceSecretType,
-  AccountSecretReferenceTargetType as AccountSecretReferenceTargetTypeType,
 } from '@prisma/client';
 
 export type AccountDbModel = Account;
@@ -14,7 +13,5 @@ export type FullAccountModel = AccountDbModel & {
   processes: AccountEventProcessModel[];
 };
 
-export type AccountSecretReferenceTargetTypeValues =
-  AccountSecretReferenceTargetTypeType;
 export type AccountSecretReferenceSecretTypeValues =
   AccountSecretReferenceSecretType;
