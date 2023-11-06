@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify';
-import { AuthenticatedRequest } from 'src/api/types';
+import { AuthenticatedRequest } from '../../../api/types';
 export interface IAccountController {
   // General
   createAccountAndUser(body: unknown, response: FastifyReply): any;

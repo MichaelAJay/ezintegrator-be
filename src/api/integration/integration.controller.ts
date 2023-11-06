@@ -1,5 +1,5 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
-import { IntegrationUtilityService } from 'src/internal-modules/integration-utility/integration-utility.service';
+import { IntegrationUtilityService } from '../../internal-modules/integration-utility/integration-utility.service';
 import { IIntegrationController } from './interfaces';
 import { validateIntegrationType } from './validators/integration-type.validator';
 

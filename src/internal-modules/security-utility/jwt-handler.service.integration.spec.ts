@@ -24,6 +24,7 @@ describe('JwtHandlerService', () => {
     it('returns a string if jwtService.signAsync resolves', async () => {
       const payload: Omit<IAuthTokenClaims, 'iss' | 'exp'> = {
         sub: 'MOCK_USER_ID',
+        acct: 'MOCK_ACCT_ID',
       };
       const secret = 'MOCK_SECRET';
       const token = await service.signWithSecret(payload, '1h', secret);
@@ -50,6 +51,7 @@ describe('JwtHandlerService', () => {
     it('throws an error if "expiresIn" is invalid', async () => {
       const payload: Omit<IAuthTokenClaims, 'iss' | 'exp'> = {
         sub: 'MOCK_USER_ID',
+        acct: 'MOCK_ACCT_ID',
       };
       const secret = 'MOCK_SECRET';
       const INVALID_EXPIRES_IN = '@@@';
@@ -65,6 +67,7 @@ describe('JwtHandlerService', () => {
     it('throws an error if "secret" is invalid', async () => {
       const payload: Omit<IAuthTokenClaims, 'iss' | 'exp'> = {
         sub: 'MOCK_USER_ID',
+        acct: 'MOCK_ACCT_ID',
       };
       const INVALID_SECRET = 100;
 
@@ -84,9 +87,10 @@ describe('JwtHandlerService', () => {
   });
   describe('verifyWithSecret tests', () => {
     it('returns payload if incoming token is valid and has not expired', async () => {
-      const partialPayload = { sub: 'MOCK_USER_ID' };
+      const partialPayload = { sub: 'MOCK_USER_ID', acct: 'MOCK_ACCT_ID' };
       const validToken = await service.signAuthToken({
         sub: partialPayload.sub,
+        acct: partialPayload.acct,
       });
       const result = await service.verifyWithSecret(validToken);
 
@@ -97,7 +101,7 @@ describe('JwtHandlerService', () => {
       expect(typeof result.exp).toBe('number');
     });
     it('throws error if secret passed in to verifyAsync does not match secret used to sign token', async () => {
-      const partialPayload = { sub: 'MOCK_USER_ID' };
+      const partialPayload = { sub: 'MOCK_USER_ID', acct: 'MOCK_ACCT_ID' };
       const validToken = await service.signAuthToken(partialPayload);
       process.env.INTERNAL_SIGNING_SECRET = 'DIFFERENT_SECRET';
       await expect(service.verifyWithSecret(validToken)).rejects.toThrow(

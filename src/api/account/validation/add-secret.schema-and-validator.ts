@@ -1,8 +1,8 @@
 import { JSONSchemaType } from 'ajv';
-import { accountSecretReferenceTypeValues } from 'src/external-modules/db-client/types/account-secret.types';
-import { IAddCrmSecretArgs } from 'src/internal-modules/account-and-caterer/interfaces';
-import { accountIntegrationValues } from 'src/internal-modules/account-and-caterer/types';
-import { ajv } from 'src/utility/singletons';
+import { accountSecretReferenceTypeValues } from '../../../external-modules/db-client/types/account-secret.types';
+import { IAddCrmSecretArgs } from '../../../internal-modules/account-and-caterer/interfaces';
+import { accountIntegrationValues } from '../../../internal-modules/account-and-caterer/types';
+import { ajv } from '../../../utility/singletons';
 
 const addSecretRequestPayloadSchema: JSONSchemaType<IAddCrmSecretArgs> = {
   type: 'object',

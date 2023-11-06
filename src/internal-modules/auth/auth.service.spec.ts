@@ -10,13 +10,13 @@ import {
   mockCryptoUtility,
   mockJwtHander,
 } from '../../../test-utilities/mocks/providers/internal-modules/security-utility';
-import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
 import { JwtHandlerService } from '../security-utility/jwt-handler.service';
 import { AuthService } from './auth.service';
 import { ILoginArgs } from './interfaces';
 import { mockReturnLogin } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
 import { mockReturnJwtHandlerVerifyWithSecret } from '../../../test-utilities/mocks/returns/internal-modules/security-utility/jwt-handler-service.returns';
+import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -456,7 +456,11 @@ describe('AuthService', () => {
   });
 
   describe('login unit tests', () => {
-    const loginArgs = { id: 'MOCK_USER_ID', salt: 'MOCK_SALT' };
+    const loginArgs = {
+      id: 'MOCK_USER_ID',
+      salt: 'MOCK_SALT',
+      accountId: 'MOCK_ACCT_ID',
+    };
     it('calls jwtHandler.signAuthAndRefreshTokens with the correct args', async () => {
       const spy = jest
         .spyOn(jwtHandler, 'signAuthAndRefreshTokens')
@@ -466,12 +470,14 @@ describe('AuthService', () => {
       await expect(service.login(loginArgs)).rejects.toThrow();
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({ sub: loginArgs.id });
+      expect(spy).toHaveBeenCalledWith({
+        sub: loginArgs.id,
+        acct: loginArgs.accountId,
+      });
     });
     describe('jwtHandler.signAuthAndRefreshTokens resolves', () => {
       const mockTokens = mockReturnLogin();
       it('calls cryptoHandler.hash with the correct args', async () => {
-        const mockTokens = mockReturnLogin();
         jest
           .spyOn(jwtHandler, 'signAuthAndRefreshTokens')
           .mockResolvedValue(mockTokens);

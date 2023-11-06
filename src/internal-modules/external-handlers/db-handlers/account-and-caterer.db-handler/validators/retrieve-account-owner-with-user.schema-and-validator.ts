@@ -1,6 +1,6 @@
 import { AccountOwner, User } from '@prisma/client';
 import { JSONSchemaType } from 'ajv';
-import { ajv } from 'src/utility/singletons';
+import { ajv } from '../../../../../utility/singletons';
 
 export type AccountOwnerWithUser = AccountOwner & {
   owner: User;

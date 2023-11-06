@@ -1,5 +1,5 @@
 import { JSONSchemaType } from 'ajv';
-import { ajv } from 'src/utility/singletons';
+import { ajv } from '../../../utility/singletons';
 import { IAccountIntegrationFieldConfigurationJson } from '../interfaces/account-integration-fields.json-interface';
 
 const accountIntegrationConfigurationTemplateSchema: JSONSchemaType<

@@ -5,9 +5,9 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
-import { Public } from 'src/common/decorators/public.decorator';
-import { AuthService } from 'src/internal-modules/auth/auth.service';
-import { getEnvironmentVariable } from 'src/utility';
+import { Public } from '../../common/decorators/public.decorator';
+import { AuthService } from '../../internal-modules/auth/auth.service';
+import { getEnvironmentVariable } from '../../utility';
 import { FastifyReply } from 'fastify';
 import { validateLoginRequestPayload } from './validation/login.validator';
 

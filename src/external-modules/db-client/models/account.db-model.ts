@@ -3,6 +3,7 @@ import {
   AccountCrm,
   AccountEventProcess,
   AccountSecretReferenceSecretType,
+  AccountStatus,
 } from '@prisma/client';
 
 export type AccountDbModel = Account;
@@ -15,3 +16,5 @@ export type FullAccountModel = AccountDbModel & {
 
 export type AccountSecretReferenceSecretTypeValues =
   AccountSecretReferenceSecretType;
+
+export type AccountStatusValues = AccountStatus;

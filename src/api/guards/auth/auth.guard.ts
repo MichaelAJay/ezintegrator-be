@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtHandlerService } from 'src/internal-modules/security-utility/jwt-handler.service';
+import { JwtHandlerService } from '../../../internal-modules/security-utility/jwt-handler.service';
 
 import { GuardService } from '../guard/guard.service';
 

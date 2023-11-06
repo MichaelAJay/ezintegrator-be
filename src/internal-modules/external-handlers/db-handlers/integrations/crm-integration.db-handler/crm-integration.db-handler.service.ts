@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Crm } from '@prisma/client';
-import { DbClientService } from 'src/external-modules';
+import { DbClientService } from '../../../../../external-modules';
 import { CrmIntegrationDbQueryBuilderService } from './crm-integration.db-query-builder.service';
 import { ICrmIntegrationDbHandlerProvider } from './interfaces';
 

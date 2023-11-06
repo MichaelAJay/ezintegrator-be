@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AccountCrmSecretReference, Prisma } from '@prisma/client';
-import { DbClientService } from 'src/external-modules';
+import { DbClientService } from '../../../../external-modules';
 import { AccountSecretDbQueryBuilderService } from './account-secret.db-query-builder.service';
 import { IAccountSecretDbHandlerProvider } from './interfaces/class-interfaces/account-secret-db-handler.class-interface';
 

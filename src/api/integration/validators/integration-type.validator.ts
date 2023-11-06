@@ -1,7 +1,7 @@
 import {
   AccountIntegrationType,
   accountIntegrationValues,
-} from 'src/internal-modules/account-and-caterer/types';
+} from '../../../internal-modules/account-and-caterer/types';
 
 export function validateIntegrationType(
   integrationType: any,

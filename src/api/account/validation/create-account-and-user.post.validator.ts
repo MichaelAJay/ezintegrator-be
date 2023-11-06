@@ -1,7 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import { ICreateAccountAndUserArgs } from 'src/internal-modules/account-and-caterer/interfaces';
-import { ajv } from 'src/utility/singletons';
-
+import { ICreateAccountAndUserArgs } from '../../../internal-modules/account-and-caterer/interfaces';
+import { ajv } from '../../../utility/singletons';
 const schema: JSONSchemaType<ICreateAccountAndUserArgs> = {
   type: 'object',
   properties: {

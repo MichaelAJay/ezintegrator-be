@@ -7,7 +7,6 @@ import {
 import { IAccountIntegrationProvider } from './interfaces';
 import { IAccountIntegrationFieldConfigurationJson } from './interfaces/account-integration-fields.json-interface';
 import * as Sentry from '@sentry/node';
-import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { validateAccountCrmWithCrmAndSecretReferences } from '../external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-crm-with-crm-and-secret-refs.schema-and-validator';
 import { AccountIntegrationType } from './types';
 import { missingConfigCheck } from './utility/account-integration/missing-config-check.account-integration-utility-function';

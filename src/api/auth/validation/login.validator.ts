@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import { ILoginArgs } from 'src/internal-modules/auth/interfaces';
-import { ajv } from 'src/utility/singletons';
+import { ILoginArgs } from '../../../internal-modules/auth/interfaces';
+import { ajv } from '../../../utility/singletons';
 
 const loginSchema: JSONSchemaType<ILoginArgs> = {
   type: 'object',

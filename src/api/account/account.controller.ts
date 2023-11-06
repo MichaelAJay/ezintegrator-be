@@ -7,15 +7,15 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { Public } from 'src/common/decorators/public.decorator';
-import { AccountAndCatererService } from 'src/internal-modules/account-and-caterer/account-and-caterer.service';
+import { Public } from '../../common/decorators/public.decorator';
+import { AccountAndCatererService } from '../../internal-modules/account-and-caterer/account-and-caterer.service';
 import { FastifyReply } from 'fastify';
-import { getEnvironmentVariable } from 'src/utility';
+import { getEnvironmentVariable } from '../../utility';
 import { createAccountAndUserApiValidator } from './validation/create-account-and-user.post.validator';
 import { AuthenticatedRequest } from '../types';
 import { addSecretRequestPayloadValidator } from './validation/add-secret.schema-and-validator';
 import { IAccountController } from './interfaces';
-import { AccountIntegrationService } from 'src/internal-modules/account-and-caterer/account-integration.service';
+import { AccountIntegrationService } from '../../internal-modules/account-and-caterer/account-integration.service';
 
 @Controller('account')
 export class AccountController implements IAccountController {

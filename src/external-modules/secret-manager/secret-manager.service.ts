@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ISecretManagerProvider } from '.';
 import * as Sentry from '@sentry/node';
-import { getEnvironmentVariable } from 'src/utility';
+import { getEnvironmentVariable } from '../../utility';
 
 @Injectable()
 export class SecretManagerService implements ISecretManagerProvider {

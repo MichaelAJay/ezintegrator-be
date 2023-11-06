@@ -9,11 +9,11 @@ import {
   mockReturnRetrieveUserByEmail,
 } from '../../../test-utilities/mocks/returns/internal-modules/external-handlers/db-handlers/user.db-handler.returns';
 import { AuthService } from '../auth/auth.service';
-import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler';
 import { CryptoUtilityService } from '../security-utility/crypto-utility.service';
 import { ICreateUserArgs } from './interfaces';
 import { UserService } from './user.service';
 import { mockReturnLogin } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
+import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
 
 describe('UserService', () => {
   let service: UserService;

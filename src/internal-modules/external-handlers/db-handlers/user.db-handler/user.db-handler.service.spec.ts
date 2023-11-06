@@ -4,7 +4,8 @@ import {
   MockDbClient,
   mockUserDbQueryBuilder,
 } from '../../../../../test-utilities';
-import { UserDbHandlerService, UserDbQueryBuilderService } from '.';
+import { UserDbHandlerService } from './user.db-handler.service';
+import { UserDbQueryBuilderService } from './user.db-query-builder.service';
 
 // Skipping tests - too simple as of 31 Oct 2023
 describe('UserDbHandlerService', () => {

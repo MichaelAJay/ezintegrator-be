@@ -53,7 +53,7 @@ describe('JwtHandlerService', () => {
   });
 
   describe('signAuthAndRefreshTokens tests', () => {
-    const mockPayload = { sub: 'MOCK_USER_ID' };
+    const mockPayload = { sub: 'MOCK_USER_ID', acct: 'MOCK_ACCT_ID' };
     const mockAt = 'MOCK_AT';
     const mockRt = 'MOCK_RT';
     it('calls service signAuthToken and signRefreshToken once each, with the correct args', async () => {

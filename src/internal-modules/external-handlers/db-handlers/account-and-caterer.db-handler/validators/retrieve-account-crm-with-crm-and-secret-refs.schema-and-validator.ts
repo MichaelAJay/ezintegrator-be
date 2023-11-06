@@ -1,7 +1,7 @@
-import { AccountCrm, AccountCrmSecretReference, Crm } from '@prisma/client';
+import { AccountCrm, AccountCrmSecretReference } from '@prisma/client';
 import { JSONSchemaType } from 'ajv';
-import { IAccountIntegrationFieldConfigurationJson } from 'src/internal-modules/account-and-caterer/interfaces/account-integration-fields.json-interface';
-import { ajv } from 'src/utility/singletons';
+import { IAccountIntegrationFieldConfigurationJson } from '../../../../../internal-modules/account-and-caterer/interfaces/account-integration-fields.json-interface';
+import { ajv } from '../../../../../utility/singletons';
 
 export type AccountCrmWithCrmAndSecretRefs = Pick<
   AccountCrm,

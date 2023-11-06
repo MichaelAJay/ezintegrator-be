@@ -3,8 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
-import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
+import { SecretManagerService } from '../../external-modules/secret-manager/secret-manager.service';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountSecretDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-secret.db-handler.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
