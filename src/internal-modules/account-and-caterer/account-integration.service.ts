@@ -18,7 +18,6 @@ import { AccountIntegrationDbHandlerService } from '../external-handlers/db-hand
 @Injectable()
 export class AccountIntegrationService implements IAccountIntegrationProvider {
   constructor(
-    private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly accountIntegrationDbhandler: AccountIntegrationDbHandlerService,
   ) {}
 

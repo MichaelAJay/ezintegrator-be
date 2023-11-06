@@ -17,7 +17,6 @@ export class AccountSecretService implements IAccountSecretProvider {
   constructor(
     private readonly accountPermissionService: AccountPermissionService,
     private readonly accountSecretDbHandler: AccountSecretDbHandlerService,
-    private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
     private readonly accountIntegrationService: AccountIntegrationService,
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
