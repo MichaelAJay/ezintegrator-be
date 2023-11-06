@@ -18,21 +18,6 @@ export interface IAccountAndCatererDbHandler {
   addAccountEventProcess(args: any): Promise<any>;
   retrieveAccountEventProcesses(args: any): Promise<any>;
 
-  // Account CRM management
-  addAccountCrm(args: any): Promise<any>;
-  retrieveAccountCrms(accountId: string): Promise<AccountCrm[]>;
-  retrieveAccountCrmById(
-    accountCrmId: string,
-    include?: Prisma.AccountCrmInclude,
-  ): Promise<AccountCrm | null>;
-  updateAccountCrm(
-    accountId: string,
-    updates: Pick<
-      Prisma.AccountCrmUncheckedUpdateInput,
-      'nonSensitiveCredentials' | 'isConfigured'
-    >,
-  ): Promise<any>;
-
   // Caterer management
   createCaterer(args: any): Promise<any>;
   retrieveCaterer(args: any): Promise<any>;

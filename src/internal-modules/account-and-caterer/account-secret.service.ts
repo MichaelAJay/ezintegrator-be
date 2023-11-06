@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { SecretManagerService } from 'src/external-modules/secret-manager/secret-manager.service';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
+import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountSecretDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-secret.db-handler.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
 import { AccountIntegrationService } from './account-integration.service';
@@ -19,6 +20,7 @@ export class AccountSecretService implements IAccountSecretProvider {
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
     private readonly accountIntegrationService: AccountIntegrationService,
+    private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
   ) {}
 
   async addCrmSecret(
@@ -32,7 +34,7 @@ export class AccountSecretService implements IAccountSecretProvider {
     // VALIDATION
     // 1) Confirm that the target accountCrm exists
     const accountCrm =
-      await this.accountAndCatererDbHandler.retrieveAccountCrmById(
+      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
         secret.accountIntegrationId,
       );
     if (!accountCrm) {
@@ -72,7 +74,7 @@ export class AccountSecretService implements IAccountSecretProvider {
       );
     if (isFullyConfigured) {
       if (!accountCrm.isConfigured) {
-        await this.accountAndCatererDbHandler.updateAccountCrm(accountCrm.id, {
+        await this.accountIntegrationDbHandler.updateAccountCrm(accountCrm.id, {
           isConfigured: true,
         });
       }

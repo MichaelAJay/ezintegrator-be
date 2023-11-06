@@ -15,11 +15,13 @@ import { createAccountAndUserApiValidator } from './validation/create-account-an
 import { AuthenticatedRequest } from '../types';
 import { addSecretRequestPayloadValidator } from './validation/add-secret.schema-and-validator';
 import { IAccountController } from './interfaces';
+import { AccountIntegrationService } from 'src/internal-modules/account-and-caterer/account-integration.service';
 
 @Controller('account')
 export class AccountController implements IAccountController {
   constructor(
     private readonly accountAndCatererService: AccountAndCatererService,
+    private readonly accountIntegrationService: AccountIntegrationService,
   ) {}
 
   @Public()
@@ -46,6 +48,16 @@ export class AccountController implements IAccountController {
     });
 
     response.status(201).send();
+  }
+
+  @Post('integration')
+  // Need to change that any to an unknown and validate
+  async createAccountIntegration(@Body() body: any) {
+    const { integrationType, integrationId } = body;
+    return this.accountIntegrationService.createAccountIntegration(
+      integrationType,
+      integrationId,
+    );
   }
 
   @Patch('secret')

@@ -17,4 +17,8 @@ export class CrmIntegrationDbHandlerService
     const query = this.queryBuilder.buildGetCrmIntegration(crmId);
     return this.dbClient.crm.findUniqueOrThrow(query);
   }
+
+  async retrieveCrms(): Promise<Crm[]> {
+    return this.dbClient.crm.findMany();
+  }
 }

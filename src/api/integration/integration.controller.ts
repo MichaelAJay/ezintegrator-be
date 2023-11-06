@@ -22,4 +22,14 @@ export class IntegrationController implements IIntegrationController {
       integrationId,
     );
   }
+
+  @Get(':type')
+  async getIntegrationsOfType(@Param('type') integrationType: unknown) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException('Invalid integrationType');
+    }
+    return this.integrationUtilityService.getIntegrationsOfType(
+      integrationType,
+    );
+  }
 }

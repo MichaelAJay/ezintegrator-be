@@ -56,47 +56,6 @@ export class AccountAndCatererDbQueryBuilderService
     throw new Error('Method not implemented.');
   }
 
-  // Account CRM management
-  buildAddAccountCrmQuery(accountId: string, crmDetails: any) {
-    throw new Error('Method not implemented.');
-  }
-
-  buildUpdateAccountCrmQuery(
-    accountCrmId: string,
-    updates: Pick<
-      Prisma.AccountCrmUncheckedUpdateInput,
-      'nonSensitiveCredentials' | 'isConfigured'
-    >,
-  ): Prisma.AccountCrmUpdateArgs {
-    const query: Prisma.AccountCrmUpdateArgs = {
-      where: { id: accountCrmId },
-      data: updates,
-    };
-    return query;
-  }
-
-  buildRetrieveAccountCrmsQuery(
-    accountId: string,
-  ): Prisma.AccountCrmFindManyArgs {
-    const query: Prisma.AccountCrmFindManyArgs = {
-      where: { accountId },
-    };
-    return query;
-  }
-
-  buildRetrieveAccountCrmQuery(
-    accountCrmId: string,
-    include?: Prisma.AccountCrmInclude,
-  ): Prisma.AccountCrmFindUniqueArgs {
-    const query: Prisma.AccountCrmFindUniqueArgs = {
-      where: { id: accountCrmId },
-    };
-    if (include) {
-      query.include = include;
-    }
-    return query;
-  }
-
   // Account Caterer management
   buildCreateCatererQuery(accountId: string, catererDetails: any) {
     throw new Error('Method not implemented.');

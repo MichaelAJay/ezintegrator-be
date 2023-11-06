@@ -33,4 +33,18 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
     }
     return configurationRequirements;
   }
+
+  async getIntegrationsOfType(integrationType: AccountIntegrationType) {
+    let results;
+    switch (integrationType) {
+      case 'CRM':
+        results = await this.crmIntegrationDbHandler.retrieveCrms();
+        break;
+      default:
+        throw new NotFoundException(
+          'No integrations found for the provided integration type',
+        );
+    }
+    return results;
+  }
 }

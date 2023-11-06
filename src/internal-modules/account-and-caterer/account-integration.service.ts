@@ -11,6 +11,7 @@ import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handl
 import { validateAccountCrmWithCrmAndSecretReferences } from '../external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-crm-with-crm-and-secret-refs.schema-and-validator';
 import { AccountIntegrationType } from './types';
 import { missingConfigCheck } from './utility/account-integration/missing-config-check.account-integration-utility-function';
+import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -18,6 +19,7 @@ import { missingConfigCheck } from './utility/account-integration/missing-config
 export class AccountIntegrationService implements IAccountIntegrationProvider {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
+    private readonly accountIntegrationDbhandler: AccountIntegrationDbHandlerService,
   ) {}
 
   async getAccountIntegration(
@@ -30,7 +32,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     switch (integrationType) {
       case 'CRM':
         const accountCrmWithCrmAndSecretReferences =
-          await this.accountAndCatererDbHandler.retrieveAccountCrmById(
+          await this.accountIntegrationDbhandler.retrieveAccountCrmById(
             accountIntegrationId,
             {
               crm: true,
@@ -74,6 +76,8 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     return result;
   }
 
+  async getAccountIntegrations() {}
+
   async isAccountCrmFullyConfigured(
     input: string | unknown,
     tokenAccountId: string,
@@ -85,7 +89,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     // Retrieve record
     const accountCrmWithCrmAndSecretReferences: unknown =
       typeof input === 'string'
-        ? await this.accountAndCatererDbHandler.retrieveAccountCrmById(input, {
+        ? await this.accountIntegrationDbhandler.retrieveAccountCrmById(input, {
             crm: true,
             crmSecretRefs: true,
           })
@@ -151,5 +155,17 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       result.missingConfigs = missingConfigs;
     }
     return result;
+  }
+
+  async createAccountIntegration(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ) {
+    switch (integrationType) {
+      case 'CRM':
+        return;
+      default:
+        throw new UnprocessableEntityException('Invalid integration type.');
+    }
   }
 }

@@ -16,4 +16,9 @@ export interface IAccountIntegrationProvider {
     isFullyConfigured: boolean;
     missingConfigs?: IAccountIntegrationFieldConfigurationJson[];
   }>;
+  createAccountIntegration(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ): any;
+  getAccountIntegrations(args: any): any;
 }
