@@ -19,6 +19,7 @@ export interface IAccountIntegrationProvider {
   createAccountIntegration(
     integrationType: AccountIntegrationType,
     integrationId: string,
+    accountId: string,
   ): any;
   getAccountIntegrations(args: any): any;
 }

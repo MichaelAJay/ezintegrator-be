@@ -2,7 +2,9 @@ import { Prisma } from '@prisma/client';
 
 export interface IAccountIntegrationDbQueryBuilder {
   // Account CRM management
-  buildAddAccountCrmQuery(accountId: string, crmDetails: any): any;
+  buildAddAccountCrmQuery(
+    data: Pick<Prisma.AccountCrmUncheckedCreateInput, 'accountId' | 'crmId'>,
+  ): Prisma.AccountCrmCreateArgs;
   buildUpdateAccountCrmQuery(
     accountCrmId: string,
     updates: Pick<

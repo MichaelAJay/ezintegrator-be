@@ -7,8 +7,10 @@ export class AccountIntegrationDbQueryBuilderService
   implements IAccountIntegrationDbQueryBuilder
 {
   // Account CRM management
-  buildAddAccountCrmQuery(accountId: string, crmDetails: any) {
-    throw new Error('Method not implemented.');
+  buildAddAccountCrmQuery(
+    data: Pick<Prisma.AccountCrmUncheckedCreateInput, 'accountId' | 'crmId'>,
+  ) {
+    return { data };
   }
 
   buildUpdateAccountCrmQuery(

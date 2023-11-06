@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { AccountAndCatererService } from './account-and-caterer.service';
 import { AccountIntegrationService } from './account-integration.service';
 import { AccountSecretService } from './account-secret.service';
+import { AccountIntegratorsModule } from './integration-classes/account-integrators.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AccountSecretService } from './account-secret.service';
     UserDbHandlerModule,
     SecretManagerModule,
     SecurityUtilityModule,
+    AccountIntegratorsModule,
   ],
   providers: [
     AccountAndCatererService,

@@ -57,6 +57,7 @@ export class AccountController implements IAccountController {
     return this.accountIntegrationService.createAccountIntegration(
       integrationType,
       integrationId,
+      'add account id',
     );
   }
 

@@ -14,9 +14,15 @@ export class AccountIntegrationDbHandlerService
   ) {}
 
   // Account Crm management
-  async addAccountCrm(args: any): Promise<any> {
+  async addAccountCrm(
+    data: Pick<Prisma.AccountCrmUncheckedCreateInput, 'accountId' | 'crmId'>,
+  ): Promise<any> {
     // The Add Account CRM process enables the requester to create the AccountCrm record
     // This should NOT handle business logic of whether or not any credentials are included - that should be at the service level - whatever calls this
+    const query = this.queryBuilder.buildAddAccountCrmQuery(data);
+
+    // @TODO - remember to think about what happens when an invalid id is sent
+    return this.dbClient.accountCrm.create(query);
   }
   async retrieveAccountCrms(accountId: string): Promise<AccountCrm[]> {
     const query = this.queryBuilder.buildRetrieveAccountCrmsQuery(accountId);
