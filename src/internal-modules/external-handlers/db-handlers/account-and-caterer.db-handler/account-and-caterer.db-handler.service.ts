@@ -69,16 +69,28 @@ export class AccountAndCatererDbHandlerService
   }
   async retrieveAccountCrmById(
     accountCrmId: string,
+    include?: Prisma.AccountCrmInclude,
   ): Promise<AccountCrm | null> {
-    const query = this.queryBuilder.buildRetrieveAccountCrmQuery(accountCrmId);
+    const query = this.queryBuilder.buildRetrieveAccountCrmQuery(
+      accountCrmId,
+      include,
+    );
     return this.dbClient.accountCrm.findUnique(query);
   }
 
-  async updateAccountCrmQuery(
-    accountId: string,
-    crmDetails: any,
+  async updateAccountCrm(
+    accountCrmId: string,
+    updates: Pick<
+      Prisma.AccountCrmUncheckedUpdateInput,
+      'nonSensitiveCredentials' | 'isConfigured'
+    >,
   ): Promise<any> {
     // The primary thing I'm thinking this will be for is to add the non-sensitive credentials AFTER CRM addition
+    const query = this.queryBuilder.buildUpdateAccountCrmQuery(
+      accountCrmId,
+      updates,
+    );
+    return this.dbClient.accountCrm.update(query);
   }
 
   // Caterer Management

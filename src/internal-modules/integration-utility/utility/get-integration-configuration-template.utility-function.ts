@@ -1,7 +1,7 @@
 import { UnprocessableEntityException } from '@nestjs/common';
-import { IAccountIntegrationFieldConfigurationJson } from '../interfaces/account-integration-fields.json-interface';
+import { IAccountIntegrationFieldConfigurationJson } from '../../account-and-caterer/interfaces/account-integration-fields.json-interface';
 import * as Sentry from '@sentry/node';
-import { validateAccountIntegrationConfigurationTemplateJSONArray } from '../validators/account-integration-configuration-template.schema-and-validator';
+import { validateAccountIntegrationConfigurationTemplateJSONArray } from '../../account-and-caterer/validators/account-integration-configuration-template.schema-and-validator';
 
 export function getIntegrationConfigurationTemplate(
   integration: unknown,

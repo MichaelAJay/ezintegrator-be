@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AccountAndCatererModule } from 'src/internal-modules/account-and-caterer/account-and-caterer.module';
+import { IntegrationUtilityModule } from 'src/internal-modules/integration-utility/integration-utility.module';
 import { IntegrationController } from './integration.controller';
 
 @Module({
-  imports: [AccountAndCatererModule],
+  imports: [IntegrationUtilityModule],
   controllers: [IntegrationController],
 })
 export class IntegrationApiModule {}

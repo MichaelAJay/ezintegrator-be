@@ -1,12 +1,12 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
-import { AccountAndCatererService } from 'src/internal-modules/account-and-caterer/account-and-caterer.service';
+import { IntegrationUtilityService } from 'src/internal-modules/integration-utility/integration-utility.service';
 import { IIntegrationController } from './interfaces';
 import { validateIntegrationType } from './validators/integration-type.validator';
 
 @Controller('integration')
 export class IntegrationController implements IIntegrationController {
   constructor(
-    private readonly accountAndCatererService: AccountAndCatererService,
+    private readonly integrationUtilityService: IntegrationUtilityService,
   ) {}
 
   @Get(':type/:id/configuration-template')
@@ -17,7 +17,7 @@ export class IntegrationController implements IIntegrationController {
     if (!validateIntegrationType(integrationType)) {
       throw new BadRequestException('Invalid integrationType');
     }
-    return this.accountAndCatererService.getAccountIntegrationConfigurationRequirements(
+    return this.integrationUtilityService.getIntegrationConfigurationRequirements(
       integrationType,
       integrationId,
     );

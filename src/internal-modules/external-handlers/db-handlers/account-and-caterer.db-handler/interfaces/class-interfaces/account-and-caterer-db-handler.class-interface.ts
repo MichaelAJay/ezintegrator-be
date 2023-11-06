@@ -1,4 +1,4 @@
-import { AccountCrm } from '@prisma/client';
+import { AccountCrm, Prisma } from '@prisma/client';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -21,7 +21,17 @@ export interface IAccountAndCatererDbHandler {
   // Account CRM management
   addAccountCrm(args: any): Promise<any>;
   retrieveAccountCrms(accountId: string): Promise<AccountCrm[]>;
-  retrieveAccountCrmById(accountCrmId: string): Promise<AccountCrm | null>;
+  retrieveAccountCrmById(
+    accountCrmId: string,
+    include?: Prisma.AccountCrmInclude,
+  ): Promise<AccountCrm | null>;
+  updateAccountCrm(
+    accountId: string,
+    updates: Pick<
+      Prisma.AccountCrmUncheckedUpdateInput,
+      'nonSensitiveCredentials' | 'isConfigured'
+    >,
+  ): Promise<any>;
 
   // Caterer management
   createCaterer(args: any): Promise<any>;

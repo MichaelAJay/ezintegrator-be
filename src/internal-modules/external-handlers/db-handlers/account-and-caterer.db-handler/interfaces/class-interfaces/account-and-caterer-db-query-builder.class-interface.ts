@@ -22,12 +22,19 @@ export interface IAccountAndCatererDbQueryBuilder {
   buildRetrieveAccountEventProcessesQuery(accountId: string): any;
   // Account CRM management
   buildAddAccountCrmQuery(accountId: string, crmDetails: any): any;
-  buildUpdateAccountCrmQuery(accountId: string, crmDetails: any): any;
+  buildUpdateAccountCrmQuery(
+    accountCrmId: string,
+    updates: Pick<
+      Prisma.AccountCrmUncheckedUpdateInput,
+      'nonSensitiveCredentials' | 'isConfigured'
+    >,
+  ): Prisma.AccountCrmUpdateArgs;
   buildRetrieveAccountCrmsQuery(
     accountId: string,
   ): Prisma.AccountCrmFindManyArgs;
   buildRetrieveAccountCrmQuery(
     accountCrmId: string,
+    include?: Prisma.AccountCrmInclude,
   ): Prisma.AccountCrmFindUniqueArgs;
   // Account Caterer management
   buildCreateCatererQuery(accountId: string, catererDetails: any): any;

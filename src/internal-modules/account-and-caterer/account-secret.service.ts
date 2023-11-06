@@ -7,7 +7,9 @@ import { SecretManagerService } from 'src/external-modules/secret-manager/secret
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { AccountSecretDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-secret.db-handler.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
+import { AccountIntegrationService } from './account-integration.service';
 import { IAccountSecretProvider, IAddCrmSecretArgs } from './interfaces';
+import { IAccountIntegrationFieldConfigurationJson } from './interfaces/account-integration-fields.json-interface';
 
 @Injectable()
 export class AccountSecretService implements IAccountSecretProvider {
@@ -16,13 +18,17 @@ export class AccountSecretService implements IAccountSecretProvider {
     private readonly accountSecretDbHandler: AccountSecretDbHandlerService,
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
+    private readonly accountIntegrationService: AccountIntegrationService,
   ) {}
 
   async addCrmSecret(
     secret: IAddCrmSecretArgs,
     userId: string,
     accountId: string,
-  ): Promise<any> {
+  ): Promise<{
+    message: string;
+    missingConfigs?: IAccountIntegrationFieldConfigurationJson[];
+  }> {
     // VALIDATION
     // 1) Confirm that the target accountCrm exists
     const accountCrm =
@@ -56,5 +62,26 @@ export class AccountSecretService implements IAccountSecretProvider {
       secretName,
       secret.secret,
     );
+
+    // 3) Check if AccountCrm is now fully configured and update if so
+    const { isFullyConfigured, missingConfigs } =
+      await this.accountIntegrationService.isAccountCrmFullyConfigured(
+        accountCrm.id,
+        accountId,
+        userId,
+      );
+    if (isFullyConfigured) {
+      if (!accountCrm.isConfigured) {
+        await this.accountAndCatererDbHandler.updateAccountCrm(accountCrm.id, {
+          isConfigured: true,
+        });
+      }
+      return { message: 'The CRM integration is complete and ready to use!' };
+    }
+
+    return {
+      message: 'Finish the CRM configuration by including all required values.',
+      missingConfigs,
+    };
   }
 }

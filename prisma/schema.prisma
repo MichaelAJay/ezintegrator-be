@@ -250,10 +250,10 @@ model ArchivedOrderItem {
 }
 
 model Crm {
-  id            String       @id @default(uuid())
-  name          CrmName      @unique()
-  configuration Json
-  accountCrms   AccountCrm[]
+  id                    String       @id @default(uuid())
+  name                  CrmName      @unique()
+  configurationTemplate Json // See prisma README for specifics on the JSON schema
+  accountCrms           AccountCrm[]
 }
 
 enum CrmName {

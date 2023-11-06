@@ -61,8 +61,18 @@ export class AccountAndCatererDbQueryBuilderService
     throw new Error('Method not implemented.');
   }
 
-  buildUpdateAccountCrmQuery(accountId: string, crmDetails: any) {
-    throw new Error('Method not implemented.');
+  buildUpdateAccountCrmQuery(
+    accountCrmId: string,
+    updates: Pick<
+      Prisma.AccountCrmUncheckedUpdateInput,
+      'nonSensitiveCredentials' | 'isConfigured'
+    >,
+  ): Prisma.AccountCrmUpdateArgs {
+    const query: Prisma.AccountCrmUpdateArgs = {
+      where: { id: accountCrmId },
+      data: updates,
+    };
+    return query;
   }
 
   buildRetrieveAccountCrmsQuery(
@@ -76,10 +86,14 @@ export class AccountAndCatererDbQueryBuilderService
 
   buildRetrieveAccountCrmQuery(
     accountCrmId: string,
+    include?: Prisma.AccountCrmInclude,
   ): Prisma.AccountCrmFindUniqueArgs {
     const query: Prisma.AccountCrmFindUniqueArgs = {
       where: { id: accountCrmId },
     };
+    if (include) {
+      query.include = include;
+    }
     return query;
   }
 
