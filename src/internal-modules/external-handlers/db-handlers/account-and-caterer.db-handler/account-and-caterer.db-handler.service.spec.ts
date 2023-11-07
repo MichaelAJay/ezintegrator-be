@@ -4,10 +4,8 @@ import {
   mockAccountAndCatererDbQueryBuilder,
   MockDbClient,
 } from '../../../../../test-utilities';
-import {
-  AccountAndCatererDbHandlerService,
-  AccountAndCatererDbQueryBuilderService,
-} from '.';
+import { AccountAndCatererDbHandlerService } from './account-and-caterer.db-handler.service';
+import { AccountAndCatererDbQueryBuilderService } from './account-and-caterer.db-query-builder.service';
 
 describe('AccountAndCatererDbHandlerService', () => {
   let service: AccountAndCatererDbHandlerService;

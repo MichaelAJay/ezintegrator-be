@@ -7,6 +7,10 @@ describe('SecretManagerService', () => {
   let service: SecretManagerService;
   let client: SecretManagerServiceClient;
 
+  beforeAll(() => {
+    process.env.GCP_PROJECT = 'MOCK_GCP_PROJECT';
+  });
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [

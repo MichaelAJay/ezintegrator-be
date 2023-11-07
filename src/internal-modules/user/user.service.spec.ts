@@ -89,7 +89,9 @@ describe('UserService', () => {
           await service.create(input).catch(() => {});
           expect(spy).toHaveBeenCalledTimes(1);
           expect(spy).toHaveBeenCalledWith({
-            ...input,
+            accountId: input.accountId,
+            email: input.email,
+            firstName: input.firstName,
             hashedPassword: mockHashAndSaltReturn.hashedValue,
             salt: mockHashAndSaltReturn.salt,
           });
@@ -126,10 +128,11 @@ describe('UserService', () => {
             expect(spy).toHaveBeenCalledWith({
               id: mockCreatedUser.id,
               salt: mockCreatedUser.salt,
+              accountId: input.accountId,
             });
           });
           describe('authService.login resolves', () => {
-            it('returns the resolved return from authService.login', async () => {
+            it('returns an object with the userId and the tokens return from auth.login', async () => {
               jest
                 .spyOn(userDbHandler, 'retrieveByEmail')
                 .mockResolvedValue(
@@ -154,7 +157,7 @@ describe('UserService', () => {
               jest.spyOn(authService, 'login').mockResolvedValue(tokens);
 
               const result = await service.create(input);
-              expect(result).toEqual(tokens);
+              expect(result).toEqual({ userId: mockCreatedUser.id, tokens });
             });
           });
           describe('authService.login rejects', () => {

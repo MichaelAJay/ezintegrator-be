@@ -43,7 +43,11 @@ describe('JwtHandlerService', () => {
 
       // Error propagates
       await expect(
-        service.signWithSecret({ sub: 'MOCK_USER_ID' }, '1h', 'MOCK_SECRET'),
+        service.signWithSecret(
+          { sub: 'MOCK_USER_ID', acct: 'MOCK_ACCT_ID' },
+          '1h',
+          'MOCK_SECRET',
+        ),
       ).rejects.toThrow(MOCK_ERROR);
 
       // Sentry.captureException is called once with the thrown error
