@@ -12,4 +12,7 @@ export interface IAccountController {
     req: AuthenticatedRequest,
     res: FastifyReply,
   ): any;
+
+  // Users
+  addUser(body: unknown, req: AuthenticatedRequest): any;
 }

@@ -7,11 +7,15 @@ import { validateRetrievedAccountOwnerWithUser } from '../external-handlers/db-h
 import { IAccountPermissionProvider } from './interfaces';
 import * as Sentry from '@sentry/node';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
+import { PermissionNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
+import { UserDbHandlerService } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.service';
+import { validateUserWithPermissions } from './schemas-and-validators/user-permissions.schema-and-validator';
 
 @Injectable()
 export class AccountPermissionService implements IAccountPermissionProvider {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
+    private readonly userDbHandler: UserDbHandlerService,
   ) {}
 
   async canUserEditSecretsForAccount(
@@ -46,5 +50,25 @@ export class AccountPermissionService implements IAccountPermissionProvider {
     }
 
     return accountOwnerWithOwner.owner.accountId === accountId;
+  }
+
+  async doesUserHavePermission(
+    userId: string,
+    accountId: string,
+    permissionName: PermissionNameValue,
+  ): Promise<boolean> {
+    const userWithPermissions =
+      await this.userDbHandler.retrieveUserPermissions(userId);
+    if (!validateUserWithPermissions(userWithPermissions)) {
+      return false;
+    }
+
+    if (userWithPermissions.accountId !== accountId) {
+      return false;
+    }
+
+    return userWithPermissions.accountRole.role.permissions.some(
+      (permission) => permission.permission === permissionName,
+    );
   }
 }

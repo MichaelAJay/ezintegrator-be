@@ -37,4 +37,10 @@ export class UserDbHandlerService implements IUserDbHandler {
     const query = this.queryBuilder.buildUpdateQuery(userId, args);
     return this.dbClient.user.update(query);
   }
+
+  // Permissions
+  async retrieveUserPermissions(userId: string): Promise<unknown> {
+    const query = this.queryBuilder.buildRetrieveUserPermissionsQuery(userId);
+    return this.dbClient.user.findUnique(query);
+  }
 }

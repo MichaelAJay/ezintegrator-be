@@ -16,6 +16,7 @@ import { AuthenticatedRequest } from '../types';
 import { addSecretRequestPayloadValidator } from './validation/add-secret.schema-and-validator';
 import { IAccountController } from './interfaces';
 import { AccountIntegrationService } from '../../internal-modules/account-and-caterer/account-integration.service';
+import { validateAddUserRequestBody } from './validation/add-user.schema-and-validator';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -73,6 +74,20 @@ export class AccountController implements IAccountController {
 
     // @TODO
     res.status(200).send();
+  }
+
+  // USER MANAGEMENT
+  @Post('user')
+  async addUser(@Body() body: any, @Req() req: AuthenticatedRequest) {
+    if (!validateAddUserRequestBody(body)) {
+      throw new BadRequestException(validateAddUserRequestBody.errors);
+    }
+
+    return this.accountAndCatererService.addUser(
+      body.email,
+      req.userId,
+      req.accountId,
+    );
   }
 }
 

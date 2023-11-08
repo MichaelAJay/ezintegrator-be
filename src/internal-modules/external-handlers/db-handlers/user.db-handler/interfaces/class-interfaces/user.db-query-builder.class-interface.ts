@@ -13,4 +13,7 @@ export interface IUserDbQueryBuilder {
     userId: string,
     args: IUpdateUserDbQueryBuilderArgs,
   ): Prisma.UserUpdateArgs;
+
+  // PERMISSIONS
+  buildRetrieveUserPermissionsQuery(userId: string): Prisma.UserFindUniqueArgs;
 }

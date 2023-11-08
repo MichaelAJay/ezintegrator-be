@@ -9,4 +9,7 @@ export interface IUserDbHandler {
     email: string,
   ): Promise<Omit<User, 'hashedPassword' | 'hashedRt' | 'salt'> | null>;
   update(userId: string, args: IUpdateUserDbQueryBuilderArgs): any;
+
+  // Permissions
+  retrieveUserPermissions(userId: string): Promise<unknown>;
 }

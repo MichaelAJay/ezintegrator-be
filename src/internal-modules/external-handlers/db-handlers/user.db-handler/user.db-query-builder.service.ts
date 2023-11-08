@@ -46,4 +46,22 @@ export class UserDbQueryBuilderService implements IUserDbQueryBuilder {
   ): Prisma.UserUpdateArgs<DefaultArgs> {
     return { where: { id: userId }, data: args };
   }
+
+  // PERMISSIONS
+  buildRetrieveUserPermissionsQuery(userId: string): Prisma.UserFindUniqueArgs {
+    return {
+      where: { id: userId },
+      include: {
+        accountRole: {
+          include: {
+            role: {
+              include: {
+                permissions: true,
+              },
+            },
+          },
+        },
+      },
+    };
+  }
 }

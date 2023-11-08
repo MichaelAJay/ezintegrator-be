@@ -85,4 +85,13 @@ export class AccountAndCatererService implements IAccountAndCatererService {
 
     return tokens;
   }
+
+  // User management
+  async addUser(
+    email: string,
+    userId: string,
+    accountId: string,
+  ): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 }

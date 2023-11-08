@@ -5,4 +5,7 @@ export interface IAccountAndCatererService {
   createAccount(
     args: ICreateAccountAndUserArgs,
   ): Promise<IGetAuthAndRefreshTokens>;
+
+  // USER MANAGEMENT
+  addUser(email: string, userId: string, accountId: string): Promise<any>;
 }
