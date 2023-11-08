@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { IBuildCreateAccountQueryArgs } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
@@ -42,8 +42,17 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     if (args.lastName) {
       createUserArgs.lastName = args.lastName;
     }
-    // Await created user resolution - important for stack trace
-    const { userId, tokens } = await this.userService.create(createUserArgs);
+
+    const { userId, tokens } = await this.userService
+      .create(createUserArgs)
+      .catch(async (reason) => {
+        if (reason instanceof ConflictException) {
+          // Delete account and raise ConflictException
+          await this.accountAndCatererDbHandler.deleteAccount(account.id);
+        }
+        reason.message = 'Account creation failed - email may not be used';
+        throw reason;
+      });
 
     try {
       await this.accountAndCatererDbHandler.assignAccountToOwner(

@@ -1,4 +1,3 @@
-import { AccountCrm, Prisma } from '@prisma/client';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -11,6 +10,7 @@ export interface IAccountAndCatererDbHandler {
   }>;
   retrieveAccount(args: any): Promise<any>;
   updateAccount(args: any): Promise<any>; // Only the user with corresponding email to contactEmail
+  deleteAccount(accountId: string): Promise<any>;
   assignAccountToOwner(accountId: string, ownerId: string): any;
   unassignAccountToOwner(accountId: string, ownerId: string): any;
 

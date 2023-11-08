@@ -8,6 +8,7 @@ export interface IAccountAndCatererDbQueryBuilder {
   ): Prisma.AccountCreateArgs;
   buildRetrieveAccountQuery(accountId: string): any;
   buildUpdateAccountQuery(accountId: string, updates: Record<string, any>): any;
+  buildDeleteAccountQuery(accountId: string): Prisma.AccountDeleteArgs;
   buildCreateAccountUserQuery(
     accountId: string,
     userId: string,

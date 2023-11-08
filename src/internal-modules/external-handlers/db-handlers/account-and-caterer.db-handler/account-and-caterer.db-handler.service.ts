@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DbClientService } from '../../../../external-modules';
 import { AccountAndCatererDbQueryBuilderService } from './account-and-caterer.db-query-builder.service';
 import { IAccountAndCatererDbHandler, IBuildCreateAccountQueryArgs } from '.';
-import { AccountCrm, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AccountAndCatererDbHandlerService
@@ -24,6 +24,11 @@ export class AccountAndCatererDbHandlerService
 
   async updateAccount(args: any): Promise<any> {
     throw new Error('Method not implemented.');
+  }
+
+  async deleteAccount(accountId: string) {
+    const query = this.queryBuilder.buildDeleteAccountQuery(accountId);
+    return this.dbClient.account.delete(query);
   }
 
   async assignAccountToOwner(accountId: string, ownerId: string) {

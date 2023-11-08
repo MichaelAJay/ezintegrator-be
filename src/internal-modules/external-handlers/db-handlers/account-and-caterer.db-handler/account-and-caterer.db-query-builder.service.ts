@@ -25,6 +25,11 @@ export class AccountAndCatererDbQueryBuilderService
   buildUpdateAccountQuery(accountId: string, updates: Record<string, any>) {
     throw new Error('Method not implemented.');
   }
+  buildDeleteAccountQuery(accountId: string): Prisma.AccountDeleteArgs {
+    return {
+      where: { id: accountId },
+    };
+  }
   buildCreateAccountUserQuery(
     accountId: string,
     userId: string,

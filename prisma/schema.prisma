@@ -26,7 +26,7 @@ model Account {
 model AccountOwner {
   accountId String  @unique()
   ownerId   String
-  account   Account @relation(fields: [accountId], references: [id])
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   owner     User    @relation(fields: [ownerId], references: id)
 
   @@id([accountId, ownerId])
@@ -41,7 +41,7 @@ model User {
   hashedRt       String?
   salt           String
   accountId      String
-  account        Account         @relation(fields: [accountId], references: [id])
+  account        Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
   archivedOrders ArchivedOrder[]
   ownedAccounts  AccountOwner[]
 
@@ -59,7 +59,7 @@ model AccountEventProcess {
   accountId String
   event     Event
   process   EventProcess
-  account   Account      @relation(fields: [accountId], references: [id])
+  account   Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@id([accountId, event, process])
   @@index([accountId, event])
@@ -93,7 +93,7 @@ model AccountCrmSecretReference {
   secretName   String                           @id @default(uuid())
   type         AccountSecretReferenceSecretType
   accountCrmId String
-  accountCrm   AccountCrm                       @relation(fields: [accountCrmId], references: [id])
+  accountCrm   AccountCrm                       @relation(fields: [accountCrmId], references: [id], onDelete: Cascade)
 
   @@unique([type, accountCrmId])
   @@index([accountCrmId], type: BTree)
@@ -108,7 +108,7 @@ model Caterer {
   name                  String
   ezManageId            String?
   accountId             String
-  account               Account                @relation(fields: [accountId], references: [id])
+  account               Account                @relation(fields: [accountId], references: [id], onDelete: Cascade)
   Menu                  Menu[]
   CatererPointOfContact CatererPointOfContact?
   Order                 Order[]
@@ -119,7 +119,7 @@ model Caterer {
 
 model CatererPointOfContact {
   catererId String  @id
-  caterer   Caterer @relation(fields: [catererId], references: [id])
+  caterer   Caterer @relation(fields: [catererId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String?
   email     String
@@ -129,7 +129,7 @@ model CatererPointOfContact {
 model Menu {
   id        String     @id @default(uuid())
   catererId String
-  caterer   Caterer    @relation(fields: [catererId], references: [id])
+  caterer   Caterer    @relation(fields: [catererId], references: [id], onDelete: Cascade)
   source    MenuSource
   sourceId  String
   MenuItem  MenuItem[]
@@ -145,7 +145,7 @@ enum MenuSource {
 model MenuItem {
   id                String              @id @default(uuid())
   menuId            String
-  menu              Menu                @relation(fields: [menuId], references: [id])
+  menu              Menu                @relation(fields: [menuId], references: [id], onDelete: Cascade)
   OrderItem         OrderItem[]
   ArchivedOrderItem ArchivedOrderItem[]
 
@@ -163,8 +163,8 @@ model Order {
   source          OrderSource   @default(OTHER)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @default(now())
-  catererId       String
-  caterer         Caterer       @relation(fields: [catererId], references: [id])
+  catererId       String?
+  caterer         Caterer?      @relation(fields: [catererId], references: [id], onDelete: SetNull)
   targets         OrderTarget[]
   items           OrderItem[]
 
@@ -190,7 +190,7 @@ model OrderTarget {
   externalHostRecordType String
   externalHostRecordId   String
   orderId                String
-  order                  Order           @relation(fields: [orderId], references: [id])
+  order                  Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId], type: BTree)
 }
@@ -200,12 +200,12 @@ enum OrderTargetType {
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   quantity   Int
-  menuItemId String
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
   orderId    String
-  order      Order    @relation(fields: [orderId], references: [id])
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId], type: BTree)
 }
@@ -213,7 +213,7 @@ model OrderItem {
 model ArchivedOrder {
   id              String                @id @default(uuid())
   archivedOn      DateTime
-  archivedBy      String
+  archivedBy      String?
   status          OrderStatus
   placementDate   DateTime
   fulfillmentDate DateTime
@@ -221,11 +221,11 @@ model ArchivedOrder {
   canceledDate    DateTime?
   sourceId        String
   source          OrderSource           @default(OTHER)
-  catererId       String
-  caterer         Caterer               @relation(fields: [catererId], references: [id])
+  catererId       String?
+  caterer         Caterer?              @relation(fields: [catererId], references: [id], onDelete: SetNull)
   targets         ArchivedOrderTarget[]
   items           ArchivedOrderItem[]
-  archiver        User                  @relation(fields: [archivedBy], references: [id])
+  archiver        User?                 @relation(fields: [archivedBy], references: [id], onDelete: SetNull)
 }
 
 model ArchivedOrderTarget {
@@ -235,7 +235,7 @@ model ArchivedOrderTarget {
   hostType   String
   hostRefId  String
   orderId    String
-  order      ArchivedOrder   @relation(fields: [orderId], references: [id])
+  order      ArchivedOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model ArchivedOrderItem {
@@ -245,8 +245,8 @@ model ArchivedOrderItem {
   menuItemId String?
   menuName   String?
   orderId    String
-  order      ArchivedOrder @relation(fields: [orderId], references: [id])
-  MenuItem   MenuItem?     @relation(fields: [menuItemId], references: [id])
+  order      ArchivedOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem?     @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
 }
 
 model Crm {
@@ -263,4 +263,15 @@ enum CrmName {
 enum CrmRecordType {
   CONTACT
   LEAD
+}
+
+model AccountPermission {
+  name AccountPermissionName @id
+}
+
+enum AccountPermissionName {
+  EDIT_ACCOUNT_INTEGRATION_CONFIGURATION
+  EDIT_ACCOUNT_INTEGRATIONS
+  EDIT_ACCOUNT_SECRETS
+  EDIT_USER_ROSTER
 }
