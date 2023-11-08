@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SecretManagerModule } from '../../external-modules/secret-manager/secret-manager.module';
 import { AccountAndCatererDbHandlerModule } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.module';
+import { RoleAndPermissionDbHandlerModule } from '../external-handlers/db-handlers/role-and-permission.db-handler/role-and-permission.db-handler.module';
 import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-handler/user.db-handler.module';
 import { SecurityUtilityModule } from '../security-utility';
 import { UserModule } from '../user/user.module';
@@ -17,6 +18,7 @@ import { AccountIntegratorsModule } from './integration-classes/account-integrat
     SecretManagerModule,
     SecurityUtilityModule,
     AccountIntegratorsModule,
+    RoleAndPermissionDbHandlerModule,
   ],
   providers: [
     AccountAndCatererService,

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { RoleNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbQueryBuilder {
@@ -18,6 +19,11 @@ export interface IAccountAndCatererDbQueryBuilder {
     accountId: string,
     ownerId: string,
   ): Prisma.AccountOwnerFindUniqueArgs;
+  buildAddUserAccountRole(
+    userId: string,
+    roleName: RoleNameValue,
+    grantorId: string,
+  ): Prisma.UserAccountRoleCreateArgs;
   // Account Event management
   buildAddEventProcessQuery(accountId: string, process: any): any;
   buildRetrieveAccountEventProcessesQuery(accountId: string): any;

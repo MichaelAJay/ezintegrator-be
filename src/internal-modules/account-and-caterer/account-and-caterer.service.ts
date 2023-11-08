@@ -9,12 +9,14 @@ import {
   ICreateAccountAndUserArgs,
 } from './interfaces';
 import * as Sentry from '@sentry/node';
+import { RoleAndPermissionDbHandlerService } from '../external-handlers/db-handlers/role-and-permission.db-handler/role-and-permission.db-handler.service';
 
 @Injectable()
 export class AccountAndCatererService implements IAccountAndCatererService {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly userService: UserService,
+    private readonly roleAndPermissionDbHandler: RoleAndPermissionDbHandlerService,
   ) {}
 
   // Special note:  The accountOwner relation is CRUCIAL to get right.  If any part of this fails, I have to manually roll everything back, because
@@ -55,10 +57,21 @@ export class AccountAndCatererService implements IAccountAndCatererService {
       });
 
     try {
-      await this.accountAndCatererDbHandler.assignAccountToOwner(
-        account.id,
-        userId,
-      );
+      const createAccountOwnershipPromise =
+        this.accountAndCatererDbHandler.assignAccountToOwner(
+          account.id,
+          userId,
+        );
+      const createUserAccountRolePromise =
+        this.accountAndCatererDbHandler.addUserAccountRole(
+          userId,
+          'MANAGER',
+          userId,
+        );
+      await Promise.all([
+        createAccountOwnershipPromise,
+        createUserAccountRolePromise,
+      ]);
     } catch (err) {
       Sentry.withScope((scope) => {
         scope.setExtras({

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
+import { RoleNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 import {
   IAccountAndCatererDbQueryBuilder,
   IBuildCreateAccountQueryArgs,
@@ -51,6 +52,15 @@ export class AccountAndCatererDbQueryBuilderService
       query.include = include;
     }
     return query;
+  }
+  buildAddUserAccountRole(
+    userId: string,
+    roleName: RoleNameValue,
+    grantorId: string,
+  ): Prisma.UserAccountRoleCreateArgs {
+    return {
+      data: { userId, roleName, grantorId },
+    };
   }
 
   // Account Event management

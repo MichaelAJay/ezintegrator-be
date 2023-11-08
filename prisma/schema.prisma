@@ -33,20 +33,59 @@ model AccountOwner {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  email          String
-  firstName      String
-  lastName       String?
-  hashedPassword String
-  hashedRt       String?
-  salt           String
-  accountId      String
-  account        Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  archivedOrders ArchivedOrder[]
-  ownedAccounts  AccountOwner[]
+  id                    String                  @id @default(uuid())
+  email                 String
+  firstName             String
+  lastName              String?
+  hashedPassword        String
+  hashedRt              String?
+  salt                  String
+  accountId             String
+  account               Account                 @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  archivedOrders        ArchivedOrder[]
+  ownedAccounts         AccountOwner[]
+  accountRole           UserAccountRole?
+  roleGrants            UserAccountRole[]       @relation(name: "Grantor")
+  catererPointOfContact CatererPointOfContact[]
 
   @@unique([email])
   @@index([email], type: BTree)
+}
+
+model UserAccountRole {
+  userId    String   @id
+  roleName  RoleName
+  grantorId String
+  grantedOn DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  role      Role     @relation(fields: [roleName], references: [name])
+  grantor   User     @relation(fields: [grantorId], references: [id], name: "Grantor")
+}
+
+model Role {
+  name         RoleName          @id
+  accountUsers UserAccountRole[]
+  permissions  RolePermission[]
+}
+
+enum RoleName {
+  MANAGER
+}
+
+model RolePermission {
+  roleName   RoleName
+  permission AccountPermissionName
+
+  role Role @relation(fields: [roleName], references: [name])
+
+  @@id([roleName, permission])
+}
+
+enum AccountPermissionName {
+  EDIT_ACCOUNT_INTEGRATION_CONFIGURATION
+  EDIT_ACCOUNT_INTEGRATIONS
+  EDIT_ACCOUNT_SECRETS
+  EDIT_USER_ROSTER
 }
 
 enum AccountStatus {
@@ -124,6 +163,8 @@ model CatererPointOfContact {
   lastName  String?
   email     String
   phone     String?
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id])
 }
 
 model Menu {
@@ -263,15 +304,4 @@ enum CrmName {
 enum CrmRecordType {
   CONTACT
   LEAD
-}
-
-model AccountPermission {
-  name AccountPermissionName @id
-}
-
-enum AccountPermissionName {
-  EDIT_ACCOUNT_INTEGRATION_CONFIGURATION
-  EDIT_ACCOUNT_INTEGRATIONS
-  EDIT_ACCOUNT_SECRETS
-  EDIT_USER_ROSTER
 }

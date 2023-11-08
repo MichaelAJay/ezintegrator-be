@@ -1,3 +1,4 @@
+import { RoleNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 import { IBuildCreateAccountQueryArgs } from '../method-interfaces';
 
 export interface IAccountAndCatererDbHandler {
@@ -13,6 +14,11 @@ export interface IAccountAndCatererDbHandler {
   deleteAccount(accountId: string): Promise<any>;
   assignAccountToOwner(accountId: string, ownerId: string): any;
   unassignAccountToOwner(accountId: string, ownerId: string): any;
+  addUserAccountRole(
+    userId: string,
+    roleName: RoleNameValue,
+    grantorId: string,
+  ): any;
 
   // Account Event Process management
   addAccountEventProcess(args: any): Promise<any>;

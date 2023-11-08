@@ -3,6 +3,7 @@ import { DbClientService } from '../../../../external-modules';
 import { AccountAndCatererDbQueryBuilderService } from './account-and-caterer.db-query-builder.service';
 import { IAccountAndCatererDbHandler, IBuildCreateAccountQueryArgs } from '.';
 import { Prisma } from '@prisma/client';
+import { RoleNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 
 @Injectable()
 export class AccountAndCatererDbHandlerService
@@ -52,6 +53,19 @@ export class AccountAndCatererDbHandlerService
       include,
     );
     return this.dbClient.accountOwner.findUnique(query);
+  }
+
+  async addUserAccountRole(
+    userId: string,
+    roleName: RoleNameValue,
+    grantorId: string,
+  ) {
+    const query = this.queryBuilder.buildAddUserAccountRole(
+      userId,
+      roleName,
+      grantorId,
+    );
+    return this.dbClient.userAccountRole.create(query);
   }
 
   // Account Event Process management
