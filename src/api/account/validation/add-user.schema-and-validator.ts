@@ -1,6 +1,6 @@
 import { JSONSchemaType } from 'ajv';
-import { ICreateUserArgs } from 'src/internal-modules/user/interfaces';
-import { ajv } from 'src/utility/singletons';
+import { ICreateUserArgs } from '../../../internal-modules/user/interfaces';
+import { ajv } from '../../../utility/singletons';
 
 export type CreateAccountUserRequestPayload = Omit<
   ICreateUserArgs,

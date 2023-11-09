@@ -1,6 +1,6 @@
 import { Role, RolePermission, User, UserAccountRole } from '@prisma/client';
 import { JSONSchemaType } from 'ajv';
-import { ajv } from 'src/utility/singletons';
+import { ajv } from '../../../utility/singletons';
 
 export type UserWithPermissions = Pick<User, 'accountId'> & {
   accountRole: Pick<UserAccountRole, 'roleName'> & {

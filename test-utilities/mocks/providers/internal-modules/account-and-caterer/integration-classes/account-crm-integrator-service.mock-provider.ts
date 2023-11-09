@@ -4,4 +4,5 @@ export const mockAccountCrmIntegrator: IAccountIntegrationClass = {
   create: jest.fn(),
   retrieveOne: jest.fn(),
   update: jest.fn(),
+  retrieveAll: jest.fn(),
 };

@@ -1,5 +1,5 @@
 import { JSONSchemaType } from 'ajv';
-import { ajv } from 'src/utility/singletons';
+import { ajv } from '../../../utility/singletons';
 import {
   AccountIntegrationType,
   accountIntegrationValues,

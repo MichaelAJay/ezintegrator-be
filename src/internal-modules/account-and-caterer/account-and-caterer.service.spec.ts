@@ -7,11 +7,14 @@ import { AccountAndCatererService } from './account-and-caterer.service';
 import { ICreateAccountAndUserArgs } from './interfaces';
 import { mockReturnLogin } from '../../../test-utilities/mocks/returns/internal-modules/auth-service.mock-returns';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
+import { AccountPermissionService } from '../security-utility/account-permission.service';
+import { mockAccountPermissionService } from '../../../test-utilities/mocks/providers/internal-modules/security-utility/account-permission-service.mock-provider';
 
 describe('AccountAndCatererService', () => {
   let service: AccountAndCatererService;
   let accountAndCatererDbHandler: AccountAndCatererDbHandlerService;
   let userService: UserService;
+  let accountPermissionService: AccountPermissionService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,6 +25,10 @@ describe('AccountAndCatererService', () => {
           useValue: mockAccountAndCatererDbHandlerService,
         },
         { provide: UserService, useValue: mockUserService },
+        {
+          provide: AccountPermissionService,
+          useValue: mockAccountPermissionService,
+        },
       ],
     }).compile();
 
@@ -30,6 +37,9 @@ describe('AccountAndCatererService', () => {
       AccountAndCatererDbHandlerService,
     );
     userService = module.get<UserService>(UserService);
+    accountPermissionService = module.get<AccountPermissionService>(
+      AccountPermissionService,
+    );
   });
 
   describe('createAccount unit tests', () => {

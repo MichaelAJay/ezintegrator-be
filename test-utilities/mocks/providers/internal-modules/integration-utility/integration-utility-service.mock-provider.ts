@@ -2,4 +2,6 @@ import { IIntegrationUtilityProvider } from '../../../../../src/internal-modules
 
 export const mockIntegrationUtilityService: IIntegrationUtilityProvider = {
   getIntegrationConfigurationRequirements: jest.fn(),
+  getIntegrationTypes: jest.fn(),
+  getIntegrationsOfType: jest.fn(),
 };

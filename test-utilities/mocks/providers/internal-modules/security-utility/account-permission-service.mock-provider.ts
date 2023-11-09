@@ -2,4 +2,5 @@ import { IAccountPermissionProvider } from 'src/internal-modules/security-utilit
 
 export const mockAccountPermissionService: IAccountPermissionProvider = {
   canUserEditSecretsForAccount: jest.fn(),
+  doesUserHavePermission: jest.fn(),
 };
