@@ -12,4 +12,6 @@ export const mockAccountAndCatererDbHandlerService: IAccountAndCatererDbHandler 
     createCaterer: jest.fn(),
     retrieveCaterer: jest.fn(),
     addCatererPointOfContact: jest.fn(),
+    deleteAccount: jest.fn(),
+    addUserAccountRole: jest.fn(),
   };
