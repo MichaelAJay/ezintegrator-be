@@ -1,0 +1,5 @@
+AuthModule is a second-class internal module.
+It MAY NOT import first-class internal modules such as AccountAndCatererModule and UserModule
+
+AuthService is a second-class internal service.
+It MAY NOT import first-class internal services such as AccountAndCatererService and UserService

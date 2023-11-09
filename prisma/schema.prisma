@@ -11,25 +11,135 @@ datasource db {
 }
 
 model Account {
-  id           String         @id @default(uuid())
+  id           String                @id @default(uuid())
   name         String
+  status       AccountStatus         @default(PENDING)
+  ownerEmail   String
   contactEmail String
-  Caterer      Caterer[]
-  AccountEvent AccountEvent[]
-  User         User[]
+  caterers     Caterer[]
+  users        User[]
+  crms         AccountCrm[]
+  processes    AccountEventProcess[]
+  accountOwner AccountOwner?
 }
 
-model AccountEvent {
-  id        String    @id @default(uuid())
-  eventName EventName
+model AccountOwner {
+  accountId String  @unique()
+  ownerId   String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  owner     User    @relation(fields: [ownerId], references: id)
+
+  @@id([accountId, ownerId])
+}
+
+model User {
+  id                    String                  @id @default(uuid())
+  email                 String
+  firstName             String
+  lastName              String?
+  hashedPassword        String
+  hashedRt              String?
+  salt                  String
+  accountId             String
+  account               Account                 @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  archivedOrders        ArchivedOrder[]
+  ownedAccounts         AccountOwner[]
+  accountRole           UserAccountRole?
+  roleGrants            UserAccountRole[]       @relation(name: "Grantor")
+  catererPointOfContact CatererPointOfContact[]
+
+  @@unique([email])
+  @@index([email], type: BTree)
+}
+
+model UserAccountRole {
+  userId    String   @id
+  roleName  RoleName
+  grantorId String
+  grantedOn DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  role      Role     @relation(fields: [roleName], references: [name])
+  grantor   User     @relation(fields: [grantorId], references: [id], name: "Grantor")
+}
+
+model Role {
+  name         RoleName          @id
+  accountUsers UserAccountRole[]
+  permissions  RolePermission[]
+}
+
+enum RoleName {
+  MANAGER
+}
+
+model RolePermission {
+  roleName   RoleName
+  permission AccountPermissionName
+
+  role Role @relation(fields: [roleName], references: [name])
+
+  @@id([roleName, permission])
+}
+
+enum AccountPermissionName {
+  EDIT_ACCOUNT_INTEGRATION_CONFIGURATION
+  EDIT_ACCOUNT_INTEGRATIONS
+  EDIT_ACCOUNT_SECRETS
+  EDIT_USER_ROSTER
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+model AccountEventProcess {
   accountId String
-  account   Account   @relation(fields: [accountId], references: [id])
+  event     Event
+  process   EventProcess
+  account   Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  @@index([accountId], type: Hash)
+  @@id([accountId, event, process])
+  @@index([accountId, event])
 }
 
-enum EventName {
-  OrderCreated
+enum Event {
+  ORDER_CREATED
+}
+
+enum EventProcess {
+  CREATE_CRM_LEAD
+  CREATE_CRM_CONTACT
+  CREATE_CRM_ORDER
+}
+
+model AccountCrm {
+  id                      String                      @id @default(uuid())
+  accountId               String
+  crmId                   String
+  nonSensitiveCredentials Json?
+  isConfigured            Boolean                     @default(false)
+  account                 Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  crm                     Crm                         @relation(fields: [crmId], references: [id])
+  crmSecretRefs           AccountCrmSecretReference[]
+
+  @@unique([accountId, crmId])
+  @@index([accountId], type: BTree)
+}
+
+model AccountCrmSecretReference {
+  secretName   String                           @id @default(uuid())
+  type         AccountSecretReferenceSecretType
+  accountCrmId String
+  accountCrm   AccountCrm                       @relation(fields: [accountCrmId], references: [id], onDelete: Cascade)
+
+  @@unique([type, accountCrmId])
+  @@index([accountCrmId], type: BTree)
+}
+
+enum AccountSecretReferenceSecretType {
+  API_KEY
 }
 
 model Caterer {
@@ -37,31 +147,35 @@ model Caterer {
   name                  String
   ezManageId            String?
   accountId             String
-  account               Account                @relation(fields: [accountId], references: [id])
+  account               Account                @relation(fields: [accountId], references: [id], onDelete: Cascade)
   Menu                  Menu[]
   CatererPointOfContact CatererPointOfContact?
   Order                 Order[]
   ArchivedOrder         ArchivedOrder[]
 
-  @@index([accountId], type: Hash)
+  @@index([accountId], type: BTree)
 }
 
 model CatererPointOfContact {
   catererId String  @id
-  caterer   Caterer @relation(fields: [catererId], references: [id])
+  caterer   Caterer @relation(fields: [catererId], references: [id], onDelete: Cascade)
   firstName String
   lastName  String?
   email     String
   phone     String?
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id])
 }
 
 model Menu {
   id        String     @id @default(uuid())
   catererId String
-  caterer   Caterer    @relation(fields: [catererId], references: [id])
+  caterer   Caterer    @relation(fields: [catererId], references: [id], onDelete: Cascade)
   source    MenuSource
   sourceId  String
   MenuItem  MenuItem[]
+
+  @@index([catererId], type: BTree)
 }
 
 enum MenuSource {
@@ -72,11 +186,11 @@ enum MenuSource {
 model MenuItem {
   id                String              @id @default(uuid())
   menuId            String
-  menu              Menu                @relation(fields: [menuId], references: [id])
+  menu              Menu                @relation(fields: [menuId], references: [id], onDelete: Cascade)
   OrderItem         OrderItem[]
   ArchivedOrderItem ArchivedOrderItem[]
 
-  @@index([menuId], type: Hash)
+  @@index([menuId], type: BTree)
 }
 
 model Order {
@@ -90,12 +204,12 @@ model Order {
   source          OrderSource   @default(OTHER)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @default(now())
-  catererId       String
-  caterer         Caterer       @relation(fields: [catererId], references: [id])
+  catererId       String?
+  caterer         Caterer?      @relation(fields: [catererId], references: [id], onDelete: SetNull)
   targets         OrderTarget[]
   items           OrderItem[]
 
-  @@index([catererId], type: Hash)
+  @@index([catererId], type: BTree)
 }
 
 enum OrderStatus {
@@ -111,33 +225,36 @@ enum OrderSource {
 }
 
 model OrderTarget {
-  id         String          @id @default(uuid())
-  targetHost OrderTargetHost
-  hostType   String
-  hostId     String
-  orderId    String
-  order      Order           @relation(fields: [orderId], references: [id])
+  id                     String          @id @default(uuid())
+  targetType             OrderTargetType
+  externalHostId         String
+  externalHostRecordType String
+  externalHostRecordId   String
+  orderId                String
+  order                  Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId], type: BTree)
 }
 
-enum OrderTargetHost {
-  NUTSHELL
+enum OrderTargetType {
+  CRM
 }
 
 model OrderItem {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   quantity   Int
-  menuItemId String
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
   orderId    String
-  order      Order    @relation(fields: [orderId], references: [id])
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  @@index([orderId], type: Hash)
+  @@index([orderId], type: BTree)
 }
 
 model ArchivedOrder {
   id              String                @id @default(uuid())
   archivedOn      DateTime
-  archivedBy      String
+  archivedBy      String?
   status          OrderStatus
   placementDate   DateTime
   fulfillmentDate DateTime
@@ -145,20 +262,21 @@ model ArchivedOrder {
   canceledDate    DateTime?
   sourceId        String
   source          OrderSource           @default(OTHER)
-  catererId       String
-  caterer         Caterer               @relation(fields: [catererId], references: [id])
+  catererId       String?
+  caterer         Caterer?              @relation(fields: [catererId], references: [id], onDelete: SetNull)
   targets         ArchivedOrderTarget[]
   items           ArchivedOrderItem[]
-  archiver        User                  @relation(fields: [archivedBy], references: [id])
+  archiver        User?                 @relation(fields: [archivedBy], references: [id], onDelete: SetNull)
 }
 
 model ArchivedOrderTarget {
   id         String          @id @default(uuid())
-  targetHost OrderTargetHost
-  hostType   String
+  targetType OrderTargetType
   hostId     String
+  hostType   String
+  hostRefId  String
   orderId    String
-  order      ArchivedOrder   @relation(fields: [orderId], references: [id])
+  order      ArchivedOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model ArchivedOrderItem {
@@ -168,20 +286,22 @@ model ArchivedOrderItem {
   menuItemId String?
   menuName   String?
   orderId    String
-  order      ArchivedOrder @relation(fields: [orderId], references: [id])
-  MenuItem   MenuItem?     @relation(fields: [menuItemId], references: [id])
+  order      ArchivedOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem?     @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
 }
 
-model User {
-  id             String          @id @default(uuid())
-  email          String
-  firstName      String
-  lastName       String?
-  hashedPassword String
-  salt           String
-  accountId      String
-  account        Account         @relation(fields: [accountId], references: [id])
-  ArchivedOrder  ArchivedOrder[]
+model Crm {
+  id                    String       @id @default(uuid())
+  name                  CrmName      @unique()
+  configurationTemplate Json // See prisma README for specifics on the JSON schema
+  accountCrms           AccountCrm[]
+}
 
-  @@unique([email, accountId])
+enum CrmName {
+  NUTSHELL
+}
+
+enum CrmRecordType {
+  CONTACT
+  LEAD
 }

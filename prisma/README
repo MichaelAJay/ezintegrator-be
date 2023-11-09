@@ -1,0 +1,13 @@
+TOPIC: AccountSecretReference.referenceId referential integrity
+Each value in AccountSecretReferenceTargetType enum should correspond to a table of type Account*
+For each record in AccountSecretReference, the referenceId should match a record from the Account* table.
+
+Example:
+For AccountSecretReferenceTargetType = "CRM", there is a corresponding AccountCRM table.
+For a record in AccountSecretReference, for any record with referenceType = "CRM", referenceId MUST reference some record's PK from the Crm table.
+
+TOPIC: Crm.configurationTemplate
+This should be a JSON array of objects of the following schema:
+fieldName: string, type: string, isSecret: boolean
+
+For each object in the array with isSecret: true, the fieldName must be a value from the AccountSecretReferenceSecretType enum
