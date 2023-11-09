@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -17,6 +19,8 @@ import { addSecretRequestPayloadValidator } from './validation/add-secret.schema
 import { IAccountController } from './interfaces';
 import { AccountIntegrationService } from '../../internal-modules/account-and-caterer/account-integration.service';
 import { validateAddUserRequestBody } from './validation/add-user.schema-and-validator';
+import { validateIntegrationType } from './validation/integration.type.validator-function';
+import { validateCreateAccountIntegrationRequestPayload } from './validation/create-account-integration.schema-and-validator';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -25,6 +29,7 @@ export class AccountController implements IAccountController {
     private readonly accountIntegrationService: AccountIntegrationService,
   ) {}
 
+  // Accounts and users
   @Public()
   @Post()
   async createAccountAndUser(
@@ -51,15 +56,38 @@ export class AccountController implements IAccountController {
     response.status(201).send();
   }
 
+  // Integrations
   @Post('integration')
   // Need to change that any to an unknown and validate
-  async createAccountIntegration(@Body() body: any) {
+  async createAccountIntegration(
+    @Body() body: any,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateCreateAccountIntegrationRequestPayload(body)) {
+      throw new BadRequestException(
+        validateCreateAccountIntegrationRequestPayload.errors,
+      );
+    }
+
     const { integrationType, integrationId } = body;
     return this.accountIntegrationService.createAccountIntegration(
       integrationType,
       integrationId,
-      'add account id',
+      req.accountId,
     );
+  }
+
+  @Get('integrations/:type')
+  async getAccountIntegrationsOfType(
+    @Param('type') integrationType: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        'Bad validation type - see the documentation.',
+      );
+    }
+    return this.accountIntegrationService.getAccountIntegrationsOfType;
   }
 
   @Patch('secret')
@@ -84,7 +112,7 @@ export class AccountController implements IAccountController {
     }
 
     return this.accountAndCatererService.addUser(
-      body.email,
+      body,
       req.userId,
       req.accountId,
     );

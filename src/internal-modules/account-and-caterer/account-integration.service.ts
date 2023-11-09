@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -22,6 +23,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     private readonly accountCrmIntegrator: AccountCrmIntegratorService,
   ) {}
 
+  // @TODO refactor to use accountCrm integration class
   async getAccountIntegration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
@@ -76,7 +78,17 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     return result;
   }
 
-  async getAccountIntegrations() {}
+  async getAccountIntegrationsOfType(
+    integrationType: AccountIntegrationType,
+    accountId: string,
+  ) {
+    switch (integrationType) {
+      case 'CRM':
+        return this.accountCrmIntegrator.retrieveAll(accountId);
+      default:
+        throw new BadRequestException('Invalid integration type');
+    }
+  }
 
   // @TODO abstract to Integration level and move this to AccountCrm
   async isAccountCrmFullyConfigured(

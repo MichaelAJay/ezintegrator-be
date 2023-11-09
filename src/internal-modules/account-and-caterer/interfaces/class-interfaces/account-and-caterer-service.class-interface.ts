@@ -1,3 +1,4 @@
+import { ICreateUserArgs } from 'src/internal-modules/user/interfaces';
 import { IGetAuthAndRefreshTokens } from '../../../../internal-modules/security-utility';
 import { ICreateAccountAndUserArgs } from '../args';
 
@@ -7,5 +8,9 @@ export interface IAccountAndCatererService {
   ): Promise<IGetAuthAndRefreshTokens>;
 
   // USER MANAGEMENT
-  addUser(email: string, userId: string, accountId: string): Promise<any>;
+  addUser(
+    user: Omit<ICreateUserArgs, 'password'>,
+    requesterId: string,
+    accountId: string,
+  ): Promise<any>;
 }

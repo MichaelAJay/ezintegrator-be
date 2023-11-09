@@ -2,7 +2,7 @@ import { ICreateUserDbQueryBuilderArgs } from '../../../../internal-modules/exte
 
 export type ICreateUserArgs = Omit<
   ICreateUserDbQueryBuilderArgs,
-  'hashedPassword' | 'salt'
+  'hashedPassword' | 'salt' | 'hashedRt'
 > & {
   password: string;
 };

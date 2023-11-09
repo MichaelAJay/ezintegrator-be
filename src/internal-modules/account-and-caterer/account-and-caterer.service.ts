@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { IBuildCreateAccountQueryArgs } from '../external-handlers/db-handlers/account-and-caterer.db-handler';
 import { AccountAndCatererDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-and-caterer.db-handler.service';
 import { IGetAuthAndRefreshTokens } from '../security-utility';
@@ -9,14 +13,15 @@ import {
   ICreateAccountAndUserArgs,
 } from './interfaces';
 import * as Sentry from '@sentry/node';
-import { RoleAndPermissionDbHandlerService } from '../external-handlers/db-handlers/role-and-permission.db-handler/role-and-permission.db-handler.service';
+import { AccountPermissionService } from '../security-utility/account-permission.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AccountAndCatererService implements IAccountAndCatererService {
   constructor(
     private readonly accountAndCatererDbHandler: AccountAndCatererDbHandlerService,
     private readonly userService: UserService,
-    private readonly roleAndPermissionDbHandler: RoleAndPermissionDbHandlerService,
+    private readonly accountPermissionService: AccountPermissionService,
   ) {}
 
   // Special note:  The accountOwner relation is CRUCIAL to get right.  If any part of this fails, I have to manually roll everything back, because
@@ -88,10 +93,27 @@ export class AccountAndCatererService implements IAccountAndCatererService {
 
   // User management
   async addUser(
-    email: string,
-    userId: string,
+    user: Omit<ICreateUserArgs, 'password' | 'accountId'>,
+    requesterId: string,
     accountId: string,
   ): Promise<any> {
-    throw new Error('Method not implemented.');
+    // Confirm user is permissioned to add a user to the account
+    if (
+      !(await this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        accountId,
+        'EDIT_USER_ROSTER',
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    await this.userService.create({
+      ...user,
+      accountId,
+      password: randomUUID(),
+    });
+
+    // @TODO - send email
   }
 }

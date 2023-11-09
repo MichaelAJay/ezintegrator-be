@@ -9,10 +9,14 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   ) {}
 
   create(crmId: string, accountId: string) {
+    // The FK constraint is handled at the DB level, but should probably be managed here.
     return this.accountIntegrationDbHandler.addAccountCrm({ accountId, crmId });
   }
-  retrieve(args: any) {
+  retrieveOne(args: any) {
     throw new Error('Method not implemented.');
+  }
+  async retrieveAll(accountId: string) {
+    return this.accountIntegrationDbHandler.retrieveAccountCrms(accountId);
   }
   update(args: any) {
     throw new Error('Method not implemented.');

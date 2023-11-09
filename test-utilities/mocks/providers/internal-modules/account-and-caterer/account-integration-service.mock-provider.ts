@@ -4,5 +4,5 @@ export const mockAccountIntegrationService: IAccountIntegrationProvider = {
   getAccountIntegration: jest.fn(),
   isAccountCrmFullyConfigured: jest.fn(),
   createAccountIntegration: jest.fn(),
-  getAccountIntegrations: jest.fn(),
+  getAccountIntegrationsOfType: jest.fn(),
 };

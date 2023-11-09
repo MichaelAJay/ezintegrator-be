@@ -2,6 +2,6 @@ import { IAccountIntegrationClass } from '../../../../../../src/internal-modules
 
 export const mockAccountCrmIntegrator: IAccountIntegrationClass = {
   create: jest.fn(),
-  retrieve: jest.fn(),
+  retrieveOne: jest.fn(),
   update: jest.fn(),
 };

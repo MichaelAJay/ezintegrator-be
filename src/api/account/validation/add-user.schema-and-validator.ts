@@ -1,16 +1,22 @@
 import { JSONSchemaType } from 'ajv';
+import { ICreateUserArgs } from 'src/internal-modules/user/interfaces';
 import { ajv } from 'src/utility/singletons';
 
-export type AddUserRequestBody = {
-  email: string;
-};
-
-const addUserRequestBodySchema: JSONSchemaType<AddUserRequestBody> = {
-  type: 'object',
-  properties: {
-    email: { type: 'string', format: 'email' },
-  },
-  required: ['email'],
-  additionalProperties: false,
-};
+export type CreateAccountUserRequestPayload = Omit<
+  ICreateUserArgs,
+  'password' | 'accountId'
+>;
+const addUserRequestBodySchema: JSONSchemaType<CreateAccountUserRequestPayload> =
+  {
+    type: 'object',
+    properties: {
+      firstName: { type: 'string' },
+      lastName: {
+        anyOf: [{ type: 'string' }, { type: 'null' }],
+      } as any,
+      email: { type: 'string', format: 'email' },
+    },
+    required: ['firstName', 'email'],
+    additionalProperties: false,
+  };
 export const validateAddUserRequestBody = ajv.compile(addUserRequestBodySchema);

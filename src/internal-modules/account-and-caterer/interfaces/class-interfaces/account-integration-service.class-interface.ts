@@ -21,5 +21,8 @@ export interface IAccountIntegrationProvider {
     integrationId: string,
     accountId: string,
   ): any;
-  getAccountIntegrations(args: any): any;
+  getAccountIntegrationsOfType(
+    integrationType: AccountIntegrationType,
+    accountId: string,
+  ): any;
 }

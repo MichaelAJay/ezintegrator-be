@@ -9,6 +9,11 @@ export class IntegrationController implements IIntegrationController {
     private readonly integrationUtilityService: IntegrationUtilityService,
   ) {}
 
+  @Get('types')
+  async getIntegrationTypes() {
+    return this.integrationUtilityService.getIntegrationTypes();
+  }
+
   @Get(':type/:id/configuration-template')
   async getIntegrationConfigurationTemplate(
     @Param('type') integrationType: unknown,

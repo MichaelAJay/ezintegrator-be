@@ -2,8 +2,10 @@ import { IAccountIntegrationFieldConfigurationJson } from '../../../../internal-
 import { AccountIntegrationType } from '../../../../internal-modules/account-and-caterer/types';
 
 export interface IIntegrationUtilityProvider {
+  getIntegrationTypes(): any;
   getIntegrationConfigurationRequirements(
     integrationType: AccountIntegrationType,
     integrationId: string,
   ): Promise<IAccountIntegrationFieldConfigurationJson[]>;
+  getIntegrationsOfType(integrationType: AccountIntegrationType): any;
 }
