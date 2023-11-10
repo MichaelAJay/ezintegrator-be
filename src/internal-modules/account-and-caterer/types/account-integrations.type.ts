@@ -1,11 +1,8 @@
-export const accountIntegration = {
-  CRM: 'CRM',
-  DEFAULT: 'DEFAULT',
-} as const;
+export enum AccountIntegration {
+  CRM = 'CRM',
+  DEFAULT = 'DEFAULT',
+}
 
-export type AccountIntegrationType =
-  (typeof accountIntegration)[keyof typeof accountIntegration];
+export type AccountIntegrationType = keyof typeof AccountIntegration;
 
-export const accountIntegrationValues = Object.values(
-  accountIntegration,
-) as Array<(typeof accountIntegration)[keyof typeof accountIntegration]>;
+export const accountIntegrationValues = Object.values(AccountIntegration);

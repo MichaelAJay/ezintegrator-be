@@ -10,10 +10,24 @@ import { AuthService } from '../../internal-modules/auth/auth.service';
 import { getEnvironmentVariable } from '../../utility';
 import { FastifyReply } from 'fastify';
 import { validateLoginRequestPayload } from './validation/login.validator';
+import {
+  ApiBadRequestResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { loginApiOperationOptions } from '../swagger/operations/auth';
+import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  @ApiOperation(loginApiOperationOptions)
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.UnauthorizedLogin,
+  })
   @Public()
   @Post('login')
   async login(@Body() body: unknown, @Res() response: FastifyReply) {

@@ -83,7 +83,19 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
   async getAccountIntegrationsOfType(
     integrationType: AccountIntegrationType,
     accountId: string,
+    requesterId: string,
   ) {
+    // Check permission
+    if (
+      !(await this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        accountId,
+        'EDIT_ACCOUNT_INTEGRATIONS',
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
+
     switch (integrationType) {
       case 'CRM':
         return this.accountCrmIntegrator.retrieveAll(accountId);
@@ -178,17 +190,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ) {
-    // Check permission
-    if (
-      !(await this.accountPermissionService.doesUserHavePermission(
-        requesterId,
-        accountId,
-        'EDIT_ACCOUNT_INTEGRATIONS',
-      ))
-    ) {
-      throw new UnauthorizedException();
-    }
-
     switch (integrationType) {
       case 'CRM':
         return this.accountCrmIntegrator.create(integrationId, accountId);

@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { IAccountIntegrationFieldConfigurationJson } from '../account-and-caterer/interfaces/account-integration-fields.json-interface';
 import {
-  accountIntegration,
+  AccountIntegration,
   AccountIntegrationType,
 } from '../account-and-caterer/types';
 import { getIntegrationConfigurationTemplate } from './utility/get-integration-configuration-template.utility-function';
@@ -14,8 +14,8 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
     private readonly crmIntegrationDbHandler: CrmIntegrationDbHandlerService,
   ) {}
 
-  async getIntegrationTypes() {
-    return accountIntegration;
+  getIntegrationTypes() {
+    return AccountIntegration;
   }
 
   async getIntegrationConfigurationRequirements(
@@ -34,7 +34,7 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
         );
         break;
       default:
-        throw new NotFoundException(
+        throw new BadRequestException(
           'No configuration requirements found for the provided integration type.',
         );
     }
@@ -48,7 +48,7 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
         results = await this.crmIntegrationDbHandler.retrieveCrms();
         break;
       default:
-        throw new NotFoundException(
+        throw new BadRequestException(
           'No integrations found for the provided integration type',
         );
     }

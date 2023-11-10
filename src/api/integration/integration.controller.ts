@@ -1,5 +1,25 @@
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Query,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
+import { AccountIntegration } from 'src/internal-modules/account-and-caterer/types';
 import { IntegrationUtilityService } from '../../internal-modules/integration-utility/integration-utility.service';
+import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
+import {
+  getIntegrationConfigurationTemplate,
+  getIntegrationsOfType,
+  getIntegrationTypesApiOperationOptions,
+} from '../swagger/operations/integrations';
 import { IIntegrationController } from './interfaces';
 import { validateIntegrationType } from './validators/integration-type.validator';
 
@@ -9,15 +29,26 @@ export class IntegrationController implements IIntegrationController {
     private readonly integrationUtilityService: IntegrationUtilityService,
   ) {}
 
+  @ApiOperation(getIntegrationTypesApiOperationOptions)
   @Get('types')
+  @ApiOkResponse()
   async getIntegrationTypes() {
     return this.integrationUtilityService.getIntegrationTypes();
   }
 
-  @Get(':type/:id/configuration-template')
+  @ApiOperation(getIntegrationConfigurationTemplate)
+  @ApiOkResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Configuration template failed validation',
+  })
+  @ApiParam({ name: 'type', enum: AccountIntegration })
+  @Get(':type/configuration-template')
   async getIntegrationConfigurationTemplate(
     @Param('type') integrationType: unknown,
-    @Param('id') integrationId: string,
+    @Query('id') integrationId: string,
   ) {
     if (!validateIntegrationType(integrationType)) {
       throw new BadRequestException('Invalid integrationType');
@@ -28,6 +59,9 @@ export class IntegrationController implements IIntegrationController {
     );
   }
 
+  @ApiOperation(getIntegrationsOfType)
+  @ApiOkResponse()
+  @ApiParam({ name: 'type', enum: AccountIntegration })
   @Get(':type')
   async getIntegrationsOfType(@Param('type') integrationType: unknown) {
     if (!validateIntegrationType(integrationType)) {

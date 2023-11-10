@@ -26,6 +26,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiUnauthorizedResponse,
@@ -34,10 +35,13 @@ import { CreateAccountAndUserRequestBody } from '../../internal-modules/account-
 import { CreateAccountUserRequestBody } from '../swagger/request/body/create-account-user.request-body';
 import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
 import {
+  addUserApiOperations,
   createAccountAndUserApiOperation,
   createAccountIntegrationApiOperations,
   getAccountIntegrationsOfTypeApiOperations,
+  upsertAccountSecretApiOperations,
 } from '../swagger/operations/account';
+import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -46,9 +50,13 @@ export class AccountController implements IAccountController {
     private readonly accountIntegrationService: AccountIntegrationService,
   ) {}
 
-  // Account management
+  /**
+   * **************************
+   * *** ACCOUNT MANAGEMENT ***
+   * **************************
+   */
   @Public()
-  @ApiOperation({ ...createAccountAndUserApiOperation })
+  @ApiOperation(createAccountAndUserApiOperation)
   @ApiBody({ type: CreateAccountAndUserRequestBody })
   @ApiCreatedResponse()
   @ApiBadRequestResponse({
@@ -80,8 +88,12 @@ export class AccountController implements IAccountController {
     response.status(201).send();
   }
 
-  // Account integrations
-  @ApiOperation({ ...createAccountIntegrationApiOperations })
+  /**
+   * **************************************
+   * *** ACCOUNT INTEGRATION MANAGEMENT ***
+   * **************************************
+   */
+  @ApiOperation(createAccountIntegrationApiOperations)
   @Post('integration')
   @ApiCreatedResponse()
   @ApiBadRequestResponse({
@@ -111,8 +123,22 @@ export class AccountController implements IAccountController {
     );
   }
 
-  @ApiOperation({ ...getAccountIntegrationsOfTypeApiOperations })
-  // @ApiParam({name: 'type', description: 'Integration type', enum: })
+  @ApiOperation(getAccountIntegrationsOfTypeApiOperations)
+  @ApiParam({
+    name: 'type',
+    description: 'Integration type',
+    enum: AccountIntegration,
+  })
+  @ApiOkResponse({
+    // @TODO Type response
+    description: 'Returns array of account integrations matching the type',
+  })
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
   @Get('integrations/:type')
   async getAccountIntegrationsOfType(
     @Param('type') integrationType: string,
@@ -123,9 +149,20 @@ export class AccountController implements IAccountController {
         'Bad validation type - see the documentation.',
       );
     }
-    return this.accountIntegrationService.getAccountIntegrationsOfType;
+    return this.accountIntegrationService.getAccountIntegrationsOfType(
+      integrationType,
+      req.accountId,
+      req.userId,
+    );
   }
 
+  /**
+   * *********************************
+   * *** ACCOUNT SECRET MANAGEMENT ***
+   * *********************************
+   */
+
+  @ApiOperation(upsertAccountSecretApiOperations)
   @Patch('secret')
   async upsertAccountSecret(
     @Body() body: unknown,
@@ -140,7 +177,12 @@ export class AccountController implements IAccountController {
     res.status(200).send();
   }
 
-  // Account user management
+  /**
+   * *******************************
+   * *** ACCOUNT USER MANAGEMENT ***
+   * *******************************
+   */
+  @ApiOperation(addUserApiOperations)
   @ApiBody({ type: CreateAccountUserRequestBody })
   @ApiCreatedResponse()
   @ApiBadRequestResponse({
