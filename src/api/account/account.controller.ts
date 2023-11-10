@@ -27,6 +27,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiOperation,
+  ApiParam,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateAccountAndUserRequestBody } from '../../internal-modules/account-and-caterer/interfaces';
@@ -111,6 +112,7 @@ export class AccountController implements IAccountController {
   }
 
   @ApiOperation({ ...getAccountIntegrationsOfTypeApiOperations })
+  // @ApiParam({name: 'type', description: 'Integration type', enum: })
   @Get('integrations/:type')
   async getAccountIntegrationsOfType(
     @Param('type') integrationType: string,
