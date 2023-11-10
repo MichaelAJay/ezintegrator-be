@@ -13,6 +13,7 @@ import { AccountIntegrationType } from './types';
 import { missingConfigCheck } from './utility/account-integration/missing-config-check.account-integration-utility-function';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
+import { AccountPermissionService } from '../security-utility/account-permission.service';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -21,6 +22,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
   constructor(
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
     private readonly accountCrmIntegrator: AccountCrmIntegratorService,
+    private readonly accountPermissionService: AccountPermissionService,
   ) {}
 
   // @TODO refactor to use accountCrm integration class
@@ -174,12 +176,25 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     integrationType: AccountIntegrationType,
     integrationId: string,
     accountId: string,
+    requesterId: string,
   ) {
+    // Check permission
+    if (
+      !(await this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        accountId,
+        'EDIT_ACCOUNT_INTEGRATIONS',
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
+
     switch (integrationType) {
       case 'CRM':
         return this.accountCrmIntegrator.create(integrationId, accountId);
       default:
-        throw new UnprocessableEntityException('Invalid integration type.');
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type.');
     }
   }
 }

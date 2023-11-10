@@ -20,6 +20,7 @@ export interface IAccountIntegrationProvider {
     integrationType: AccountIntegrationType,
     integrationId: string,
     accountId: string,
+    requesterId: string,
   ): any;
   getAccountIntegrationsOfType(
     integrationType: AccountIntegrationType,

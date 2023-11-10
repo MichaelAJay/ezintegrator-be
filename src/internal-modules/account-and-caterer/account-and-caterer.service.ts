@@ -115,5 +115,6 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     });
 
     // @TODO - send email
+    return { created: true, emailSent: false };
   }
 }

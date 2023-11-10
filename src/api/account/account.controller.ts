@@ -21,6 +21,22 @@ import { AccountIntegrationService } from '../../internal-modules/account-and-ca
 import { validateAddUserRequestBody } from './validation/add-user.schema-and-validator';
 import { validateIntegrationType } from './validation/integration.type.validator-function';
 import { validateCreateAccountIntegrationRequestPayload } from './validation/create-account-integration.schema-and-validator';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { CreateAccountAndUserRequestBody } from '../../internal-modules/account-and-caterer/interfaces';
+import { CreateAccountUserRequestBody } from '../swagger/request/body/create-account-user.request-body';
+import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
+import {
+  createAccountAndUserApiOperation,
+  createAccountIntegrationApiOperations,
+  getAccountIntegrationsOfTypeApiOperations,
+} from '../swagger/operations/account';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -29,8 +45,15 @@ export class AccountController implements IAccountController {
     private readonly accountIntegrationService: AccountIntegrationService,
   ) {}
 
-  // Accounts and users
+  // Account management
   @Public()
+  @ApiOperation({ ...createAccountAndUserApiOperation })
+  @ApiBody({ type: CreateAccountAndUserRequestBody })
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiConflictResponse({ description: SwaggerErrorDescriptions.NonUniqueEmail })
   @Post()
   async createAccountAndUser(
     @Body() body: unknown,
@@ -56,8 +79,17 @@ export class AccountController implements IAccountController {
     response.status(201).send();
   }
 
-  // Integrations
+  // Account integrations
+  @ApiOperation({ ...createAccountIntegrationApiOperations })
   @Post('integration')
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  // @TODO - FK constraint error for accountId
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
   // Need to change that any to an unknown and validate
   async createAccountIntegration(
     @Body() body: any,
@@ -74,9 +106,11 @@ export class AccountController implements IAccountController {
       integrationType,
       integrationId,
       req.accountId,
+      req.userId,
     );
   }
 
+  @ApiOperation({ ...getAccountIntegrationsOfTypeApiOperations })
   @Get('integrations/:type')
   async getAccountIntegrationsOfType(
     @Param('type') integrationType: string,
@@ -104,7 +138,16 @@ export class AccountController implements IAccountController {
     res.status(200).send();
   }
 
-  // USER MANAGEMENT
+  // Account user management
+  @ApiBody({ type: CreateAccountUserRequestBody })
+  @ApiCreatedResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
+  @ApiConflictResponse({ description: SwaggerErrorDescriptions.NonUniqueEmail })
   @Post('user')
   async addUser(@Body() body: any, @Req() req: AuthenticatedRequest) {
     if (!validateAddUserRequestBody(body)) {
