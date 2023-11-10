@@ -190,12 +190,52 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ) {
+    if (
+      !this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        accountId,
+        'EDIT_ACCOUNT_INTEGRATIONS',
+      )
+    ) {
+      throw new UnauthorizedException();
+    }
+
     switch (integrationType) {
       case 'CRM':
         return this.accountCrmIntegrator.create(integrationId, accountId);
       default:
         Sentry.captureMessage('Invalid integration type passed in', 'error');
         throw new BadRequestException('Invalid integration type.');
+    }
+  }
+
+  async updateAccountIntegrationConfig(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+    accountId: string,
+    requesterId: string,
+    config: Record<string, any>,
+  ) {
+    if (
+      !this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        accountId,
+        'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
+      )
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    switch (integrationType) {
+      case 'CRM':
+        return this.accountCrmIntegrator.updateConfig(
+          integrationId,
+          accountId,
+          config,
+        );
+      default:
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type');
     }
   }
 }

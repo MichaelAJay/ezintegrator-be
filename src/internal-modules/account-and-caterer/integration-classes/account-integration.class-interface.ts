@@ -4,4 +4,9 @@ export interface IAccountIntegrationClass {
   retrieveOne(args: any): any;
   retrieveAll(accountId: string): any;
   update(args: any): any;
+  updateConfig(
+    integrationId: string,
+    accountId: string,
+    config: Record<string, any>,
+  ): any;
 }

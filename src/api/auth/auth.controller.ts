@@ -12,11 +12,13 @@ import { FastifyReply } from 'fastify';
 import { validateLoginRequestPayload } from './validation/login.validator';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { loginApiOperationOptions } from '../swagger/operations/auth';
 import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
+import { LoginRequestBody } from '../swagger/request/body/login.request-body';
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +30,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: SwaggerErrorDescriptions.UnauthorizedLogin,
   })
+  @ApiBody({ type: LoginRequestBody })
   @Public()
   @Post('login')
   async login(@Body() body: unknown, @Res() response: FastifyReply) {

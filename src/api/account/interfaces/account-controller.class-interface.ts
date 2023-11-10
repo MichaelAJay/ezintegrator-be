@@ -4,7 +4,16 @@ export interface IAccountController {
   // General
   createAccountAndUser(body: unknown, response: FastifyReply): any;
 
-  // INTEGRATIONS
+  /**
+   * *************************************************************
+   * *** ACCOUNT INTEGRATION CONFIGURATION & SECRET MANAGEMENT ***
+   * *************************************************************
+   */
+  upsertAccountIntegrationConfigValues(
+    body: unknown,
+    req: AuthenticatedRequest,
+    res: FastifyReply,
+  ): any;
 
   // Secrets
   upsertAccountSecret(

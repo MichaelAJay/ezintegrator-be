@@ -21,4 +21,18 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   update(args: any) {
     throw new Error('Method not implemented.');
   }
+  async updateConfig(
+    integrationId: string,
+    accountId: string,
+    config: Record<string, any>,
+  ) {
+    // Retrieve integration by id - include what it references (for instance, Nutshell CRM)
+    // Validate the incoming config against the expected config
+    // Thoughts on how this update works:
+    // 1) It doesn't need to be include all properties.  Missing properties from the config are assumed to represent no change
+    // Downside:  If a user just wants to get rid of some information, this won't do it.  But they could just destroy the whole integration
+    // 2) Whatever IS included in the config will overwrite anything already stored
+    // 3) A check is (?always) performed to determine if the integration's configuration is complete
+    // 4) The remaining configuration keys to include are returned, if they exist
+  }
 }

@@ -25,6 +25,7 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
+  ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -103,9 +104,8 @@ export class AccountController implements IAccountController {
   @ApiUnauthorizedResponse({
     description: SwaggerErrorDescriptions.RequesterLacksPermission,
   })
-  // Need to change that any to an unknown and validate
   async createAccountIntegration(
-    @Body() body: any,
+    @Body() body: unknown,
     @Req() req: AuthenticatedRequest,
   ) {
     if (!validateCreateAccountIntegrationRequestPayload(body)) {
@@ -157,13 +157,32 @@ export class AccountController implements IAccountController {
   }
 
   /**
-   * *********************************
-   * *** ACCOUNT SECRET MANAGEMENT ***
-   * *********************************
+   * *************************************************************
+   * *** ACCOUNT INTEGRATION CONFIGURATION & SECRET MANAGEMENT ***
+   * *************************************************************
    */
+  @ApiParam({ name: 'type', enum: AccountIntegration })
+  @ApiParam({
+    name: 'id',
+    description: 'The id of the account integration to update',
+  })
+  @ApiOkResponse()
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
+  @Patch('integration/:type/:id/config')
+  async upsertAccountIntegrationConfigValues(
+    @Body() body: unknown,
+    @Req() req: AuthenticatedRequest,
+    @Res() res: FastifyReply,
+  ) {
+    // The config should actually be specific to a very specific integration - for instance Nutshell CRM
+    //
+    // NOTE:  The validation of this function must occur at the service level, because it depends on the integration
+  }
 
   @ApiOperation(upsertAccountSecretApiOperations)
-  @Patch('secret')
+  @Patch('integration/:id/secret')
   async upsertAccountSecret(
     @Body() body: unknown,
     @Req() req: AuthenticatedRequest,

@@ -48,10 +48,13 @@ export class IntegrationController implements IIntegrationController {
   @Get(':type/configuration-template')
   async getIntegrationConfigurationTemplate(
     @Param('type') integrationType: unknown,
-    @Query('id') integrationId: string,
+    @Query('id') integrationId: string | undefined,
   ) {
     if (!validateIntegrationType(integrationType)) {
-      throw new BadRequestException('Invalid integrationType');
+      throw new BadRequestException('Invalid integration type');
+    }
+    if (!integrationId) {
+      throw new BadRequestException('Missing integration id query param');
     }
     return this.integrationUtilityService.getIntegrationConfigurationRequirements(
       integrationType,
@@ -62,10 +65,10 @@ export class IntegrationController implements IIntegrationController {
   @ApiOperation(getIntegrationsOfType)
   @ApiOkResponse()
   @ApiParam({ name: 'type', enum: AccountIntegration })
-  @Get(':type')
+  @Get('type/:type')
   async getIntegrationsOfType(@Param('type') integrationType: unknown) {
     if (!validateIntegrationType(integrationType)) {
-      throw new BadRequestException('Invalid integrationType');
+      throw new BadRequestException('Invalid integration type');
     }
     return this.integrationUtilityService.getIntegrationsOfType(
       integrationType,

@@ -4,6 +4,7 @@ import { IAddCrmSecretArgs } from '../../../internal-modules/account-and-caterer
 import { accountIntegrationValues } from '../../../internal-modules/account-and-caterer/types';
 import { ajv } from '../../../utility/singletons';
 
+// The request body payload should actually not include the accountIntegrationId and integration type
 const addSecretRequestPayloadSchema: JSONSchemaType<IAddCrmSecretArgs> = {
   type: 'object',
   properties: {

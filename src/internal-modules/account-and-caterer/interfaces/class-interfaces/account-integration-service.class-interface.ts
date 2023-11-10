@@ -27,4 +27,11 @@ export interface IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ): any;
+  updateAccountIntegrationConfig(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+    accountId: string,
+    requesterId: string,
+    config: Record<string, any>,
+  ): any;
 }
