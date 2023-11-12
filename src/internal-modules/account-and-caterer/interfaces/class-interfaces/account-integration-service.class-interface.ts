@@ -72,7 +72,7 @@ export interface IAccountIntegrationProvider {
   ): any;
   getAccountIntegrationConfigurations(
     requesterId: string,
-    accountId: string,
+    requesterAccountId: string,
     integrationType?: AccountIntegrationType,
   ): any;
 }

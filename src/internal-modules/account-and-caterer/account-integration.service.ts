@@ -329,9 +329,19 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
 
   async getAccountIntegrationConfigurations(
     requesterId: string,
-    accountId: string,
+    requesterAccountId: string,
     integrationType?: AccountIntegrationType,
-  ) {}
+  ) {
+    if (
+      !(await this.accountPermissionService.doesUserHavePermission(
+        requesterId,
+        requesterAccountId,
+        'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
+  }
 
   // Helper
 

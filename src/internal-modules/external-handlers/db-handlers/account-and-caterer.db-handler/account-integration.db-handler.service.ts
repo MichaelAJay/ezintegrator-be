@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -82,7 +83,7 @@ export class AccountIntegrationDbHandlerService
   // GENERALIZED METHODS
 
   // Whatever calls this should validate the response
-  async retrieveAllAccountIntegrationSecretReferences(
+  async retrieveAllTargetAccountIntegrationSecretReferences(
     integrationType: AccountIntegrationType,
     integrationId: string,
   ) {
@@ -109,6 +110,28 @@ export class AccountIntegrationDbHandlerService
         return this.dbClient.accountCrm.delete(query);
       default:
         throw new Error('Integration type not found');
+    }
+  }
+
+  // IMPORTANT:  service methods calling this should not pass secret names to the request response
+  async retrieveAccountIntegrationsAndSecretReferencesByType(
+    accountId: string,
+    type: AccountIntegrationType,
+  ): Promise<Array<any>> {
+    switch (type) {
+      case 'CRM':
+        const query =
+          this.queryBuilder.buildRetrieveAccountCrmIntegrationsAndSecretReferencesQuery(
+            accountId,
+          );
+        return this.dbClient.accountCrm.findMany(query);
+      default:
+        const err = new Error('Invalid account integration type');
+        Sentry.withScope((scope) => {
+          scope.setExtra('type', type);
+          Sentry.captureException(err);
+        });
+        throw err;
     }
   }
 }

@@ -31,4 +31,9 @@ export interface IAccountIntegrationDbQueryBuilder {
   buildDeleteAccountIntegrationQuery(accountCrmId: string): {
     where: { id: string };
   };
+
+  // These must be unique to the integration type because of the includes
+  buildRetrieveAccountCrmIntegrationsAndSecretReferencesQuery(
+    accountId: string,
+  ): Prisma.AccountCrmFindManyArgs;
 }

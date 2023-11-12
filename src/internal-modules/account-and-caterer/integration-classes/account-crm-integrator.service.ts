@@ -91,7 +91,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
 
     // Retrieve all crm secret references
     const secretReferences =
-      await this.accountIntegrationDbHandler.retrieveAllAccountIntegrationSecretReferences(
+      await this.accountIntegrationDbHandler.retrieveAllTargetAccountIntegrationSecretReferences(
         'CRM',
         accountCrmId,
       );

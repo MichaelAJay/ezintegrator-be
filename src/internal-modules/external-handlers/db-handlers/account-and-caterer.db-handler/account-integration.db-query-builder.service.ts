@@ -66,4 +66,16 @@ export class AccountIntegrationDbQueryBuilderService
       where: { id: accountCrmId },
     };
   }
+
+  buildRetrieveAccountCrmIntegrationsAndSecretReferencesQuery(
+    accountId: string,
+  ): Prisma.AccountCrmFindManyArgs {
+    return {
+      where: { accountId },
+      include: {
+        crm: true,
+        crmSecretRefs: true,
+      },
+    };
+  }
 }

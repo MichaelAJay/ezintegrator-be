@@ -19,12 +19,16 @@ export interface IAccountIntegrationDbHandlerProvider {
       'nonSensitiveCredentials' | 'isConfigured' | 'isActive'
     >,
   ): Promise<any>;
-  retrieveAllAccountIntegrationSecretReferences(
+  retrieveAllTargetAccountIntegrationSecretReferences(
     integrationType: AccountIntegrationType,
     integrationId: string,
   ): any;
   deleteAccountIntegration(
     integrationType: AccountIntegrationType,
     integrationId: string,
+  ): any;
+  retrieveAccountIntegrationsAndSecretReferencesByType(
+    accountId: string,
+    type: AccountIntegrationType,
   ): any;
 }

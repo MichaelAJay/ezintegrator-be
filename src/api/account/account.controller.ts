@@ -286,6 +286,13 @@ export class AccountController implements IAccountController {
     );
   }
 
+  @ApiOkResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
   @Get('integrations/configurations')
   async getAccountIntegrationConfigurations(
     @Req() req: AuthenticatedRequest,
