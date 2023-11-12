@@ -4,4 +4,7 @@ export const SwaggerErrorDescriptions = {
   NonUniqueEmail: 'Email already exists in system',
   UnauthorizedLogin:
     'Email was not found in system or password was not successfully validated',
+  NotFound: 'Record not found',
+  RecordDoesNotBelongToAccount:
+    "The target integration does not belong to the requesting user's account",
 };

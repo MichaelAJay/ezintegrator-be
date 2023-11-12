@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -14,6 +15,7 @@ import { missingConfigCheck } from './utility/account-integration/missing-config
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
+import { PermissionNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -191,11 +193,11 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     requesterId: string,
   ) {
     if (
-      !this.accountPermissionService.doesUserHavePermission(
+      !(await this.accountPermissionService.doesUserHavePermission(
         requesterId,
         accountId,
         'EDIT_ACCOUNT_INTEGRATIONS',
-      )
+      ))
     ) {
       throw new UnauthorizedException();
     }
@@ -211,25 +213,22 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
 
   async updateAccountIntegrationConfig(
     integrationType: AccountIntegrationType,
-    integrationId: string,
+    accountIntegrationId: string,
     accountId: string,
     requesterId: string,
     config: Record<string, any>,
   ) {
-    if (
-      !this.accountPermissionService.doesUserHavePermission(
-        requesterId,
-        accountId,
-        'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
-      )
-    ) {
-      throw new UnauthorizedException();
-    }
+    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
+      { id: requesterId, accountId },
+      integrationType,
+      accountIntegrationId,
+      'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
+    );
 
     switch (integrationType) {
       case 'CRM':
         return this.accountCrmIntegrator.updateConfig(
-          integrationId,
+          accountIntegrationId,
           accountId,
           config,
         );
@@ -237,5 +236,178 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
         Sentry.captureMessage('Invalid integration type passed in', 'error');
         throw new BadRequestException('Invalid integration type');
     }
+  }
+
+  async deactivate(
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+    accountId: string,
+    requesterId: string,
+  ) {
+    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
+      { id: requesterId, accountId },
+      integrationType,
+      accountIntegrationId,
+      'EDIT_ACCOUNT_INTEGRATIONS',
+    );
+
+    switch (integrationType) {
+      case 'CRM':
+        return this.accountCrmIntegrator.deactivate(
+          accountIntegrationId,
+          accountId,
+        );
+      default:
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type');
+    }
+  }
+
+  async activate(
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+    accountId: string,
+    requesterId: string,
+  ) {
+    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
+      { id: requesterId, accountId },
+      integrationType,
+      accountIntegrationId,
+      'EDIT_ACCOUNT_INTEGRATIONS',
+    );
+
+    switch (integrationType) {
+      case 'CRM':
+        return this.accountCrmIntegrator.activate(
+          accountIntegrationId,
+          accountId,
+        );
+      default:
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type');
+    }
+  }
+
+  /**
+   * @throws NotFoundException (record not found)
+   * @throws ConflictException (record account doesn't match user account)
+   * @throws UnprocessableEntityException (record is active)
+   * @throws UnprocessableEntityException (record missing accountId)
+   * @throws UnauthorizedException (requester lacks permission)
+   */
+  async delete(
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+    accountId: string,
+    requesterId: string,
+  ) {
+    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
+      { id: requesterId, accountId },
+      integrationType,
+      accountIntegrationId,
+      'EDIT_ACCOUNT_INTEGRATIONS',
+    );
+
+    switch (integrationType) {
+      case 'CRM':
+        return this.accountCrmIntegrator.delete(
+          accountIntegrationId,
+          accountId,
+        );
+      default:
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type');
+    }
+  }
+
+  async getAccountIntegrationConfiguration(
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+    requesterAccountId: string,
+    requesterId: string,
+  ) {}
+
+  async getAccountIntegrationConfigurations(
+    requesterId: string,
+    accountId: string,
+    integrationType?: AccountIntegrationType,
+  ) {}
+
+  // Helper
+
+  /**
+   * Ensures that requester's account matches the integration's account
+   * And that the requester has adequate permission on the account to carry out the action
+   *
+   * @throws NotFoundException (record not found by id)
+   * @throws UnprocessableEntityException (record missing accountId)
+   * @throws ConflictException (record and user do not share the same account)
+   * @throws UnauthorizedException (requester lacks permission)
+   */
+  async confirmRequesterCanCarryOutAccountIntegrationAction(
+    requester: { id: string; accountId: string },
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+    permission: PermissionNameValue,
+  ) {
+    if (
+      !(await this.accountIntegrationBelongsToUserAccount(
+        requester.accountId,
+        integrationType,
+        accountIntegrationId,
+      ))
+    ) {
+      throw new ConflictException();
+    }
+
+    if (
+      !(await this.accountPermissionService.doesUserHavePermission(
+        requester.id,
+        requester.accountId,
+        permission,
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    return true;
+  }
+
+  /**
+   * @throws NotFoundException (record not found by id)
+   * @throws UnprocessableEntityException (record missing accountId)
+   */
+  async accountIntegrationBelongsToUserAccount(
+    requesterAccountId: string,
+    integrationType: AccountIntegrationType,
+    accountIntegrationId: string,
+  ) {
+    let record: any;
+    switch (integrationType) {
+      case 'CRM':
+        record = await this.accountCrmIntegrator.retrieveOne(
+          accountIntegrationId,
+        );
+
+        break;
+      default:
+        Sentry.captureMessage('Invalid integration type passed in', 'error');
+        throw new BadRequestException('Invalid integration type');
+    }
+
+    if (!record) {
+      throw new NotFoundException();
+    }
+
+    if (!record.accountId) {
+      const err = new UnprocessableEntityException();
+      Sentry.withScope((scope) => {
+        scope.setExtra('id', accountIntegrationId);
+        Sentry.captureException(err);
+      });
+      throw err;
+    }
+
+    return requesterAccountId === record.accountId;
   }
 }

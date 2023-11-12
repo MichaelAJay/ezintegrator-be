@@ -5,4 +5,5 @@ export interface ISecretManagerProvider {
   getSecret(input: any): any;
   getSecretLocally(input: any): any;
   getRemoteSecret(input: any): any;
+  deleteSecret(secretName: string): any;
 }

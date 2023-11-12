@@ -1,4 +1,5 @@
 import { AccountCrm, Prisma } from '@prisma/client';
+import { AccountIntegrationType } from 'src/internal-modules/account-and-caterer/types';
 
 export interface IAccountIntegrationDbHandlerProvider {
   // Account CRM management
@@ -11,10 +12,19 @@ export interface IAccountIntegrationDbHandlerProvider {
     include?: Prisma.AccountCrmInclude,
   ): Promise<AccountCrm | null>;
   updateAccountCrm(
+    accountCrmId: string,
     accountId: string,
     updates: Pick<
       Prisma.AccountCrmUncheckedUpdateInput,
-      'nonSensitiveCredentials' | 'isConfigured'
+      'nonSensitiveCredentials' | 'isConfigured' | 'isActive'
     >,
   ): Promise<any>;
+  retrieveAllAccountIntegrationSecretReferences(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ): any;
+  deleteAccountIntegration(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ): any;
 }

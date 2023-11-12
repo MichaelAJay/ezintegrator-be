@@ -24,11 +24,28 @@ export const createAccountIntegrationApiOperations: ApiOperationOptions = {
     'If requester has adequate permission, a new unconfigured account integration is created',
   tags: [ApiOperationTags.AccountIntegrationManagement],
 };
-
 export const getAccountIntegrationsOfTypeApiOperations: ApiOperationOptions = {
   summary: 'Retrieve account integrations of specified type',
   description:
     'If a requester has permission to edit account integrations, returns a list of integrations of the specified integration type',
+  tags: [ApiOperationTags.AccountIntegrationManagement],
+};
+export const deactivateAccountIntegration: ApiOperationOptions = {
+  summary: 'Deactivate an account integration',
+  description:
+    'If requester has "EDIT_ACCOUNT_INTEGRATIONS" permission and account integration belongs to requester\'s account, deactivate the integration.',
+  tags: [ApiOperationTags.AccountIntegrationManagement],
+};
+export const activateAccountIntegration: ApiOperationOptions = {
+  summary: 'Activate a deactivated account integration',
+  description:
+    'If requester has "EDIT_ACCOUNT_INTEGRATIONS" permission and account integration belongs to requester\'s account, reactivate the integration.',
+  tags: [ApiOperationTags.AccountIntegrationManagement],
+};
+export const deleteAccountIntegration: ApiOperationOptions = {
+  summary: 'Delete an account integration',
+  description:
+    'If requester has "EDIT_ACCOUNT_INTEGRATIONS" permission and account integration belongs to requester\'s account, delete the integration and all of its secrets.',
   tags: [ApiOperationTags.AccountIntegrationManagement],
 };
 

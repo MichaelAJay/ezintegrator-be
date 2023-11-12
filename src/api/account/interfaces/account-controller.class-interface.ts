@@ -1,7 +1,12 @@
 import { FastifyReply } from 'fastify';
+import { AccountIntegrationType } from '../../../internal-modules/account-and-caterer/types';
 import { AuthenticatedRequest } from '../../../api/types';
 export interface IAccountController {
-  // General
+  /**
+   * **************************
+   * *** ACCOUNT MANAGEMENT ***
+   * **************************
+   */
   createAccountAndUser(body: unknown, response: FastifyReply): any;
 
   /**
@@ -9,10 +14,35 @@ export interface IAccountController {
    * *** ACCOUNT INTEGRATION CONFIGURATION & SECRET MANAGEMENT ***
    * *************************************************************
    */
+  createAccountIntegration(body: unknown, req: AuthenticatedRequest): any;
+  deactivateAccountIntegration(
+    integrationType: string,
+    accountIntegrationId: string,
+    req: AuthenticatedRequest,
+  ): any;
+  activateAccountIntegration(
+    integrationType: string,
+    accountIntegrationId: string,
+    req: AuthenticatedRequest,
+  ): any;
   upsertAccountIntegrationConfigValues(
     body: unknown,
     req: AuthenticatedRequest,
     res: FastifyReply,
+  ): any;
+  deleteAccountIntegration(
+    integrationType: string,
+    accountIntegrationId: string,
+    req: AuthenticatedRequest,
+  ): any;
+  getAccountIntegrationConfiguration(
+    integrationType: string,
+    accountIntegrationId: string,
+    req: AuthenticatedRequest,
+  ): any;
+  getAccountIntegrationConfigurations(
+    req: AuthenticatedRequest,
+    integrationType?: string,
   ): any;
 
   // Secrets

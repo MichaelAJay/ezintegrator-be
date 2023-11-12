@@ -120,6 +120,7 @@ model AccountCrm {
   crmId                   String
   nonSensitiveCredentials Json?
   isConfigured            Boolean                     @default(false)
+  isActive                Boolean                     @default(true)
   account                 Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
   crm                     Crm                         @relation(fields: [crmId], references: [id])
   crmSecretRefs           AccountCrmSecretReference[]

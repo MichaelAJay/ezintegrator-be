@@ -7,6 +7,7 @@ export interface IAccountIntegrationDbQueryBuilder {
   ): Prisma.AccountCrmCreateArgs;
   buildUpdateAccountCrmQuery(
     accountCrmId: string,
+    accountId: string,
     updates: Pick<
       Prisma.AccountCrmUncheckedUpdateInput,
       'nonSensitiveCredentials' | 'isConfigured'
@@ -19,4 +20,15 @@ export interface IAccountIntegrationDbQueryBuilder {
     accountCrmId: string,
     include?: Prisma.AccountCrmInclude,
   ): Prisma.AccountCrmFindUniqueArgs;
+
+  // GENERALIZED
+  // This should be generalizable with a union return
+  buildRetrieveAllAccountIntegrationSecretReferencesQuery(
+    accountCrmId: string,
+  ): {
+    where: { accountCrmId: string };
+  };
+  buildDeleteAccountIntegrationQuery(accountCrmId: string): {
+    where: { id: string };
+  };
 }

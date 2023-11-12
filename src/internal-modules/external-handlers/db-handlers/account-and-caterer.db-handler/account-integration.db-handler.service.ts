@@ -1,8 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { AccountCrm, Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DbClientService } from '../../../../external-modules';
 import { AccountIntegrationDbQueryBuilderService } from './account-integration.db-query-builder.service';
 import { IAccountIntegrationDbHandlerProvider } from './interfaces';
+import * as Sentry from '@sentry/node';
+import { AccountIntegrationType } from '../../../account-and-caterer/types';
 
 @Injectable()
 export class AccountIntegrationDbHandlerService
@@ -41,16 +48,67 @@ export class AccountIntegrationDbHandlerService
 
   async updateAccountCrm(
     accountCrmId: string,
+    accountId: string,
     updates: Pick<
       Prisma.AccountCrmUncheckedUpdateInput,
-      'nonSensitiveCredentials' | 'isConfigured'
+      'nonSensitiveCredentials' | 'isConfigured' | 'isActive'
     >,
   ): Promise<any> {
     // The primary thing I'm thinking this will be for is to add the non-sensitive credentials AFTER CRM addition
     const query = this.queryBuilder.buildUpdateAccountCrmQuery(
       accountCrmId,
+      accountId,
       updates,
     );
-    return this.dbClient.accountCrm.update(query);
+    await this.dbClient.accountCrm.update(query).catch(async (reason) => {
+      if (
+        reason instanceof PrismaClientKnownRequestError &&
+        reason.code === 'P2025'
+      ) {
+        const accountCrm = await this.retrieveAccountCrmById(accountCrmId);
+        if (!accountCrm) {
+          throw new NotFoundException('Record to update not found.');
+        }
+        if (accountCrm.accountId !== accountId) {
+          throw new ConflictException();
+        }
+      }
+      // If not "RecordNotFound" Prisma exception, log and throw
+      Sentry.captureException(reason);
+      throw reason;
+    });
+  }
+
+  // GENERALIZED METHODS
+
+  // Whatever calls this should validate the response
+  async retrieveAllAccountIntegrationSecretReferences(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ) {
+    switch (integrationType) {
+      case 'CRM':
+        const query =
+          this.queryBuilder.buildRetrieveAllAccountIntegrationSecretReferencesQuery(
+            integrationId,
+          );
+        return this.dbClient.accountCrmSecretReference.findMany(query);
+      default:
+        throw new Error('Integration type not found');
+    }
+  }
+
+  async deleteAccountIntegration(
+    integrationType: AccountIntegrationType,
+    integrationId: string,
+  ) {
+    switch (integrationType) {
+      case 'CRM':
+        const query =
+          this.queryBuilder.buildDeleteAccountIntegrationQuery(integrationId);
+        return this.dbClient.accountCrm.delete(query);
+      default:
+        throw new Error('Integration type not found');
+    }
   }
 }

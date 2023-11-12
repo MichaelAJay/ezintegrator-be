@@ -15,13 +15,14 @@ export class AccountIntegrationDbQueryBuilderService
 
   buildUpdateAccountCrmQuery(
     accountCrmId: string,
+    accountId: string,
     updates: Pick<
       Prisma.AccountCrmUncheckedUpdateInput,
       'nonSensitiveCredentials' | 'isConfigured'
     >,
   ): Prisma.AccountCrmUpdateArgs {
     const query: Prisma.AccountCrmUpdateArgs = {
-      where: { id: accountCrmId },
+      where: { id: accountCrmId, accountId },
       data: updates,
     };
     return query;
@@ -47,5 +48,22 @@ export class AccountIntegrationDbQueryBuilderService
       query.include = include;
     }
     return query;
+  }
+
+  // This should be generalizable with a union return -
+  buildRetrieveAllAccountIntegrationSecretReferencesQuery(
+    accountCrmId: string,
+  ) {
+    return {
+      where: { accountCrmId },
+    };
+  }
+
+  buildDeleteAccountIntegrationQuery(accountCrmId: string): {
+    where: { id: string };
+  } {
+    return {
+      where: { id: accountCrmId },
+    };
   }
 }

@@ -2,10 +2,12 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
 } from '@nestjs/common';
@@ -25,24 +27,31 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
-  ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { CreateAccountAndUserRequestBody } from '../../internal-modules/account-and-caterer/interfaces';
 import { CreateAccountUserRequestBody } from '../swagger/request/body/create-account-user.request-body';
 import { SwaggerErrorDescriptions } from '../swagger/descriptions/errors';
 import {
+  activateAccountIntegration,
   addUserApiOperations,
   createAccountAndUserApiOperation,
   createAccountIntegrationApiOperations,
+  deactivateAccountIntegration,
+  deleteAccountIntegration,
   getAccountIntegrationsOfTypeApiOperations,
   upsertAccountSecretApiOperations,
 } from '../swagger/operations/account';
-import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
+import {
+  AccountIntegration,
+  AccountIntegrationType,
+} from '../../internal-modules/account-and-caterer/types';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -95,7 +104,6 @@ export class AccountController implements IAccountController {
    * **************************************
    */
   @ApiOperation(createAccountIntegrationApiOperations)
-  @Post('integration')
   @ApiCreatedResponse()
   @ApiBadRequestResponse({
     description: SwaggerErrorDescriptions.RequestValidationFailed,
@@ -104,6 +112,7 @@ export class AccountController implements IAccountController {
   @ApiUnauthorizedResponse({
     description: SwaggerErrorDescriptions.RequesterLacksPermission,
   })
+  @Post('integration')
   async createAccountIntegration(
     @Body() body: unknown,
     @Req() req: AuthenticatedRequest,
@@ -118,6 +127,72 @@ export class AccountController implements IAccountController {
     return this.accountIntegrationService.createAccountIntegration(
       integrationType,
       integrationId,
+      req.accountId,
+      req.userId,
+    );
+  }
+
+  @ApiOperation(deactivateAccountIntegration)
+  @ApiParam({ name: 'type', enum: AccountIntegration })
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
+  @ApiNotFoundResponse({ description: SwaggerErrorDescriptions.NotFound })
+  @ApiConflictResponse({
+    description: SwaggerErrorDescriptions.RecordDoesNotBelongToAccount,
+  })
+  @Patch('integration/:type/:id/deactivate')
+  async deactivateAccountIntegration(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        SwaggerErrorDescriptions.RequestValidationFailed,
+      );
+    }
+    return this.accountIntegrationService.deactivate(
+      integrationType,
+      accountIntegrationId,
+      req.accountId,
+      req.userId,
+    );
+  }
+
+  @ApiOperation(activateAccountIntegration)
+  @ApiParam({ name: 'type', enum: AccountIntegration })
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
+  @ApiNotFoundResponse({ description: SwaggerErrorDescriptions.NotFound })
+  @ApiConflictResponse({
+    description: SwaggerErrorDescriptions.RecordDoesNotBelongToAccount,
+  })
+  @Patch('integration/:type/:id/activate')
+  async activateAccountIntegration(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        SwaggerErrorDescriptions.RequestValidationFailed,
+      );
+    }
+    return this.accountIntegrationService.activate(
+      integrationType,
+      accountIntegrationId,
       req.accountId,
       req.userId,
     );
@@ -154,6 +229,86 @@ export class AccountController implements IAccountController {
       req.accountId,
       req.userId,
     );
+  }
+
+  @ApiOperation(deleteAccountIntegration)
+  @ApiParam({ name: 'type', enum: AccountIntegration })
+  @ApiParam({ name: 'id' })
+  @ApiOkResponse()
+  @ApiBadRequestResponse({
+    description: SwaggerErrorDescriptions.RequestValidationFailed,
+  })
+  @ApiUnauthorizedResponse({
+    description: SwaggerErrorDescriptions.RequesterLacksPermission,
+  })
+  @ApiNotFoundResponse({ description: SwaggerErrorDescriptions.NotFound })
+  @ApiConflictResponse({
+    description: SwaggerErrorDescriptions.RecordDoesNotBelongToAccount,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'Record is missing accountId or is active',
+  })
+  @Delete('integration/:type/:id')
+  async deleteAccountIntegration(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        'Bad validation type - see the documentation.',
+      );
+    }
+    return this.accountIntegrationService.delete(
+      integrationType,
+      accountIntegrationId,
+      req.accountId,
+      req.userId,
+    );
+  }
+
+  @Get('integration/configuration/:type/:id')
+  async getAccountIntegrationConfiguration(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        'Bad validation type - see the documentation.',
+      );
+    }
+    return this.accountIntegrationService.getAccountIntegrationConfiguration(
+      integrationType,
+      accountIntegrationId,
+      req.accountId,
+      req.userId,
+    );
+  }
+
+  @Get('integrations/configurations')
+  async getAccountIntegrationConfigurations(
+    @Req() req: AuthenticatedRequest,
+    @Query('type') integrationType?: string,
+  ) {
+    if (integrationType) {
+      if (!validateIntegrationType(integrationType)) {
+        throw new BadRequestException(
+          'Bad validation type - see the documentation.',
+        );
+      }
+      // Forces type safety if integrationType is included
+      return this.accountIntegrationService.getAccountIntegrationConfigurations(
+        req.userId,
+        req.accountId,
+        integrationType,
+      );
+    } else {
+      return this.accountIntegrationService.getAccountIntegrationConfigurations(
+        req.userId,
+        req.accountId,
+      );
+    }
   }
 
   /**

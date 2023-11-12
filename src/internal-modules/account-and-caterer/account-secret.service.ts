@@ -72,9 +72,13 @@ export class AccountSecretService implements IAccountSecretProvider {
       );
     if (isFullyConfigured) {
       if (!accountCrm.isConfigured) {
-        await this.accountIntegrationDbHandler.updateAccountCrm(accountCrm.id, {
-          isConfigured: true,
-        });
+        await this.accountIntegrationDbHandler.updateAccountCrm(
+          accountCrm.id,
+          accountId,
+          {
+            isConfigured: true,
+          },
+        );
       }
       return { message: 'The CRM integration is complete and ready to use!' };
     }

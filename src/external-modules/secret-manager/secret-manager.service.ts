@@ -11,14 +11,12 @@ import { getEnvironmentVariable } from '../../utility';
 @Injectable()
 export class SecretManagerService implements ISecretManagerProvider {
   private readonly projectName: string;
-
   constructor(
     @Inject('SecretManagerServiceClient')
     private readonly client: SecretManagerServiceClient,
   ) {
     this.projectName = getEnvironmentVariable('GCP_PROJECT');
   }
-
   async upsertSecretVersion(secretId: string, secretPayload: string | Buffer) {
     try {
       // Add secret version (assumes already versioned)
@@ -33,7 +31,6 @@ export class SecretManagerService implements ISecretManagerProvider {
       }
     }
   }
-
   async createSecretContainer(secretId: string) {
     await this.client.createSecret({
       parent: `projects/${this.projectName}`,
@@ -45,7 +42,6 @@ export class SecretManagerService implements ISecretManagerProvider {
       },
     });
   }
-
   async addSecretVersion(secretId: string, secretPayload: string | Buffer) {
     // Convert if string here
     const payloadBuffer =
@@ -66,7 +62,6 @@ export class SecretManagerService implements ISecretManagerProvider {
       payloadBuffer.fill(0);
     }
   }
-
   async getSecret(secretName: string) {
     try {
       // @@ ts-ignore
@@ -97,5 +92,8 @@ export class SecretManagerService implements ISecretManagerProvider {
       throw new InternalServerErrorException('Secret could not be retrieved');
     }
     return version.payload.data.toString();
+  }
+  async deleteSecret(secretName: string) {
+    return this.client.deleteSecret({ name: secretName });
   }
 }
