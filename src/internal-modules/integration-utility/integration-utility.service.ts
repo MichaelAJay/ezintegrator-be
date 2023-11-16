@@ -41,6 +41,9 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
     return configurationRequirements;
   }
 
+  /**
+   * @TODO this should also return each integration's possible event processes
+   */
   async getIntegrationsOfType(integrationType: AccountIntegrationType) {
     let results;
     switch (integrationType) {

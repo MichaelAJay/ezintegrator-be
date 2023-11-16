@@ -11,3 +11,14 @@ This should be a JSON array of objects of the following schema:
 fieldName: string, type: string, isSecret: boolean
 
 For each object in the array with isSecret: true, the fieldName must be a value from the AccountSecretReferenceSecretType enum
+
+TOPIC: ACCOUNT INTEGRATIONS
+Every account integration (account*, e.g. accountCrm) record will have
+many secretRefereces -> account*SecretReference (e.g. accountCrmSecretReference)
+many eventProcesses -> account*EventProcess (e.g. accountCrmEventProcess)
+
+There must be a system constraint capability, so that a specific reference to an integration can't use an inaccurate event process.
+
+For example: In Nutshell, a lead can be created.  However, in crm x, there is no lead
+
+So, there is an accompanying CrmIntegrationAction ()

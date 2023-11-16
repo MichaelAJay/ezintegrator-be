@@ -48,10 +48,7 @@ import {
   getAccountIntegrationsOfTypeApiOperations,
   upsertAccountSecretApiOperations,
 } from '../swagger/operations/account';
-import {
-  AccountIntegration,
-  AccountIntegrationType,
-} from '../../internal-modules/account-and-caterer/types';
+import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
 
 @Controller('account')
 export class AccountController implements IAccountController {

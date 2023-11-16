@@ -42,7 +42,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
             accountIntegrationId,
             {
               crm: true,
-              crmSecretRefs: true,
+              secretRefs: true,
             },
           );
         if (!accountCrmWithCrmAndSecretReferences) {
@@ -120,7 +120,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       typeof input === 'string'
         ? await this.accountIntegrationDbHandler.retrieveAccountCrmById(input, {
             crm: true,
-            crmSecretRefs: true,
+            secretRefs: true,
           })
         : input;
     if (!accountCrmWithCrmAndSecretReferences) {

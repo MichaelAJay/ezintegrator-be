@@ -11,15 +11,14 @@ datasource db {
 }
 
 model Account {
-  id           String                @id @default(uuid())
+  id           String        @id @default(uuid())
   name         String
-  status       AccountStatus         @default(PENDING)
+  status       AccountStatus @default(PENDING)
   ownerEmail   String
   contactEmail String
   caterers     Caterer[]
   users        User[]
   crms         AccountCrm[]
-  processes    AccountEventProcess[]
   accountOwner AccountOwner?
 }
 
@@ -94,24 +93,8 @@ enum AccountStatus {
   SUSPENDED
 }
 
-model AccountEventProcess {
-  accountId String
-  event     Event
-  process   EventProcess
-  account   Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@id([accountId, event, process])
-  @@index([accountId, event])
-}
-
 enum Event {
   ORDER_CREATED
-}
-
-enum EventProcess {
-  CREATE_CRM_LEAD
-  CREATE_CRM_CONTACT
-  CREATE_CRM_ORDER
 }
 
 model AccountCrm {
@@ -123,10 +106,28 @@ model AccountCrm {
   isActive                Boolean                     @default(true)
   account                 Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
   crm                     Crm                         @relation(fields: [crmId], references: [id])
-  crmSecretRefs           AccountCrmSecretReference[]
+  eventProcesses          AccountCrmEventProcess[]
+  secretRefs              AccountCrmSecretReference[]
 
   @@unique([accountId, crmId])
   @@index([accountId], type: BTree)
+}
+
+model AccountCrmEventProcess {
+  id           String               @id @default(uuid())
+  accountCrmId String
+  event        Event
+  action       CrmIntegrationAction
+  accountCrm   AccountCrm           @relation(fields: [accountCrmId], references: [id])
+
+  @@unique([accountCrmId, event, action])
+  @@index([accountCrmId])
+}
+
+enum CrmIntegrationAction {
+  CREATE_LEAD
+  CREATE_CONTACT
+  CREATE_ORDER
 }
 
 model AccountCrmSecretReference {
@@ -292,10 +293,11 @@ model ArchivedOrderItem {
 }
 
 model Crm {
-  id                    String       @id @default(uuid())
-  name                  CrmName      @unique()
+  id                    String            @id @default(uuid())
+  name                  CrmName           @unique()
   configurationTemplate Json // See prisma README for specifics on the JSON schema
   accountCrms           AccountCrm[]
+  validEventProcesses   CrmEventProcess[]
 }
 
 enum CrmName {
@@ -305,4 +307,14 @@ enum CrmName {
 enum CrmRecordType {
   CONTACT
   LEAD
+}
+
+model CrmEventProcess {
+  crmId  String
+  action CrmIntegrationAction
+
+  crm Crm @relation(fields: [crmId], references: [id])
+
+  @@id([crmId, action])
+  @@index([crmId])
 }

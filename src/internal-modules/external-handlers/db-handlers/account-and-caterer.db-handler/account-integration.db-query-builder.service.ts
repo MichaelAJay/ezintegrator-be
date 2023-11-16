@@ -74,7 +74,7 @@ export class AccountIntegrationDbQueryBuilderService
       where: { accountId },
       include: {
         crm: true,
-        crmSecretRefs: true,
+        secretRefs: true,
       },
     };
   }
