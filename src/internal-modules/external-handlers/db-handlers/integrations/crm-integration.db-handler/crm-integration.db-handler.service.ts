@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Crm } from '@prisma/client';
+import { Crm, Prisma } from '@prisma/client';
 import { DbClientService } from '../../../../../external-modules';
 import { CrmIntegrationDbQueryBuilderService } from './crm-integration.db-query-builder.service';
 import { ICrmIntegrationDbHandlerProvider } from './interfaces';
@@ -18,7 +18,8 @@ export class CrmIntegrationDbHandlerService
     return this.dbClient.crm.findUniqueOrThrow(query);
   }
 
-  async retrieveCrms(): Promise<Crm[]> {
-    return this.dbClient.crm.findMany();
+  async retrieveCrms(include?: Prisma.CrmInclude): Promise<Crm[]> {
+    const query = this.queryBuilder.buildGetCrmIntegrations(include);
+    return this.dbClient.crm.findMany(query);
   }
 }

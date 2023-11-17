@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -25,12 +24,24 @@ export class AccountIntegrationDbHandlerService
   async addAccountCrm(
     data: Pick<Prisma.AccountCrmUncheckedCreateInput, 'accountId' | 'crmId'>,
   ): Promise<any> {
-    // The Add Account CRM process enables the requester to create the AccountCrm record
-    // This should NOT handle business logic of whether or not any credentials are included - that should be at the service level - whatever calls this
-    const query = this.queryBuilder.buildAddAccountCrmQuery(data);
+    try {
+      // The Add Account CRM process enables the requester to create the AccountCrm record
+      // This should NOT handle business logic of whether or not any credentials are included - that should be at the service level - whatever calls this
+      const query = this.queryBuilder.buildAddAccountCrmQuery(data);
 
-    // @TODO - remember to think about what happens when an invalid id is sent
-    return this.dbClient.accountCrm.create(query);
+      // @TODO - remember to think about what happens when an invalid id is sent
+      const result = await this.dbClient.accountCrm.create(query);
+      return result;
+    } catch (err) {
+      console.error(err);
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new ConflictException('This integration is already in place');
+      }
+      throw err;
+    }
   }
   async retrieveAccountCrms(accountId: string): Promise<AccountCrm[]> {
     const query = this.queryBuilder.buildRetrieveAccountCrmsQuery(accountId);

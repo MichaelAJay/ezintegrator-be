@@ -9,4 +9,16 @@ export class CrmIntegrationDbQueryBuilderService
   buildGetCrmIntegration(crmId: string): Prisma.CrmFindUniqueArgs {
     return { where: { id: crmId } };
   }
+
+  buildGetCrmIntegrations(include?: Prisma.CrmInclude): Prisma.CrmFindManyArgs {
+    const query: Prisma.CrmFindManyArgs = {
+      include: {
+        validEventProcesses: true,
+      },
+    };
+    if (include) {
+      query.include = include;
+    }
+    return query;
+  }
 }

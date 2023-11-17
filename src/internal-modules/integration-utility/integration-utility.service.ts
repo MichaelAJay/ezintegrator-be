@@ -4,15 +4,12 @@ import {
   AccountIntegration,
   AccountIntegrationType,
 } from '../account-and-caterer/types';
-import { getIntegrationConfigurationTemplate } from './utility/get-integration-configuration-template.utility-function';
-import { CrmIntegrationDbHandlerService } from '../external-handlers/db-handlers/integrations/crm-integration.db-handler/crm-integration.db-handler.service';
 import { IIntegrationUtilityProvider } from './interfaces/class-interfaces/integration-utility-service.class-interface';
+import { CrmIntegratorService } from './integrators/integration-classes/crm-integrator.service';
 
 @Injectable()
 export class IntegrationUtilityService implements IIntegrationUtilityProvider {
-  constructor(
-    private readonly crmIntegrationDbHandler: CrmIntegrationDbHandlerService,
-  ) {}
+  constructor(private readonly crmIntegratorService: CrmIntegratorService) {}
 
   getIntegrationTypes() {
     return AccountIntegration;
@@ -26,12 +23,10 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
       [];
     switch (integrationType) {
       case 'CRM':
-        const crm = await this.crmIntegrationDbHandler.retrieveCrm(
-          integrationId,
-        );
-        configurationRequirements = getIntegrationConfigurationTemplate(
-          crm.configurationTemplate,
-        );
+        configurationRequirements =
+          await this.crmIntegratorService.retrieveIntegrationConfigurationRequirements(
+            integrationId,
+          );
         break;
       default:
         throw new BadRequestException(
@@ -41,14 +36,11 @@ export class IntegrationUtilityService implements IIntegrationUtilityProvider {
     return configurationRequirements;
   }
 
-  /**
-   * @TODO this should also return each integration's possible event processes
-   */
   async getIntegrationsOfType(integrationType: AccountIntegrationType) {
     let results;
     switch (integrationType) {
       case 'CRM':
-        results = await this.crmIntegrationDbHandler.retrieveCrms();
+        results = await this.crmIntegratorService.retrieveMany();
         break;
       default:
         throw new BadRequestException(

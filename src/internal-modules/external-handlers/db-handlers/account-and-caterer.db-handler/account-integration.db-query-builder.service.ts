@@ -9,8 +9,17 @@ export class AccountIntegrationDbQueryBuilderService
   // Account CRM management
   buildAddAccountCrmQuery(
     data: Pick<Prisma.AccountCrmUncheckedCreateInput, 'accountId' | 'crmId'>,
-  ) {
-    return { data };
+  ): Prisma.AccountCrmCreateArgs {
+    return {
+      data,
+      include: {
+        crm: {
+          include: {
+            validEventProcesses: true,
+          },
+        },
+      },
+    };
   }
 
   buildUpdateAccountCrmQuery(

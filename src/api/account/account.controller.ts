@@ -49,6 +49,8 @@ import {
   upsertAccountSecretApiOperations,
 } from '../swagger/operations/account';
 import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
+import { CreateAccountInterfaceRequestBody } from '../swagger/request/body/create-account-interface.request-body';
+import { CreateAccountIntegrationReturn } from './returns/create-account-integration.return-class';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -101,10 +103,12 @@ export class AccountController implements IAccountController {
    * **************************************
    */
   @ApiOperation(createAccountIntegrationApiOperations)
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({ type: CreateAccountIntegrationReturn })
   @ApiBadRequestResponse({
     description: SwaggerErrorDescriptions.RequestValidationFailed,
   })
+  @ApiConflictResponse()
+  @ApiBody({ type: CreateAccountInterfaceRequestBody })
   // @TODO - FK constraint error for accountId
   @ApiUnauthorizedResponse({
     description: SwaggerErrorDescriptions.RequesterLacksPermission,

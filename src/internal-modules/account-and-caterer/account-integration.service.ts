@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -15,7 +16,8 @@ import { missingConfigCheck } from './utility/account-integration/missing-config
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { PermissionNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
+import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
+import { createAccountIntegrationResponseValidator } from './validators/create-account-integration-response.schema-and-validator';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -202,13 +204,28 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       throw new UnauthorizedException();
     }
 
+    // It would be nice to generalize some validator here, to implicitly type the response
+    let result;
     switch (integrationType) {
       case 'CRM':
-        return this.accountCrmIntegrator.create(integrationId, accountId);
+        result = await this.accountCrmIntegrator.create(
+          integrationId,
+          accountId,
+        );
+        break;
       default:
         Sentry.captureMessage('Invalid integration type passed in', 'error');
         throw new BadRequestException('Invalid integration type.');
     }
+
+    if (!createAccountIntegrationResponseValidator(result)) {
+      const err = new InternalServerErrorException(
+        'Created integration data did not match expected value',
+      );
+      Sentry.captureException(err);
+      throw err;
+    }
+    return result;
   }
 
   async updateAccountIntegrationConfig(
