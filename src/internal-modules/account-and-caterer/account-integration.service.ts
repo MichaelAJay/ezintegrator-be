@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,8 +15,8 @@ import { missingConfigCheck } from './utility/account-integration/missing-config
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
 import { createAccountIntegrationResponseValidator } from './validators/create-account-integration-response.schema-and-validator';
+import { AccountIntegrationHelperService } from './account-integration-helper.service';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -27,46 +26,34 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
     private readonly accountCrmIntegrator: AccountCrmIntegratorService,
     private readonly accountPermissionService: AccountPermissionService,
+    private readonly accountIntegrationHelper: AccountIntegrationHelperService,
   ) {}
 
-  // @TODO refactor to use accountCrm integration class
+  /**
+   * @TODO - the switch statement should return a uniform result so that the shape of the returned account integration is consistent
+   * To do this, look at the way it's done for Create Account Integration
+   *
+   * Further, the account*Integrator retrieveOne is doing too much, and much of it is redundant
+   * Try to write this in a way that the generalized return from retrieveOne can be used to determine
+   * 1) Ownership is validated (account ownership)
+   * 2) Check config status
+   * 2a) If status doesn't match record's status, update to reflect check result
+   */
   async getAccountIntegration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    tokenAccountId: string,
-    userId: string,
+    requester: {
+      accountId: string;
+      userId: string;
+    },
   ) {
     let result: any;
     switch (integrationType) {
       case 'CRM':
-        const accountCrmWithCrmAndSecretReferences =
-          await this.accountIntegrationDbHandler.retrieveAccountCrmById(
-            accountIntegrationId,
-            {
-              crm: true,
-              secretRefs: true,
-            },
-          );
-        if (!accountCrmWithCrmAndSecretReferences) {
-          throw new NotFoundException();
-        }
-
-        // Validates result
-        // Confirms that accountCrm belongs to token's accountId
-        // Reports whether crm is fully configured, and if not, what's missing
-        const isAccountCrmFullyConfiguredResult =
-          await this.isAccountCrmFullyConfigured(
-            accountCrmWithCrmAndSecretReferences,
-            tokenAccountId,
-            userId,
-          );
-
-        result.integration = accountCrmWithCrmAndSecretReferences;
-
-        result = {
-          ...isAccountCrmFullyConfiguredResult,
-          integration: accountCrmWithCrmAndSecretReferences,
-        };
+        result = await this.accountCrmIntegrator.retrieveOne(
+          accountIntegrationId,
+          requester,
+        );
 
         break;
       default:
@@ -77,6 +64,10 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
         });
         throw err;
     }
+
+    // Validate generalized result shape
+    // Validate record ownership (account)
+    // Check config status
 
     if (typeof result.integration === 'object' && result.integration != null) {
       delete result.integration.accountId;
@@ -204,7 +195,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       throw new UnauthorizedException();
     }
 
-    // It would be nice to generalize some validator here, to implicitly type the response
     let result;
     switch (integrationType) {
       case 'CRM':
@@ -358,83 +348,5 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     ) {
       throw new UnauthorizedException();
     }
-  }
-
-  // Helper
-
-  /**
-   * Ensures that requester's account matches the integration's account
-   * And that the requester has adequate permission on the account to carry out the action
-   *
-   * @throws NotFoundException (record not found by id)
-   * @throws UnprocessableEntityException (record missing accountId)
-   * @throws ConflictException (record and user do not share the same account)
-   * @throws UnauthorizedException (requester lacks permission)
-   */
-  async confirmRequesterCanCarryOutAccountIntegrationAction(
-    requester: { id: string; accountId: string },
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
-    permission: PermissionNameValue,
-  ) {
-    if (
-      !(await this.accountIntegrationBelongsToUserAccount(
-        requester.accountId,
-        integrationType,
-        accountIntegrationId,
-      ))
-    ) {
-      throw new ConflictException();
-    }
-
-    if (
-      !(await this.accountPermissionService.doesUserHavePermission(
-        requester.id,
-        requester.accountId,
-        permission,
-      ))
-    ) {
-      throw new UnauthorizedException();
-    }
-
-    return true;
-  }
-
-  /**
-   * @throws NotFoundException (record not found by id)
-   * @throws UnprocessableEntityException (record missing accountId)
-   */
-  async accountIntegrationBelongsToUserAccount(
-    requesterAccountId: string,
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
-  ) {
-    let record: any;
-    switch (integrationType) {
-      case 'CRM':
-        record = await this.accountCrmIntegrator.retrieveOne(
-          accountIntegrationId,
-        );
-
-        break;
-      default:
-        Sentry.captureMessage('Invalid integration type passed in', 'error');
-        throw new BadRequestException('Invalid integration type');
-    }
-
-    if (!record) {
-      throw new NotFoundException();
-    }
-
-    if (!record.accountId) {
-      const err = new UnprocessableEntityException();
-      Sentry.withScope((scope) => {
-        scope.setExtra('id', accountIntegrationId);
-        Sentry.captureException(err);
-      });
-      throw err;
-    }
-
-    return requesterAccountId === record.accountId;
   }
 }

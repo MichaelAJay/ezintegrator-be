@@ -6,6 +6,7 @@ import { UserDbHandlerModule } from '../external-handlers/db-handlers/user.db-ha
 import { SecurityUtilityModule } from '../security-utility';
 import { UserModule } from '../user/user.module';
 import { AccountAndCatererService } from './account-and-caterer.service';
+import { AccountIntegrationHelperService } from './account-integration-helper.service';
 import { AccountIntegrationService } from './account-integration.service';
 import { AccountSecretService } from './account-secret.service';
 import { AccountIntegratorsModule } from './integration-classes/account-integrators.module';
@@ -24,6 +25,7 @@ import { AccountIntegratorsModule } from './integration-classes/account-integrat
     AccountAndCatererService,
     AccountSecretService,
     AccountIntegrationService,
+    AccountIntegrationHelperService,
   ],
   exports: [
     AccountAndCatererService,

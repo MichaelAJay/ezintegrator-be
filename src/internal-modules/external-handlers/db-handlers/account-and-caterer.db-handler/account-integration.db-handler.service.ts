@@ -47,15 +47,41 @@ export class AccountIntegrationDbHandlerService
     const query = this.queryBuilder.buildRetrieveAccountCrmsQuery(accountId);
     return this.dbClient.accountCrm.findMany(query);
   }
-  async retrieveAccountCrmById(
+  // async retrieveAccountCrmById(
+  //   accountCrmId: string,
+  //   include?: Prisma.AccountCrmInclude,
+  // ): Promise<AccountCrm | null> {
+  //   const query = this.queryBuilder.buildRetrieveAccountCrmQuery(
+  //     accountCrmId,
+  //     include,
+  //   );
+  //   return this.dbClient.accountCrm.findUnique(query);
+  // }
+
+  async retrieveAccountCrmById<T>(
     accountCrmId: string,
     include?: Prisma.AccountCrmInclude,
-  ): Promise<AccountCrm | null> {
+    validator?,
+  ): Promise<T | null> {
     const query = this.queryBuilder.buildRetrieveAccountCrmQuery(
       accountCrmId,
       include,
     );
-    return this.dbClient.accountCrm.findUnique(query);
+
+    const record = await this.dbClient.accountCrm.findUnique(query);
+    if (record == null) {
+      return record;
+    }
+
+    if (
+      validator /** && Use validator, which should be paired with the optional include */
+    ) {
+      // The validator should be something of the form:
+      // validateData(data: unknown): data is T {}
+      // Where T is the same T that this generic method takes
+    }
+
+    return record;
   }
 
   async updateAccountCrm(

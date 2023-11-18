@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { SecretManagerService } from '../../../external-modules/secret-manager/secret-manager.service';
@@ -9,7 +10,12 @@ import { AccountIntegrationDbHandlerService } from '../../../internal-modules/ex
 import { IAccountIntegrationClass } from './account-integration.class-interface';
 import * as Sentry from '@sentry/node';
 import { generalizeCreateAccountCrmIntegrationResult } from './utility/generalized-create-integration-converter.utility-function';
-import { ICreateAccountIntegrationReturn } from '../interfaces';
+import {
+  IAccountIntegrationFieldConfigurationJson,
+  ICreateAccountIntegrationReturn,
+} from '../interfaces';
+import { validateAccountCrmWithCrmAndSecretReferences } from 'src/internal-modules/external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-crm-with-crm-and-secret-refs.schema-and-validator';
+import { missingConfigCheck } from '../utility/account-integration/missing-config-check.account-integration-utility-function';
 
 @Injectable()
 export class AccountCrmIntegratorService implements IAccountIntegrationClass {
@@ -32,10 +38,34 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       generalizeCreateAccountCrmIntegrationResult(result);
     return generalizedResult;
   }
-  retrieveOne(accountCrmId: string) {
-    return this.accountIntegrationDbHandler.retrieveAccountCrmById(
-      accountCrmId,
-    );
+  async retrieveOne(
+    accountCrmId: string,
+    requester: { accountId: string; userId: string },
+  ) {
+    const accountCrm =
+      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
+        accountCrmId,
+        {
+          crm: {
+            include: {
+              validEventProcesses: true,
+            },
+          },
+          secretRefs: true,
+        },
+      );
+
+    if (!accountCrm) {
+      throw new NotFoundException();
+    }
+
+    // Validates result
+    // Confirms that accountCrm belongs to token's accountId
+    // Reports whether crm is fully configured, and if not, what's missing
+    const isAccountCrmFullyConfigured =
+      await this.isAccountIntegrationFullyConfigured(accountCrm, requester);
+
+    return { ...isAccountCrmFullyConfigured, integration: accountCrm };
   }
   async retrieveAll(accountId: string) {
     return this.accountIntegrationDbHandler.retrieveAccountCrms(accountId);
@@ -146,4 +176,91 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     // Return
     return;
   }
+
+  async isAccountIntegrationFullyConfigured(
+    input: string | unknown,
+    requester: { userId: string; accountId: string },
+  ): Promise<{
+    isFullyConfigured: boolean;
+    missingConfigs?: IAccountIntegrationFieldConfigurationJson[] | undefined;
+  }> {
+    // Retrieve record
+    const accountCrmWithCrmAndSecretReferences: unknown =
+      typeof input === 'string'
+        ? await this.accountIntegrationDbHandler.retrieveAccountCrmById(input, {
+            crm: true,
+            secretRefs: true,
+          })
+        : input;
+    if (!accountCrmWithCrmAndSecretReferences) {
+      throw new NotFoundException('No record found');
+    }
+
+    // Validate shape
+    if (
+      !validateAccountCrmWithCrmAndSecretReferences(
+        accountCrmWithCrmAndSecretReferences,
+      )
+    ) {
+      const err = new UnprocessableEntityException(
+        'Record did not match expected data shape',
+      );
+      Sentry.withScope((scope) => {
+        scope.setExtras({
+          errors: validateAccountCrmWithCrmAndSecretReferences.errors,
+          inputType: typeof input,
+        });
+        Sentry.captureException(err);
+      });
+      throw err;
+    }
+
+    // Validate ownership
+    if (
+      accountCrmWithCrmAndSecretReferences.accountId !== requester.accountId
+    ) {
+      const err = new UnauthorizedException();
+      Sentry.withScope((scope) => {
+        scope.setExtras({
+          accountCrmId: input,
+          accountId: requester.accountId,
+          userId: requester.userId,
+        });
+        Sentry.captureException(err);
+      });
+      throw err;
+    }
+
+    // Check configuration
+    const nonSensitiveConfigKeys: string[] =
+      accountCrmWithCrmAndSecretReferences.nonSensitiveCredentials
+        ? Object.keys(
+            accountCrmWithCrmAndSecretReferences.nonSensitiveCredentials,
+          )
+        : [];
+    const missingConfigs: IAccountIntegrationFieldConfigurationJson[] =
+      missingConfigCheck(
+        accountCrmWithCrmAndSecretReferences.crm.configurationTemplate,
+        accountCrmWithCrmAndSecretReferences.crmSecretRefs,
+        nonSensitiveConfigKeys,
+      );
+
+    const result: {
+      isFullyConfigured: boolean;
+      missingConfigs?: IAccountIntegrationFieldConfigurationJson[];
+    } = {
+      isFullyConfigured: missingConfigs.length === 0,
+    };
+    if (missingConfigs.length > 0) {
+      result.missingConfigs = missingConfigs;
+    }
+    return result;
+  }
+
+  /**
+   * *************************
+   * *** SECRET MANAGEMENT ***
+   * *************************
+   */
+  async addIntegrationSecret() {}
 }

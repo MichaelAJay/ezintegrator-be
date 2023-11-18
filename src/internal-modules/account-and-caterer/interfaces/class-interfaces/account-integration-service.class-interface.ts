@@ -1,4 +1,3 @@
-import { PermissionNameValue } from 'src/external-modules/db-client/models/role-and-permission.db-models';
 import { AccountIntegrationType } from '../../types';
 import { IAccountIntegrationFieldConfigurationJson } from '../account-integration-fields.json-interface';
 
@@ -6,8 +5,10 @@ export interface IAccountIntegrationProvider {
   getAccountIntegration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    tokenAccountId: string,
-    userId: string,
+    requester: {
+      accountId: string;
+      userId: string;
+    },
   ): Promise<any>;
   isAccountCrmFullyConfigured(
     accountCrmId: string,
@@ -53,17 +54,8 @@ export interface IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ): any;
-  confirmRequesterCanCarryOutAccountIntegrationAction(
-    requester: { id: string; accountId: string },
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
-    permission: PermissionNameValue,
-  ): Promise<boolean>;
-  accountIntegrationBelongsToUserAccount(
-    requesterAccountId: string,
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
-  ): Promise<boolean>;
+  // These two should probably be helper functions, but they should take records and not make DB calls
+  // Maybe it's ok to make DB calls...
   getAccountIntegrationConfiguration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
