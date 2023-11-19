@@ -17,7 +17,6 @@ export class AccountSecretService implements IAccountSecretProvider {
     private readonly accountPermissionService: AccountPermissionService,
     private readonly accountSecretDbHandler: AccountSecretDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
-    private readonly accountIntegrationService: AccountIntegrationService,
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
   ) {}
 
@@ -64,28 +63,29 @@ export class AccountSecretService implements IAccountSecretProvider {
     );
 
     // 3) Check if AccountCrm is now fully configured and update if so
-    const { isFullyConfigured, missingConfigs } =
-      await this.accountIntegrationService.isAccountCrmFullyConfigured(
-        accountCrm.id,
-        accountId,
-        userId,
-      );
-    if (isFullyConfigured) {
-      if (!accountCrm.isConfigured) {
-        await this.accountIntegrationDbHandler.updateAccountCrm(
-          accountCrm.id,
-          accountId,
-          {
-            isConfigured: true,
-          },
-        );
-      }
-      return { message: 'The CRM integration is complete and ready to use!' };
-    }
+    // const { isFullyConfigured, missingConfigs } =
+    //   await this.accountIntegrationService.isAccountCrmFullyConfigured(
+    //     accountCrm.id,
+    //     accountId,
+    //     userId,
+    //   );
+    // if (isFullyConfigured) {
+    //   if (!accountCrm.isConfigured) {
+    //     await this.accountIntegrationDbHandler.updateAccountCrm(
+    //       accountCrm.id,
+    //       accountId,
+    //       {
+    //         isConfigured: true,
+    //       },
+    //     );
+    //   }
+    //   return { message: 'The CRM integration is complete and ready to use!' };
+    // }
 
-    return {
-      message: 'Finish the CRM configuration by including all required values.',
-      missingConfigs,
-    };
+    // return {
+    //   message: 'Finish the CRM configuration by including all required values.',
+    //   missingConfigs,
+    // };
+    return { message: 'FIX ME' };
   }
 }

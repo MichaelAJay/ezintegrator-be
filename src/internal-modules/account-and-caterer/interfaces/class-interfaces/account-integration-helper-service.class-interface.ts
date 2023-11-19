@@ -1,13 +1,11 @@
 import { IAccountIntegrationFieldConfigurationJson } from '..';
 import { PermissionNameValue } from '../../../../external-modules/db-client/models/role-and-permission.db-models';
-import { AccountIntegrationType } from '../../types';
 import { IAccountIntegration } from '../account-integration.interface';
 
 export interface IAccountIntegrationHelper {
   confirmRequesterCanCarryOutAccountIntegrationAction(
     requester: { id: string; accountId: string },
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
+    record: IAccountIntegration,
     permission: PermissionNameValue,
   ): Promise<boolean>;
 

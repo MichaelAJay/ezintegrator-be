@@ -37,15 +37,13 @@ export class AccountIntegrationHelperService
    */
   async confirmRequesterCanCarryOutAccountIntegrationAction(
     requester: { id: string; accountId: string },
-    integrationType: AccountIntegrationType,
-    accountIntegrationId: string,
+    record: IAccountIntegration,
     permission: PermissionNameValue,
   ) {
     if (
       !(await this.accountIntegrationBelongsToUserAccount(
         requester.accountId,
-        integrationType,
-        accountIntegrationId,
+        record,
       ))
     ) {
       throw new ConflictException();
@@ -86,8 +84,12 @@ export class AccountIntegrationHelperService
 
   getAccountIntegrationConfigStatusAndMissingValues(
     accountIntegration: IAccountIntegration,
-    configFromSystem: Array<IAccountIntegrationFieldConfigurationJson>,
-  ) {
+  ): {
+    isFullyConfigured: boolean;
+    missingConfigs?: Array<IAccountIntegrationFieldConfigurationJson>;
+  } {
+    const configFromSystem =
+      accountIntegration.integration.configurationTemplate;
     const missingConfigs: Array<IAccountIntegrationFieldConfigurationJson> = [];
     for (const config of configFromSystem) {
       if (config.isSecret) {

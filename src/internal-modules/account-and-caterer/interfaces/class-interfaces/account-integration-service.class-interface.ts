@@ -10,14 +10,6 @@ export interface IAccountIntegrationProvider {
       userId: string;
     },
   ): Promise<any>;
-  isAccountCrmFullyConfigured(
-    accountCrmId: string,
-    accountId: string,
-    userId: string,
-  ): Promise<{
-    isFullyConfigured: boolean;
-    missingConfigs?: IAccountIntegrationFieldConfigurationJson[];
-  }>;
   createAccountIntegration(
     integrationType: AccountIntegrationType,
     integrationId: string,

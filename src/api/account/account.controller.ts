@@ -268,6 +268,24 @@ export class AccountController implements IAccountController {
     );
   }
 
+  @Get('integration/:type/:id')
+  async getAccountIntegration(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        'Bad validation type - see the documentation.',
+      );
+    }
+    return this.accountIntegrationService.getAccountIntegration(
+      integrationType,
+      accountIntegrationId,
+      { accountId: req.accountId, userId: req.userId },
+    );
+  }
+
   @Get('integration/configuration/:type/:id')
   async getAccountIntegrationConfiguration(
     @Param('type') integrationType: string,

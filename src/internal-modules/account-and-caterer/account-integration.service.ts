@@ -2,21 +2,19 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { IAccountIntegrationProvider } from './interfaces';
-import { IAccountIntegrationFieldConfigurationJson } from './interfaces/account-integration-fields.json-interface';
 import * as Sentry from '@sentry/node';
-import { validateAccountCrmWithCrmAndSecretReferences } from '../external-handlers/db-handlers/account-and-caterer.db-handler/validators/retrieve-account-crm-with-crm-and-secret-refs.schema-and-validator';
 import { AccountIntegrationType } from './types';
-import { missingConfigCheck } from './utility/account-integration/missing-config-check.account-integration-utility-function';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
 import { createAccountIntegrationResponseValidator } from './validators/create-account-integration-response.schema-and-validator';
 import { AccountIntegrationHelperService } from './account-integration-helper.service';
+import { IAccountIntegration } from './interfaces/account-integration.interface';
+import { mapAccountCrmToGeneralizedAccountIntegration } from './utility/account-integration/mappers/map-account-crm-to-generalized-account-integration.utility-mapper';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -47,14 +45,14 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       userId: string;
     },
   ) {
-    let result: any;
+    let result: IAccountIntegration;
     switch (integrationType) {
       case 'CRM':
-        result = await this.accountCrmIntegrator.retrieveOne(
+        const accountCrm = await this.accountCrmIntegrator.retrieveOne(
           accountIntegrationId,
           requester,
         );
-
+        result = mapAccountCrmToGeneralizedAccountIntegration(accountCrm);
         break;
       default:
         const err = new UnprocessableEntityException();
@@ -65,13 +63,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
         throw err;
     }
 
-    // Validate generalized result shape
-    // Validate record ownership (account)
-    // Check config status
-
-    if (typeof result.integration === 'object' && result.integration != null) {
-      delete result.integration.accountId;
-    }
     return result;
   }
 
@@ -97,86 +88,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       default:
         throw new BadRequestException('Invalid integration type');
     }
-  }
-
-  // @TODO abstract to Integration level and move this to AccountCrm
-  async isAccountCrmFullyConfigured(
-    input: string | unknown,
-    tokenAccountId: string,
-    userId: string,
-  ): Promise<{
-    isFullyConfigured: boolean;
-    missingConfigs?: IAccountIntegrationFieldConfigurationJson[] | undefined;
-  }> {
-    // Retrieve record
-    const accountCrmWithCrmAndSecretReferences: unknown =
-      typeof input === 'string'
-        ? await this.accountIntegrationDbHandler.retrieveAccountCrmById(input, {
-            crm: true,
-            secretRefs: true,
-          })
-        : input;
-    if (!accountCrmWithCrmAndSecretReferences) {
-      throw new NotFoundException('No record found');
-    }
-
-    // Validate shape
-    if (
-      !validateAccountCrmWithCrmAndSecretReferences(
-        accountCrmWithCrmAndSecretReferences,
-      )
-    ) {
-      const err = new UnprocessableEntityException(
-        'Record did not match expected data shape',
-      );
-      Sentry.withScope((scope) => {
-        scope.setExtras({
-          errors: validateAccountCrmWithCrmAndSecretReferences.errors,
-          inputType: typeof input,
-        });
-        Sentry.captureException(err);
-      });
-      throw err;
-    }
-
-    // Validate ownership
-    if (accountCrmWithCrmAndSecretReferences.accountId !== tokenAccountId) {
-      const err = new UnauthorizedException();
-      Sentry.withScope((scope) => {
-        scope.setExtras({
-          accountCrmId: input,
-          accountId: tokenAccountId,
-          userId,
-        });
-        Sentry.captureException(err);
-      });
-      throw err;
-    }
-
-    // Check configuration
-    const nonSensitiveConfigKeys: string[] =
-      accountCrmWithCrmAndSecretReferences.nonSensitiveCredentials
-        ? Object.keys(
-            accountCrmWithCrmAndSecretReferences.nonSensitiveCredentials,
-          )
-        : [];
-    const missingConfigs: IAccountIntegrationFieldConfigurationJson[] =
-      missingConfigCheck(
-        accountCrmWithCrmAndSecretReferences.crm.configurationTemplate,
-        accountCrmWithCrmAndSecretReferences.crmSecretRefs,
-        nonSensitiveConfigKeys,
-      );
-
-    const result: {
-      isFullyConfigured: boolean;
-      missingConfigs?: IAccountIntegrationFieldConfigurationJson[];
-    } = {
-      isFullyConfigured: missingConfigs.length === 0,
-    };
-    if (missingConfigs.length > 0) {
-      result.missingConfigs = missingConfigs;
-    }
-    return result;
   }
 
   async createAccountIntegration(
@@ -225,12 +136,9 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     requesterId: string,
     config: Record<string, any>,
   ) {
-    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
-      { id: requesterId, accountId },
-      integrationType,
-      accountIntegrationId,
-      'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
-    );
+    /**
+     * @OTODO replace permission checker
+     */
 
     switch (integrationType) {
       case 'CRM':
@@ -251,12 +159,9 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ) {
-    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
-      { id: requesterId, accountId },
-      integrationType,
-      accountIntegrationId,
-      'EDIT_ACCOUNT_INTEGRATIONS',
-    );
+    /**
+     * @TODO replace permission checker
+     */
 
     switch (integrationType) {
       case 'CRM':
@@ -276,12 +181,9 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ) {
-    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
-      { id: requesterId, accountId },
-      integrationType,
-      accountIntegrationId,
-      'EDIT_ACCOUNT_INTEGRATIONS',
-    );
+    /**
+     * @TODO replace permission checker
+     */
 
     switch (integrationType) {
       case 'CRM':
@@ -308,12 +210,9 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     accountId: string,
     requesterId: string,
   ) {
-    await this.confirmRequesterCanCarryOutAccountIntegrationAction(
-      { id: requesterId, accountId },
-      integrationType,
-      accountIntegrationId,
-      'EDIT_ACCOUNT_INTEGRATIONS',
-    );
+    /**
+     * @TODO fix permission checker
+     */
 
     switch (integrationType) {
       case 'CRM':

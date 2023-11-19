@@ -131,16 +131,16 @@ enum CrmIntegrationAction {
 }
 
 model AccountCrmSecretReference {
-  secretName   String                           @id @default(uuid())
-  type         AccountSecretReferenceSecretType
+  secretName   String                               @id @default(uuid())
+  type         IntegrationSecretReferenceSecretType
   accountCrmId String
-  accountCrm   AccountCrm                       @relation(fields: [accountCrmId], references: [id], onDelete: Cascade)
+  accountCrm   AccountCrm                           @relation(fields: [accountCrmId], references: [id], onDelete: Cascade)
 
   @@unique([type, accountCrmId])
   @@index([accountCrmId], type: BTree)
 }
 
-enum AccountSecretReferenceSecretType {
+enum IntegrationSecretReferenceSecretType {
   API_KEY
 }
 

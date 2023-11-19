@@ -58,30 +58,16 @@ export class AccountIntegrationDbHandlerService
   //   return this.dbClient.accountCrm.findUnique(query);
   // }
 
-  async retrieveAccountCrmById<T>(
+  async retrieveAccountCrmById(
     accountCrmId: string,
     include?: Prisma.AccountCrmInclude,
-    validator?,
-  ): Promise<T | null> {
+  ): Promise<any | null> {
     const query = this.queryBuilder.buildRetrieveAccountCrmQuery(
       accountCrmId,
       include,
     );
 
-    const record = await this.dbClient.accountCrm.findUnique(query);
-    if (record == null) {
-      return record;
-    }
-
-    if (
-      validator /** && Use validator, which should be paired with the optional include */
-    ) {
-      // The validator should be something of the form:
-      // validateData(data: unknown): data is T {}
-      // Where T is the same T that this generic method takes
-    }
-
-    return record;
+    return this.dbClient.accountCrm.findUnique(query);
   }
 
   async updateAccountCrm(

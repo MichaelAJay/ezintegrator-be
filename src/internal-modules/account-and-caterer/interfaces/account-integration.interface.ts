@@ -24,5 +24,5 @@ export interface ISystemIntegration {
 
 export interface IAccountEventProcess {
   event: EventType;
-  actions: CrmIntegrationActionValues; // This should be a union of all string literal unions of *IntegrationActions from the Prisma schema
+  actions: CrmIntegrationActionValues[]; // This should be a union of all string literal unions of *IntegrationActions from the Prisma schema
 }
