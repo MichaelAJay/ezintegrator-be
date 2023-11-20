@@ -11,7 +11,7 @@ export interface IAccountIntegration {
   id: string;
   type: AccountIntegrationType;
   accountId: string;
-  nonSensitiveCredentials: Record<string, any>;
+  nonSensitiveCredentials: Record<string, any> | null;
   isConfigured: boolean;
   isActive: boolean;
   secretRefs: AccountSecretReferenceSecretTypeValues[];

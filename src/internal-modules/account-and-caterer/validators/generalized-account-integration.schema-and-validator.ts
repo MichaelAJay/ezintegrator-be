@@ -15,9 +15,8 @@ const generalizedAccountIntegrationSchema: JSONSchemaType<IAccountIntegration> =
       accountId: { type: 'string' },
       // This is done
       nonSensitiveCredentials: {
-        type: 'object',
-        required: [],
-      },
+        anyOf: [{ type: 'object', required: [] }, { type: 'null' }],
+      } as any,
       isConfigured: { type: 'boolean' },
       isActive: { type: 'boolean' },
       secretRefs: {

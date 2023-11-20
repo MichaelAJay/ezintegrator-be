@@ -10,7 +10,6 @@ import {
 } from './interfaces';
 import * as Sentry from '@sentry/node';
 import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
-import { AccountIntegrationType } from './types';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
 import { IAccountIntegration } from './interfaces/account-integration.interface';
 import { AccountSecretReferenceSecretTypeValues } from '../../external-modules';
@@ -101,8 +100,11 @@ export class AccountIntegrationHelperService
         }
       } else {
         if (
-          !accountIntegration.nonSensitiveCredentials.hasOwnProperty(
-            config.fieldName,
+          !(
+            accountIntegration.nonSensitiveCredentials &&
+            accountIntegration.nonSensitiveCredentials.hasOwnProperty(
+              config.fieldName,
+            )
           )
         ) {
           missingConfigs.push(config);

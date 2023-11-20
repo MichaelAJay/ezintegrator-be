@@ -66,7 +66,32 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
         throw err;
     }
 
-    return result;
+    if (!validateGeneralizedAccountIntegration(result)) {
+      const err = new InternalServerErrorException('Failed validation');
+      Sentry.withScope((scope) => {
+        scope.setExtra('errs', validateGeneralizedAccountIntegration.errors);
+        Sentry.captureException(err);
+      });
+      throw err;
+    }
+
+    if (result.accountId !== requester.accountId) {
+      throw new UnauthorizedException();
+    }
+
+    const configStatus: any =
+      this.accountIntegrationHelper.getAccountIntegrationConfigStatusAndMissingValues(
+        result,
+      );
+
+    const ret: any = {
+      ...result,
+      ...configStatus,
+    };
+
+    delete ret.accountId;
+
+    return ret;
   }
 
   async getAccountIntegrationsOfType(
@@ -136,7 +161,14 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       });
       throw err;
     }
-    return result;
+
+    const ret: any =
+      this.accountIntegrationHelper.getAccountIntegrationConfigStatusAndMissingValues(
+        result,
+      );
+    delete ret.accountId;
+
+    return ret;
   }
 
   async updateAccountIntegrationConfig(
