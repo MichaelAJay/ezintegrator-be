@@ -11,10 +11,10 @@ import { AccountIntegrationType } from './types';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { createAccountIntegrationResponseValidator } from './validators/create-account-integration-response.schema-and-validator';
 import { AccountIntegrationHelperService } from './account-integration-helper.service';
 import { IAccountIntegration } from './interfaces/account-integration.interface';
 import { mapAccountCrmToGeneralizedAccountIntegration } from './utility/account-integration/mappers/map-account-crm-to-generalized-account-integration.utility-mapper';
+import { validateGeneralizedAccountIntegration } from './validators/generalized-account-integration.schema-and-validator';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -52,7 +52,10 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
           accountIntegrationId,
           requester,
         );
-        result = mapAccountCrmToGeneralizedAccountIntegration(accountCrm);
+        result = mapAccountCrmToGeneralizedAccountIntegration(
+          accountCrm,
+          'CRM',
+        );
         break;
       default:
         const err = new UnprocessableEntityException();
@@ -109,9 +112,13 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     let result;
     switch (integrationType) {
       case 'CRM':
-        result = await this.accountCrmIntegrator.create(
+        const createdCrm = await this.accountCrmIntegrator.create(
           integrationId,
           accountId,
+        );
+        result = mapAccountCrmToGeneralizedAccountIntegration(
+          createdCrm,
+          'CRM',
         );
         break;
       default:
@@ -119,11 +126,14 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
         throw new BadRequestException('Invalid integration type.');
     }
 
-    if (!createAccountIntegrationResponseValidator(result)) {
+    if (!validateGeneralizedAccountIntegration(result)) {
       const err = new InternalServerErrorException(
         'Created integration data did not match expected value',
       );
-      Sentry.captureException(err);
+      Sentry.withScope((scope) => {
+        scope.setExtra('errs', validateGeneralizedAccountIntegration.errors);
+        Sentry.captureException(err);
+      });
       throw err;
     }
     return result;

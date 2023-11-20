@@ -1,11 +1,8 @@
-import { ICreateAccountIntegrationReturn } from '../interfaces';
+import { IAccountIntegration } from '../interfaces/account-integration.interface';
 
 // All specific account integration providers (ex: AccountCrm) should implement this interface
 export interface IAccountIntegrationClass {
-  create(
-    integrationId: string,
-    accountId: string,
-  ): Promise<ICreateAccountIntegrationReturn>;
+  create(integrationId: string, accountId: string): Promise<any>;
   retrieveOne(
     integrationId: string,
     requester: { accountId: string; userId: string },

@@ -5,9 +5,11 @@ import {
 } from '../../../external-modules';
 import { IAccountIntegrationFieldConfigurationJson } from './account-integration-fields.json-interface';
 import { CrmIntegrationActionValues } from 'src/external-modules/db-client/types/crm-integration-action.type';
+import { AccountIntegrationType } from '../types';
 
 export interface IAccountIntegration {
   id: string;
+  type: AccountIntegrationType;
   accountId: string;
   nonSensitiveCredentials: Record<string, any>;
   isConfigured: boolean;
@@ -18,6 +20,7 @@ export interface IAccountIntegration {
 }
 
 export interface ISystemIntegration {
+  name: string; // This could be a union of string literals
   configurationTemplate: IAccountIntegrationFieldConfigurationJson[];
   validEventProcesses: IntegrationActionValues[];
 }

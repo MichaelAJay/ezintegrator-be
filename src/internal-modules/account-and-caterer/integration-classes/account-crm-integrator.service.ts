@@ -8,8 +8,6 @@ import { SecretManagerService } from '../../../external-modules/secret-manager/s
 import { AccountIntegrationDbHandlerService } from '../../../internal-modules/external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { IAccountIntegrationClass } from './account-integration.class-interface';
 import * as Sentry from '@sentry/node';
-import { generalizeCreateAccountCrmIntegrationResult } from './utility/generalized-create-integration-converter.utility-function';
-import { ICreateAccountIntegrationReturn } from '../interfaces';
 
 @Injectable()
 export class AccountCrmIntegratorService implements IAccountIntegrationClass {
@@ -18,19 +16,14 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     private readonly secretManagerService: SecretManagerService,
   ) {}
 
-  async create(
-    crmId: string,
-    accountId: string,
-  ): Promise<ICreateAccountIntegrationReturn> {
+  async create(crmId: string, accountId: string): Promise<any> {
     // The FK constraint is handled at the DB level, but should probably be managed here.
     const result = await this.accountIntegrationDbHandler.addAccountCrm({
       accountId,
       crmId,
     });
 
-    const generalizedResult =
-      generalizeCreateAccountCrmIntegrationResult(result);
-    return generalizedResult;
+    return result;
   }
   async retrieveOne(
     accountCrmId: string,

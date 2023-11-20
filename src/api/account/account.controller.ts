@@ -50,7 +50,6 @@ import {
 } from '../swagger/operations/account';
 import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
 import { CreateAccountInterfaceRequestBody } from '../swagger/request/body/create-account-interface.request-body';
-import { CreateAccountIntegrationReturn } from './returns/create-account-integration.return-class';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -103,7 +102,7 @@ export class AccountController implements IAccountController {
    * **************************************
    */
   @ApiOperation(createAccountIntegrationApiOperations)
-  @ApiCreatedResponse({ type: CreateAccountIntegrationReturn })
+  // @ApiCreatedResponse({ type: CreateAccountIntegrationReturn })
   @ApiBadRequestResponse({
     description: SwaggerErrorDescriptions.RequestValidationFailed,
   })

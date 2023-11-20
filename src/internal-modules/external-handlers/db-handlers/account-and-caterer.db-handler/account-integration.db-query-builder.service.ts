@@ -18,6 +18,8 @@ export class AccountIntegrationDbQueryBuilderService
             validEventProcesses: true,
           },
         },
+        secretRefs: true,
+        eventProcesses: true,
       },
     };
   }

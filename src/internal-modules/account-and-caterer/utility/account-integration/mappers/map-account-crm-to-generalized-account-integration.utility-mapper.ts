@@ -5,9 +5,11 @@ import {
 import * as Sentry from '@sentry/node';
 import { CrmIntegrationActionValues } from '../../../../../external-modules/db-client/types/crm-integration-action.type';
 import { EventType } from 'src/external-modules/db-client/types/event.type';
+import { AccountIntegrationType } from 'src/internal-modules/account-and-caterer/types';
 
 export function mapAccountCrmToGeneralizedAccountIntegration(
   accountCrm: any,
+  type: AccountIntegrationType,
 ): IAccountIntegration {
   try {
     const eventProcessesHashMap: Record<string, CrmIntegrationActionValues[]> =
@@ -30,6 +32,7 @@ export function mapAccountCrmToGeneralizedAccountIntegration(
 
     const ret: IAccountIntegration = {
       id: accountCrm.id,
+      type,
       accountId: accountCrm.accountId,
       nonSensitiveCredentials: accountCrm.nonSensitiveCredentials,
       isConfigured: accountCrm.isConfigured,
@@ -37,6 +40,7 @@ export function mapAccountCrmToGeneralizedAccountIntegration(
       secretRefs: accountCrm.secretRefs.map((secretRef: any) => secretRef.type),
       eventProcesses,
       integration: {
+        name: accountCrm.crm.name,
         configurationTemplate: accountCrm.crm.configurationTemplate,
         validEventProcesses: accountCrm.crm.validEventProcesses.map(
           (eventProcess: any) => eventProcess.action,
