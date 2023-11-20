@@ -52,18 +52,19 @@ export class AccountPermissionService implements IAccountPermissionProvider {
     return accountOwnerWithOwner.owner.accountId === accountId;
   }
 
+  /**
+   * !!! IMPORTANT !!!
+   * This only checks to see if the user has permissions on THEIR account
+   * Any action taken on an account specified resource (e.g. an account integration)
+   * should confirm that the user's accountId matches the specified resource's accountId
+   */
   async doesUserHavePermission(
     userId: string,
-    accountId: string,
     permissionName: PermissionNameValue,
   ): Promise<boolean> {
     const userWithPermissions =
       await this.userDbHandler.retrieveUserPermissions(userId);
     if (!validateUserWithPermissions(userWithPermissions)) {
-      return false;
-    }
-
-    if (userWithPermissions.accountId !== accountId) {
       return false;
     }
 

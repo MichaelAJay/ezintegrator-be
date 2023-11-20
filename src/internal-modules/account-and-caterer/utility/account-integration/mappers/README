@@ -1,1 +1,0 @@
-There should be a mapper for every specific integration type (i.e. Account*Integration; e.g. AccountCrmIntegration)

@@ -4,10 +4,10 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { SecretManagerService } from '../../../external-modules/secret-manager/secret-manager.service';
-import { AccountIntegrationDbHandlerService } from '../../../internal-modules/external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
-import { IAccountIntegrationClass } from './account-integration.class-interface';
 import * as Sentry from '@sentry/node';
+import { SecretManagerService } from '../../../../external-modules/secret-manager/secret-manager.service';
+import { AccountIntegrationDbHandlerService } from '../../../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
+import { IAccountIntegrationClass } from '../account-integration.class-interface';
 
 @Injectable()
 export class AccountCrmIntegratorService implements IAccountIntegrationClass {
@@ -55,33 +55,19 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   update(args: any) {
     throw new Error('Method not implemented.');
   }
-  async updateConfig(
-    integrationId: string,
-    accountId: string,
-    config: Record<string, any>,
-  ) {
-    // Retrieve integration by id - include what it references (for instance, Nutshell CRM)
-    // Validate the incoming config against the expected config
-    // Thoughts on how this update works:
-    // 1) It doesn't need to be include all properties.  Missing properties from the config are assumed to represent no change
-    // Downside:  If a user just wants to get rid of some information, this won't do it.  But they could just destroy the whole integration
-    // 2) Whatever IS included in the config will overwrite anything already stored
-    // 3) A check is (?always) performed to determine if the integration's configuration is complete
-    // 4) The remaining configuration keys to include are returned, if they exist
-  }
 
-  async deactivate(integrationId: string, accountId: string) {
+  async deactivate(accountIntegrationId: string, accountId: string) {
     return this.accountIntegrationDbHandler.updateAccountCrm(
-      integrationId,
+      accountIntegrationId,
       accountId,
       {
         isActive: false,
       },
     );
   }
-  async activate(integrationId: string, accountId: string) {
+  async activate(accountIntegrationId: string, accountId: string) {
     return this.accountIntegrationDbHandler.updateAccountCrm(
-      integrationId,
+      accountIntegrationId,
       accountId,
       {
         isActive: true,
@@ -94,11 +80,11 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
    * @throws ConflictException (record account doesn't match user account)
    * @throws UnprocessableEntityException (record is active)
    */
-  async delete(accountCrmId: string, accountId: string) {
+  async delete(accountIntegrationId: string, accountId: string) {
     // Get record - make sure that it's inactive & belongs to the specified account
     const accountCrm =
       await this.accountIntegrationDbHandler.retrieveAccountCrmById(
-        accountCrmId,
+        accountIntegrationId,
       );
 
     if (!accountCrm) {
@@ -117,12 +103,12 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     const secretReferences =
       await this.accountIntegrationDbHandler.retrieveAllTargetAccountIntegrationSecretReferences(
         'CRM',
-        accountCrmId,
+        accountIntegrationId,
       );
     // Delete account integration & all reference records
     await this.accountIntegrationDbHandler.deleteAccountIntegration(
       'CRM',
-      accountCrmId,
+      accountIntegrationId,
     );
 
     // Delete all secrets

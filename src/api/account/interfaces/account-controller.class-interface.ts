@@ -1,5 +1,4 @@
 import { FastifyReply } from 'fastify';
-import { AccountIntegrationType } from '../../../internal-modules/account-and-caterer/types';
 import { AuthenticatedRequest } from '../../../api/types';
 export interface IAccountController {
   /**
@@ -25,7 +24,9 @@ export interface IAccountController {
     accountIntegrationId: string,
     req: AuthenticatedRequest,
   ): any;
-  upsertAccountIntegrationConfigValues(
+  updateAccountIntegrationConfig(
+    integrationType: string,
+    accountIntegrationId: string,
     body: unknown,
     req: AuthenticatedRequest,
     res: FastifyReply,

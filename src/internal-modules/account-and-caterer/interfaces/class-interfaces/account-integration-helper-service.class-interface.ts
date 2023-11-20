@@ -1,11 +1,11 @@
 import { IAccountIntegrationFieldConfigurationJson } from '..';
 import { PermissionNameValue } from '../../../../external-modules/db-client/models/role-and-permission.db-models';
-import { IAccountIntegration } from '../account-integration.interface';
+import { IFullAccountIntegration } from '../account-integration.interface';
 
 export interface IAccountIntegrationHelper {
   confirmRequesterCanCarryOutAccountIntegrationAction(
     requester: { id: string; accountId: string },
-    record: IAccountIntegration,
+    record: IFullAccountIntegration,
     permission: PermissionNameValue,
   ): Promise<boolean>;
 
@@ -15,11 +15,11 @@ export interface IAccountIntegrationHelper {
    */
   accountIntegrationBelongsToUserAccount(
     requesterAccountId: string,
-    record: IAccountIntegration,
+    record: IFullAccountIntegration,
   ): Promise<boolean>;
 
   getAccountIntegrationConfigStatusAndMissingValues(
-    accountIntegration: IAccountIntegration,
+    accountIntegration: IFullAccountIntegration,
     configFromSystem: Array<IAccountIntegrationFieldConfigurationJson>,
   ): any;
 }

@@ -1,5 +1,4 @@
 import { AccountIntegrationType } from '../../types';
-import { IAccountIntegrationFieldConfigurationJson } from '../account-integration-fields.json-interface';
 
 export interface IAccountIntegrationProvider {
   getAccountIntegration(
@@ -24,8 +23,10 @@ export interface IAccountIntegrationProvider {
   updateAccountIntegrationConfig(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    accountId: string,
-    requesterId: string,
+    requester: {
+      accountId: string;
+      userId: string;
+    },
     config: Record<string, any>,
   ): any;
   deactivate(

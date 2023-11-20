@@ -50,6 +50,7 @@ import {
 } from '../swagger/operations/account';
 import { AccountIntegration } from '../../internal-modules/account-and-caterer/types';
 import { CreateAccountInterfaceRequestBody } from '../swagger/request/body/create-account-interface.request-body';
+import { validateGeneralObjectPayload } from '../common/validators/object-payload.validator';
 
 @Controller('account')
 export class AccountController implements IAccountController {
@@ -351,14 +352,29 @@ export class AccountController implements IAccountController {
     description: SwaggerErrorDescriptions.RequesterLacksPermission,
   })
   @Patch('integration/:type/:id/config')
-  async upsertAccountIntegrationConfigValues(
+  async updateAccountIntegrationConfig(
+    @Param('type') integrationType: string,
+    @Param('id') accountIntegrationId: string,
     @Body() body: unknown,
     @Req() req: AuthenticatedRequest,
     @Res() res: FastifyReply,
   ) {
-    // The config should actually be specific to a very specific integration - for instance Nutshell CRM
-    //
-    // NOTE:  The validation of this function must occur at the service level, because it depends on the integration
+    if (!validateIntegrationType(integrationType)) {
+      throw new BadRequestException(
+        'Bad validation type - see the documentation.',
+      );
+    }
+
+    if (!validateGeneralObjectPayload(body)) {
+      throw new BadRequestException('Bad payload - see the documentation.');
+    }
+
+    return this.accountIntegrationService.updateAccountIntegrationConfig(
+      integrationType,
+      accountIntegrationId,
+      { accountId: req.accountId, userId: req.userId },
+      body,
+    );
   }
 
   @ApiOperation(upsertAccountSecretApiOperations)

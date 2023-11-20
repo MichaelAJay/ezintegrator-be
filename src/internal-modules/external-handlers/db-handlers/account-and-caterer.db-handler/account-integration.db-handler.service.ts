@@ -1,15 +1,11 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { AccountCrm, Prisma } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DbClientService } from '../../../../external-modules';
 import { AccountIntegrationDbQueryBuilderService } from './account-integration.db-query-builder.service';
 import { IAccountIntegrationDbHandlerProvider } from './interfaces';
 import * as Sentry from '@sentry/node';
 import { AccountIntegrationType } from '../../../account-and-caterer/types';
+import { handlePrismaError } from '../prisma-error-handler.callback';
 
 @Injectable()
 export class AccountIntegrationDbHandlerService
@@ -58,6 +54,9 @@ export class AccountIntegrationDbHandlerService
   //   return this.dbClient.accountCrm.findUnique(query);
   // }
 
+  /**
+   * @important Whatever calls this method should ensure that the accountCrm belongs to the same account as the requesting user
+   */
   async retrieveAccountCrmById(
     accountCrmId: string,
     include?: Prisma.AccountCrmInclude,
@@ -84,23 +83,16 @@ export class AccountIntegrationDbHandlerService
       accountId,
       updates,
     );
-    await this.dbClient.accountCrm.update(query).catch(async (reason) => {
-      if (
-        reason instanceof PrismaClientKnownRequestError &&
-        reason.code === 'P2025'
-      ) {
-        const accountCrm = await this.retrieveAccountCrmById(accountCrmId);
-        if (!accountCrm) {
-          throw new NotFoundException('Record to update not found.');
-        }
-        if (accountCrm.accountId !== accountId) {
-          throw new ConflictException();
-        }
-      }
-      // If not "RecordNotFound" Prisma exception, log and throw
-      Sentry.captureException(reason);
-      throw reason;
-    });
+    await this.dbClient.accountCrm
+      .update(query)
+      .catch((reason) =>
+        handlePrismaError(
+          reason,
+          this.retrieveAccountCrmById.bind(this),
+          accountCrmId,
+          accountId,
+        ),
+      );
   }
 
   // GENERALIZED METHODS

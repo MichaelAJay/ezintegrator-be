@@ -9,12 +9,12 @@ import { IAccountIntegrationProvider } from './interfaces';
 import * as Sentry from '@sentry/node';
 import { AccountIntegrationType } from './types';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
-import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
 import { AccountIntegrationHelperService } from './account-integration-helper.service';
-import { IAccountIntegration } from './interfaces/account-integration.interface';
-import { mapAccountCrmToGeneralizedAccountIntegration } from './utility/account-integration/mappers/map-account-crm-to-generalized-account-integration.utility-mapper';
+import { IFullAccountIntegration } from './interfaces/account-integration.interface';
 import { validateGeneralizedAccountIntegration } from './validators/generalized-account-integration.schema-and-validator';
+import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator/account-crm-integrator.service';
+import { AccountIntegrationMapperService } from './integration-classes/account-integration-mapper.service';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -25,6 +25,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     private readonly accountCrmIntegrator: AccountCrmIntegratorService,
     private readonly accountPermissionService: AccountPermissionService,
     private readonly accountIntegrationHelper: AccountIntegrationHelperService,
+    private readonly accountIntegrationMapper: AccountIntegrationMapperService,
   ) {}
 
   /**
@@ -45,17 +46,18 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       userId: string;
     },
   ) {
-    let result: IAccountIntegration;
+    let result: IFullAccountIntegration;
     switch (integrationType) {
       case 'CRM':
         const accountCrm = await this.accountCrmIntegrator.retrieveOne(
           accountIntegrationId,
           requester,
         );
-        result = mapAccountCrmToGeneralizedAccountIntegration(
-          accountCrm,
-          'CRM',
-        );
+        result =
+          this.accountIntegrationMapper.mapAccountIntegrationToFullGeneralizedIntegration(
+            accountCrm,
+            'CRM',
+          );
         break;
       default:
         const err = new UnprocessableEntityException();
@@ -64,15 +66,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
           Sentry.captureException(err);
         });
         throw err;
-    }
-
-    if (!validateGeneralizedAccountIntegration(result)) {
-      const err = new InternalServerErrorException('Failed validation');
-      Sentry.withScope((scope) => {
-        scope.setExtra('errs', validateGeneralizedAccountIntegration.errors);
-        Sentry.captureException(err);
-      });
-      throw err;
     }
 
     if (result.accountId !== requester.accountId) {
@@ -103,7 +96,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     if (
       !(await this.accountPermissionService.doesUserHavePermission(
         requesterId,
-        accountId,
         'EDIT_ACCOUNT_INTEGRATIONS',
       ))
     ) {
@@ -127,24 +119,24 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     if (
       !(await this.accountPermissionService.doesUserHavePermission(
         requesterId,
-        accountId,
         'EDIT_ACCOUNT_INTEGRATIONS',
       ))
     ) {
       throw new UnauthorizedException();
     }
 
-    let result;
+    let result: IFullAccountIntegration;
     switch (integrationType) {
       case 'CRM':
         const createdCrm = await this.accountCrmIntegrator.create(
           integrationId,
           accountId,
         );
-        result = mapAccountCrmToGeneralizedAccountIntegration(
-          createdCrm,
-          'CRM',
-        );
+        result =
+          this.accountIntegrationMapper.mapAccountIntegrationToFullGeneralizedIntegration(
+            createdCrm,
+            'CRM',
+          );
         break;
       default:
         Sentry.captureMessage('Invalid integration type passed in', 'error');
@@ -174,21 +166,29 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
   async updateAccountIntegrationConfig(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    accountId: string,
-    requesterId: string,
+    requester: {
+      accountId: string;
+      userId: string;
+    },
     config: Record<string, any>,
   ) {
-    /**
-     * @OTODO replace permission checker
-     */
+    if (
+      !(await this.accountPermissionService.canUserEditSecretsForAccount(
+        requester.accountId,
+        requester.userId,
+      ))
+    ) {
+      throw new UnauthorizedException();
+    }
 
+    let accountIntegration: any;
     switch (integrationType) {
       case 'CRM':
-        return this.accountCrmIntegrator.updateConfig(
+        const accountCrm = await this.accountCrmIntegrator.retrieveOne(
           accountIntegrationId,
-          accountId,
-          config,
+          requester,
         );
+        break;
       default:
         Sentry.captureMessage('Invalid integration type passed in', 'error');
         throw new BadRequestException('Invalid integration type');
@@ -283,7 +283,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     if (
       !(await this.accountPermissionService.doesUserHavePermission(
         requesterId,
-        requesterAccountId,
         'EDIT_ACCOUNT_INTEGRATION_CONFIGURATION',
       ))
     ) {

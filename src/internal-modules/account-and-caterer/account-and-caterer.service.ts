@@ -97,11 +97,10 @@ export class AccountAndCatererService implements IAccountAndCatererService {
     requesterId: string,
     accountId: string,
   ): Promise<any> {
-    // Confirm user is permissioned to add a user to the account
+    // Confirm user is permissioned to add a user to THEIR account
     if (
       !(await this.accountPermissionService.doesUserHavePermission(
         requesterId,
-        accountId,
         'EDIT_USER_ROSTER',
       ))
     ) {

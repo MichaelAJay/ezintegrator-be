@@ -11,7 +11,7 @@ import {
 import * as Sentry from '@sentry/node';
 import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { IAccountIntegration } from './interfaces/account-integration.interface';
+import { IFullAccountIntegration } from './interfaces/account-integration.interface';
 import { AccountSecretReferenceSecretTypeValues } from '../../external-modules';
 
 /**
@@ -36,7 +36,7 @@ export class AccountIntegrationHelperService
    */
   async confirmRequesterCanCarryOutAccountIntegrationAction(
     requester: { id: string; accountId: string },
-    record: IAccountIntegration,
+    record: IFullAccountIntegration,
     permission: PermissionNameValue,
   ) {
     if (
@@ -51,7 +51,6 @@ export class AccountIntegrationHelperService
     if (
       !(await this.accountPermissionService.doesUserHavePermission(
         requester.id,
-        requester.accountId,
         permission,
       ))
     ) {
@@ -67,7 +66,7 @@ export class AccountIntegrationHelperService
    */
   async accountIntegrationBelongsToUserAccount(
     requesterAccountId: string,
-    record: IAccountIntegration,
+    record: IFullAccountIntegration,
   ) {
     if (!record.accountId) {
       const err = new UnprocessableEntityException();
@@ -82,7 +81,7 @@ export class AccountIntegrationHelperService
   }
 
   getAccountIntegrationConfigStatusAndMissingValues(
-    accountIntegration: IAccountIntegration,
+    accountIntegration: IFullAccountIntegration,
   ): {
     isFullyConfigured: boolean;
     missingConfigs?: Array<IAccountIntegrationFieldConfigurationJson>;
