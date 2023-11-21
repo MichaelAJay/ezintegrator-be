@@ -35,6 +35,7 @@ export interface IAccountEventProcess {
 
 export type IAccountIntegrationWithConfigAndSystemIntegration =
   IAccountIntegration & {
+    // This needs to be changed - this isn't the right way to handle secretRefs here
     secretRefs: AccountSecretReferenceSecretTypeValues[];
     integration: Omit<ISystemIntegration, 'validEventProcesses'>;
   };

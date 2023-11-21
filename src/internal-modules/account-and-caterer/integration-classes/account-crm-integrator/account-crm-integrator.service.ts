@@ -4,14 +4,21 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { AccountCrm, AccountCrmSecretReference, Crm } from '@prisma/client';
 import * as Sentry from '@sentry/node';
+import { ValidationError } from '../../../../common/errors/validation-error';
+import { AccountSecretReferenceSecretTypeValues } from '../../../../external-modules';
 import { SecretManagerService } from '../../../../external-modules/secret-manager/secret-manager.service';
 import { AccountIntegrationDbHandlerService } from '../../../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
+import { prepareAccountIntegrationConfigurationUpdate } from '../../utility/account-integration/prepare-configuration-update.utility-function';
+import { validateExistingSecrets } from '../../validators/account-integration-existing-secrets.schema-and-validator';
+import { AccountIntegrationMapperService } from '../account-integration-mapper.service';
 import { IAccountIntegrationClass } from '../account-integration.class-interface';
 
 @Injectable()
 export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   constructor(
+    private readonly accountIntegrationMapper: AccountIntegrationMapperService,
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
   ) {}
@@ -54,6 +61,57 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   }
   update(args: any) {
     throw new Error('Method not implemented.');
+  }
+
+  async updateConfig(
+    accountIntegrationId: string,
+    requesterAccountId: string,
+    configUpdate: Record<string, any>,
+  ) {
+    type AccountCrmWithCrmAndSecretRefs = AccountCrm & {
+      crm: Crm;
+      secretRefs: Array<AccountCrmSecretReference>;
+    };
+
+    /**
+     * @TODO GET RID OF THIS TYPE
+     */
+    const accountCrm: AccountCrmWithCrmAndSecretRefs =
+      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
+        accountIntegrationId,
+        { crm: true, secretRefs: true },
+      );
+
+    // Generalize result
+    const accountIntegration =
+      this.accountIntegrationMapper.mapAccountIntegrationForConfig(
+        accountCrm,
+        'CRM',
+      );
+
+    /**
+     * @check — the target accountIntegration belongs to the same account as the requesting user
+     */
+    if (accountIntegration.accountId !== requesterAccountId) {
+      throw new ConflictException();
+    }
+
+    // Get validated updates
+    const { secrets, nonSensitiveCredentials } =
+      prepareAccountIntegrationConfigurationUpdate(
+        accountIntegration.integration,
+        configUpdate,
+      );
+
+    const updatedNonSensitiveCredentials = {
+      ...(accountCrm.nonSensitiveCredentials as object),
+      ...nonSensitiveCredentials,
+    };
+
+    const secretsResult = await this.handleSecretsUpdate(
+      accountCrm.secretRefs,
+      secrets,
+    );
   }
 
   async deactivate(accountIntegrationId: string, accountId: string) {
@@ -143,5 +201,43 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
 
     // Return
     return;
+  }
+
+  async handleSecretsUpdate(
+    existingSecrets: any,
+    incomingSecrets: Array<{
+      type: AccountSecretReferenceSecretTypeValues;
+      secret: any;
+    }>,
+  ) {
+    try {
+      /**
+       * @check — existingSecrets is an array and every secret in existingSecrets is an object with "type" property
+       */
+      if (!validateExistingSecrets(existingSecrets)) {
+        throw new ValidationError(
+          'existingSecrets validation failed',
+          validateExistingSecrets.errors,
+        );
+      }
+
+      const promiseAllResult = await Promise.all(
+        incomingSecrets.map(async (secret) => {
+          if (
+            existingSecrets.some((secretRef) => secretRef.type === secret.type)
+          ) {
+            // Replace
+            return new Promise(() => {});
+          } else {
+            // Create
+            return new Promise(() => {});
+          }
+        }),
+      );
+      return promiseAllResult;
+    } catch (err) {
+      Sentry.captureException(err);
+      throw err;
+    }
   }
 }

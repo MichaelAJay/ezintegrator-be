@@ -11,7 +11,10 @@ import {
 import * as Sentry from '@sentry/node';
 import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { IFullAccountIntegration } from './interfaces/account-integration.interface';
+import {
+  IFullAccountIntegration,
+  ISystemIntegration,
+} from './interfaces/account-integration.interface';
 import { AccountSecretReferenceSecretTypeValues } from '../../external-modules';
 
 /**

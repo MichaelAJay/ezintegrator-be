@@ -1,6 +1,9 @@
 import { IAccountIntegrationFieldConfigurationJson } from '..';
 import { PermissionNameValue } from '../../../../external-modules/db-client/models/role-and-permission.db-models';
-import { IFullAccountIntegration } from '../account-integration.interface';
+import {
+  IFullAccountIntegration,
+  ISystemIntegration,
+} from '../account-integration.interface';
 
 export interface IAccountIntegrationHelper {
   confirmRequesterCanCarryOutAccountIntegrationAction(

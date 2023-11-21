@@ -28,16 +28,6 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     private readonly accountIntegrationMapper: AccountIntegrationMapperService,
   ) {}
 
-  /**
-   * @TODO - the switch statement should return a uniform result so that the shape of the returned account integration is consistent
-   * To do this, look at the way it's done for Create Account Integration
-   *
-   * Further, the account*Integrator retrieveOne is doing too much, and much of it is redundant
-   * Try to write this in a way that the generalized return from retrieveOne can be used to determine
-   * 1) Ownership is validated (account ownership)
-   * 2) Check config status
-   * 2a) If status doesn't match record's status, update to reflect check result
-   */
   async getAccountIntegration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
@@ -170,7 +160,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       accountId: string;
       userId: string;
     },
-    config: Record<string, any>,
+    configUpdate: Record<string, any>,
   ) {
     if (
       !(await this.accountPermissionService.canUserEditSecretsForAccount(
@@ -181,12 +171,12 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       throw new UnauthorizedException();
     }
 
-    let accountIntegration: any;
     switch (integrationType) {
       case 'CRM':
-        const accountCrm = await this.accountCrmIntegrator.retrieveOne(
+        await this.accountCrmIntegrator.updateConfig(
           accountIntegrationId,
-          requester,
+          requester.accountId,
+          configUpdate,
         );
         break;
       default:
