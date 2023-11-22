@@ -292,3 +292,33 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
     }
   }
 }
+
+/**
+ * When the configuration is updated, the IGetAccountIntegrationConfigStatusAndMissingValues
+ * has been delivered to the frontend
+ *
+ * This includes an array of all of the missing configs:
+ * {
+ *   isSecret: boolean;
+ *   fieldName: string (if isSecret, should be one of the specified field names)
+ * }
+ *
+ * When the config is updated, the array of configs to update should look like this:
+ * {
+ *   fieldName: string;
+ *   value: any;
+ * }
+ *
+ * When the update is occurring
+ * 1) Get the account integration with its reference system integration
+ * 2) For each update in updates payload
+ * 2a) Confirm that update.fieldName is in system integration's configTemplates
+ * 2b) If it is, then if it's a secret, handle as a secret.  If not, handle as nonSensitive credentials
+ * @TODO figure out how nonSensitive credentials is supposed to look again.  I think it's:
+ * {
+ *   [`${update.fieldName}`]: ... something
+ * }
+ *
+ * So here, perhaps, is the problem.  It seems like I'm unsure of whether I'm supposed to be sending an array, or an object
+ * An object actually seems right, where the keys are the field names and the values are their values.
+ */

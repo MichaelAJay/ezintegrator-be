@@ -25,6 +25,7 @@ export interface IAccountIntegrationClass {
    * @check existingSecrets is an array and every secret in existingSecrets is an object with "type" property
    */
   handleSecretsUpdate(
+    accountIntegrationId: string,
     existingSecrets: Array<any>,
     incomingSecrets: Array<{
       type: AccountSecretReferenceSecretTypeValues;

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AccountCrm, AccountCrmSecretReference, Crm } from '@prisma/client';
 import * as Sentry from '@sentry/node';
+import { AccountSecretDbHandlerService } from 'src/internal-modules/external-handlers/db-handlers/account-and-caterer.db-handler/account-secret.db-handler.service';
 import { ValidationError } from '../../../../common/errors/validation-error';
 import { AccountSecretReferenceSecretTypeValues } from '../../../../external-modules';
 import { SecretManagerService } from '../../../../external-modules/secret-manager/secret-manager.service';
@@ -21,6 +22,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     private readonly accountIntegrationMapper: AccountIntegrationMapperService,
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
+    private readonly accountSecretDbHandler: AccountSecretDbHandlerService,
   ) {}
 
   async create(crmId: string, accountId: string): Promise<any> {
@@ -97,11 +99,14 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     }
 
     // Get validated updates
-    const { secrets, nonSensitiveCredentials } =
-      prepareAccountIntegrationConfigurationUpdate(
-        accountIntegration.integration,
-        configUpdate,
-      );
+    const {
+      secrets,
+      nonSensitiveCredentials,
+      invalidFields: invalidFieldNames,
+    } = prepareAccountIntegrationConfigurationUpdate(
+      accountIntegration.integration,
+      configUpdate,
+    );
 
     const updatedNonSensitiveCredentials = {
       ...(accountCrm.nonSensitiveCredentials as object),
@@ -109,6 +114,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     };
 
     const secretsResult = await this.handleSecretsUpdate(
+      accountIntegrationId,
       accountCrm.secretRefs,
       secrets,
     );
@@ -204,6 +210,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   }
 
   async handleSecretsUpdate(
+    accountIntegrationId: string,
     existingSecrets: any,
     incomingSecrets: Array<{
       type: AccountSecretReferenceSecretTypeValues;
@@ -212,7 +219,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   ) {
     try {
       /**
-       * @check — existingSecrets is an array and every secret in existingSecrets is an object with "type" property
+       * @check — existingSecrets is an array and every elemeht is an object with "secretName" and "type" properties
        */
       if (!validateExistingSecrets(existingSecrets)) {
         throw new ValidationError(
@@ -227,13 +234,23 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
             (secretRef) => secretRef.type === secret.type,
           );
           if (existingSecret) {
-            return this.secretManagerService.addSecretVersion(
+            return this.secretManagerService.upsertSecretVersion(
               existingSecret.secretName,
               secret.secret,
             );
           } else {
             // Create
-            return new Promise(() => {});
+            return this.accountSecretDbHandler
+              .createAccountCrmSecretReference({
+                accountCrmId: accountIntegrationId,
+                type: secret.type,
+              })
+              .then((result) =>
+                this.secretManagerService.upsertSecretVersion(
+                  result.secretName,
+                  secret.secret,
+                ),
+              );
           }
         }),
       );
