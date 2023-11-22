@@ -1,7 +1,7 @@
 import {
   accountSecretReferenceSecretTypes,
   AccountSecretReferenceSecretTypeValues,
-} from 'src/external-modules';
+} from '../../../external-modules';
 
 export function validateAccountIntegrationSecretReferenceType(
   fieldName: any,

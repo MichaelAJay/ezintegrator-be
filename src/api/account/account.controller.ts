@@ -300,8 +300,7 @@ export class AccountController implements IAccountController {
     return this.accountIntegrationService.getAccountIntegrationConfiguration(
       integrationType,
       accountIntegrationId,
-      req.accountId,
-      req.userId,
+      { accountId: req.accountId, userId: req.userId },
     );
   }
 

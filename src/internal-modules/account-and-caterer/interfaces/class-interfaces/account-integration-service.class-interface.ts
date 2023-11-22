@@ -1,6 +1,10 @@
 import { AccountIntegrationType } from '../../types';
+import { GetAccountIntegrationReturn } from '../method-returns/account-integration-helper/get-account-integration.method-return';
 
 export interface IAccountIntegrationProvider {
+  /**
+   * @check accountId is not leaked in return
+   */
   getAccountIntegration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
@@ -8,7 +12,7 @@ export interface IAccountIntegrationProvider {
       accountId: string;
       userId: string;
     },
-  ): Promise<any>;
+  ): Promise<GetAccountIntegrationReturn>;
   createAccountIntegration(
     integrationType: AccountIntegrationType,
     integrationId: string,
@@ -52,8 +56,10 @@ export interface IAccountIntegrationProvider {
   getAccountIntegrationConfiguration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    requesterAccountId: string,
-    requesterId: string,
+    requester: {
+      accountId: string;
+      userId: string;
+    },
   ): any;
   getAccountIntegrationConfigurations(
     requesterId: string,

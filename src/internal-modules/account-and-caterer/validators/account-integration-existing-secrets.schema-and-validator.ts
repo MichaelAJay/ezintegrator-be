@@ -6,6 +6,7 @@ import {
 } from '../../../external-modules';
 
 export type ValidExistingSecrets = Array<{
+  secretName: string;
   type: AccountSecretReferenceSecretTypeValues;
 }>;
 
@@ -14,6 +15,7 @@ const existingSecretsSchema: JSONSchemaType<ValidExistingSecrets> = {
   items: {
     type: 'object',
     properties: {
+      secretName: { type: 'string' },
       type: {
         type: 'string',
         enum: accountSecretReferenceSecretTypes,

@@ -11,11 +11,9 @@ import {
 import * as Sentry from '@sentry/node';
 import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import {
-  IFullAccountIntegration,
-  ISystemIntegration,
-} from './interfaces/account-integration.interface';
+import { IFullAccountIntegration } from './interfaces/account-integration.interface';
 import { AccountSecretReferenceSecretTypeValues } from '../../external-modules';
+import { IGetAccountIntegrationConfigStatusAndMissingValues } from './interfaces/method-returns';
 
 /**
  * This is a helper service for AccountIntegrationService
@@ -28,15 +26,7 @@ export class AccountIntegrationHelperService
   constructor(
     private readonly accountPermissionService: AccountPermissionService,
   ) {}
-  /**
-   * Ensures that requester's account matches the integration's account
-   * And that the requester has adequate permission on the account to carry out the action
-   *
-   * @throws NotFoundException (record not found by id)
-   * @throws UnprocessableEntityException (record missing accountId)
-   * @throws ConflictException (record and user do not share the same account)
-   * @throws UnauthorizedException (requester lacks permission)
-   */
+
   async confirmRequesterCanCarryOutAccountIntegrationAction(
     requester: { id: string; accountId: string },
     record: IFullAccountIntegration,
@@ -63,10 +53,6 @@ export class AccountIntegrationHelperService
     return true;
   }
 
-  /**
-   * @throws NotFoundException (record not found by id)
-   * @throws UnprocessableEntityException (record missing accountId)
-   */
   async accountIntegrationBelongsToUserAccount(
     requesterAccountId: string,
     record: IFullAccountIntegration,
@@ -85,10 +71,7 @@ export class AccountIntegrationHelperService
 
   getAccountIntegrationConfigStatusAndMissingValues(
     accountIntegration: IFullAccountIntegration,
-  ): {
-    isFullyConfigured: boolean;
-    missingConfigs?: Array<IAccountIntegrationFieldConfigurationJson>;
-  } {
+  ): IGetAccountIntegrationConfigStatusAndMissingValues {
     const configFromSystem =
       accountIntegration.integration.configurationTemplate;
     const missingConfigs: Array<IAccountIntegrationFieldConfigurationJson> = [];

@@ -223,11 +223,14 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
 
       const promiseAllResult = await Promise.all(
         incomingSecrets.map(async (secret) => {
-          if (
-            existingSecrets.some((secretRef) => secretRef.type === secret.type)
-          ) {
-            // Replace
-            return new Promise(() => {});
+          const existingSecret = existingSecrets.find(
+            (secretRef) => secretRef.type === secret.type,
+          );
+          if (existingSecret) {
+            return this.secretManagerService.addSecretVersion(
+              existingSecret.secretName,
+              secret.secret,
+            );
           } else {
             // Create
             return new Promise(() => {});

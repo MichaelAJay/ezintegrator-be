@@ -15,6 +15,7 @@ import { IFullAccountIntegration } from './interfaces/account-integration.interf
 import { validateGeneralizedAccountIntegration } from './validators/generalized-account-integration.schema-and-validator';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator/account-crm-integrator.service';
 import { AccountIntegrationMapperService } from './integration-classes/account-integration-mapper.service';
+import { GetAccountIntegrationReturn } from './interfaces/method-returns/account-integration-helper/get-account-integration.method-return';
 
 // MAY NOT INJECT:
 // AccountSecretService
@@ -35,7 +36,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       accountId: string;
       userId: string;
     },
-  ) {
+  ): Promise<GetAccountIntegrationReturn> {
     let result: IFullAccountIntegration;
     switch (integrationType) {
       case 'CRM':
@@ -62,14 +63,16 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       throw new UnauthorizedException();
     }
 
-    const configStatus: any =
+    const configStatus =
       this.accountIntegrationHelper.getAccountIntegrationConfigStatusAndMissingValues(
         result,
       );
 
-    const ret: any = {
+    const ret: GetAccountIntegrationReturn & {
+      accountId?: string; // FOR REMOVAL
+    } = {
       ...result,
-      ...configStatus,
+      configStatus,
     };
 
     delete ret.accountId;
@@ -261,9 +264,18 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
   async getAccountIntegrationConfiguration(
     integrationType: AccountIntegrationType,
     accountIntegrationId: string,
-    requesterAccountId: string,
-    requesterId: string,
-  ) {}
+    requester: {
+      accountId: string;
+      userId: string;
+    },
+  ) {
+    const { configStatus } = await this.getAccountIntegration(
+      integrationType,
+      accountIntegrationId,
+      requester,
+    );
+    return configStatus;
+  }
 
   async getAccountIntegrationConfigurations(
     requesterId: string,
