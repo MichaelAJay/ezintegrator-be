@@ -42,7 +42,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       await this.accountIntegrationDbHandler.retrieveAccountCrmById(
         accountCrmId,
         {
-          crm: {
+          integration: {
             include: {
               validEventProcesses: true,
             },
@@ -81,7 +81,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     const accountCrm: AccountCrmWithCrmAndSecretRefs =
       await this.accountIntegrationDbHandler.retrieveAccountCrmById(
         accountIntegrationId,
-        { crm: true, secretRefs: true },
+        { integration: true, secretRefs: true },
       );
 
     // Generalize result
@@ -99,14 +99,11 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     }
 
     // Get validated updates
-    const {
-      secrets,
-      nonSensitiveCredentials,
-      invalidFields: invalidFieldNames,
-    } = prepareAccountIntegrationConfigurationUpdate(
-      accountIntegration.integration,
-      configUpdate,
-    );
+    const { secrets, nonSensitiveCredentials, invalidFields } =
+      prepareAccountIntegrationConfigurationUpdate(
+        accountIntegration.integration,
+        configUpdate,
+      );
 
     const updatedNonSensitiveCredentials = {
       ...(accountCrm.nonSensitiveCredentials as object),

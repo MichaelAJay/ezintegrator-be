@@ -1,8 +1,8 @@
 import {
   Account,
   AccountCrm,
-  AccountSecretReferenceSecretType,
-  AccountSecretReferenceSecretType as AccountSecretReferenceSecretTypeConstant,
+  IntegrationSecretReferenceSecretType,
+  IntegrationSecretReferenceSecretType as AccountSecretReferenceSecretTypeConstant,
   AccountStatus,
 } from '@prisma/client';
 
@@ -13,7 +13,7 @@ export type FullAccountModel = AccountDbModel & {
 };
 
 export type AccountSecretReferenceSecretTypeValues =
-  AccountSecretReferenceSecretType;
+  IntegrationSecretReferenceSecretType;
 
 export type AccountStatusValues = AccountStatus;
 

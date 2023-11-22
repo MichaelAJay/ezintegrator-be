@@ -12,7 +12,7 @@ import {
   IAccountIntegrationWithEventProcessesAndSystemIntegration,
   IFullAccountIntegration,
 } from '../interfaces/account-integration.interface';
-import { AccountIntegrationFieldName, AccountIntegrationType } from '../types';
+import { AccountIntegrationType } from '../types';
 import { generateEventProcessesArray } from '../utility/account-integration/generate-event-processes-array.utility-function';
 import { IAccountIntegrationMapperService } from './account-integration-mapper-service.class-interface';
 import * as Sentry from '@sentry/node';
@@ -56,21 +56,8 @@ export class AccountIntegrationMapperService
       const eventProcesses =
         this.mapAccountIntegrationEventProcesses(accountIntegration);
 
-      let systemIntegrationFieldName: AccountIntegrationFieldName;
-      switch (type) {
-        case 'CRM':
-          systemIntegrationFieldName = 'crm';
-          break;
-        default:
-          throw new InternalServerErrorException(
-            'Invalid account integration type',
-          );
-      }
-
-      const integration = this.mapSystemIntegrationForGeneralizedIntegration(
-        accountIntegration,
-        systemIntegrationFieldName,
-      );
+      const integration =
+        this.mapSystemIntegrationForGeneralizedIntegration(accountIntegration);
 
       return {
         ...baseIntegration,
@@ -85,10 +72,9 @@ export class AccountIntegrationMapperService
   }
   mapSystemIntegrationForGeneralizedIntegration(
     accountIntegration: any,
-    systemIntegrationFieldName: AccountIntegrationFieldName,
   ): ISystemIntegration {
     try {
-      const systemIntegration = accountIntegration[systemIntegrationFieldName];
+      const systemIntegration = accountIntegration['integration'];
       if (!systemIntegration) {
         throw new InternalServerErrorException(
           'Invalid system integration field name',
@@ -116,13 +102,7 @@ export class AccountIntegrationMapperService
         validEventProcesses,
       };
     } catch (err) {
-      Sentry.withScope((scope) => {
-        scope.setExtra(
-          'systemIntegrationFieldName',
-          systemIntegrationFieldName,
-        );
-        Sentry.captureException(err);
-      });
+      Sentry.captureException(err);
       throw err;
     }
   }
@@ -152,21 +132,8 @@ export class AccountIntegrationMapperService
       const secretRefs =
         this.mapSecretRefsForGeneralizedIntegration(accountIntegration);
 
-      let systemIntegrationFieldName: AccountIntegrationFieldName;
-      switch (type) {
-        case 'CRM':
-          systemIntegrationFieldName = 'crm';
-          break;
-        default:
-          throw new InternalServerErrorException(
-            'Invalid account integration type',
-          );
-      }
-
-      const integration = this.mapSystemIntegrationForGeneralizedIntegration(
-        accountIntegration,
-        systemIntegrationFieldName,
-      );
+      const integration =
+        this.mapSystemIntegrationForGeneralizedIntegration(accountIntegration);
 
       return {
         ...baseIntegration,
@@ -192,21 +159,8 @@ export class AccountIntegrationMapperService
       const eventProcesses =
         this.mapAccountIntegrationEventProcesses(accountIntegration);
 
-      let systemIntegrationFieldName: AccountIntegrationFieldName;
-      switch (type) {
-        case 'CRM':
-          systemIntegrationFieldName = 'crm';
-          break;
-        default:
-          throw new InternalServerErrorException(
-            'Invalid account integration type',
-          );
-      }
-
-      const integration = this.mapSystemIntegrationForGeneralizedIntegration(
-        accountIntegration,
-        systemIntegrationFieldName,
-      );
+      const integration =
+        this.mapSystemIntegrationForGeneralizedIntegration(accountIntegration);
 
       return {
         ...baseIntegration,

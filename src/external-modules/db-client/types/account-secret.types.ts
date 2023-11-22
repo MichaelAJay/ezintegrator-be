@@ -1,6 +1,6 @@
-import { AccountSecretReferenceSecretType } from '@prisma/client';
+import { IntegrationSecretReferenceSecretType } from '@prisma/client';
 
-export const accountSecretReferenceType = AccountSecretReferenceSecretType;
+export const accountSecretReferenceType = IntegrationSecretReferenceSecretType;
 export type AccountSecretReferenceTypeValues =
   (typeof accountSecretReferenceType)[keyof typeof accountSecretReferenceType];
 

@@ -13,7 +13,7 @@ export class AccountIntegrationDbQueryBuilderService
     return {
       data,
       include: {
-        crm: {
+        integration: {
           include: {
             validEventProcesses: true,
           },
@@ -84,7 +84,7 @@ export class AccountIntegrationDbQueryBuilderService
     return {
       where: { accountId },
       include: {
-        crm: true,
+        integration: true,
         secretRefs: true,
       },
     };
