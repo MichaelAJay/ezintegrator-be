@@ -176,12 +176,11 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
 
     switch (integrationType) {
       case 'CRM':
-        await this.accountCrmIntegrator.updateConfig(
+        return this.accountCrmIntegrator.updateConfig(
           accountIntegrationId,
           requester.accountId,
           configUpdate,
         );
-        break;
       default:
         Sentry.captureMessage('Invalid integration type passed in', 'error');
         throw new BadRequestException('Invalid integration type');

@@ -81,8 +81,15 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     const accountCrm: AccountCrmWithCrmAndSecretRefs =
       await this.accountIntegrationDbHandler.retrieveAccountCrmById(
         accountIntegrationId,
-        { integration: true, secretRefs: true },
+        {
+          integration: { include: { validEventProcesses: true } },
+          secretRefs: true,
+        },
       );
+
+    if (!accountCrm) {
+      throw new NotFoundException('Record not found');
+    }
 
     // Generalize result
     const accountIntegration =
@@ -110,11 +117,13 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       ...nonSensitiveCredentials,
     };
 
-    const secretsResult = await this.handleSecretsUpdate(
-      accountIntegrationId,
-      accountCrm.secretRefs,
-      secrets,
-    );
+    return { secrets, updatedNonSensitiveCredentials, invalidFields };
+
+    // const secretsResult = await this.handleSecretsUpdate(
+    //   accountIntegrationId,
+    //   accountCrm.secretRefs,
+    //   secrets,
+    // );
   }
 
   async deactivate(accountIntegrationId: string, accountId: string) {

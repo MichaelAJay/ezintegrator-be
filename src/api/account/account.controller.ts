@@ -356,7 +356,6 @@ export class AccountController implements IAccountController {
     @Param('id') accountIntegrationId: string,
     @Body() body: unknown,
     @Req() req: AuthenticatedRequest,
-    @Res() res: FastifyReply,
   ) {
     if (!validateIntegrationType(integrationType)) {
       throw new BadRequestException(
