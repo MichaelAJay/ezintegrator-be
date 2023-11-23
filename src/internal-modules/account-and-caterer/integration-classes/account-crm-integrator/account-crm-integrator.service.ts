@@ -67,7 +67,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
 
   async updateConfig(
     accountIntegrationId: string,
-    requesterAccountId: string,
+    requester: { accountId: string; userId: string },
     configUpdate: Record<string, any>,
   ) {
     type AccountCrmWithCrmAndSecretRefs = AccountCrm & {
@@ -101,7 +101,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     /**
      * @check — the target accountIntegration belongs to the same account as the requesting user
      */
-    if (accountIntegration.accountId !== requesterAccountId) {
+    if (accountIntegration.accountId !== requester.accountId) {
       throw new ConflictException();
     }
 
@@ -117,13 +117,29 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       ...nonSensitiveCredentials,
     };
 
-    return { secrets, updatedNonSensitiveCredentials, invalidFields };
+    // This is working as intended
+    // Should probably confirm it's required
+    await this.accountIntegrationDbHandler.updateAccountCrm(
+      accountIntegrationId,
+      requester.accountId,
+      { nonSensitiveCredentials: updatedNonSensitiveCredentials },
+    );
 
-    // const secretsResult = await this.handleSecretsUpdate(
-    //   accountIntegrationId,
-    //   accountCrm.secretRefs,
-    //   secrets,
-    // );
+    const secretsResult = await this.handleSecretsUpdate(
+      accountIntegrationId,
+      accountCrm.secretRefs,
+      secrets,
+    );
+
+    const newAccountIntegration = await this.retrieveOne(
+      accountIntegrationId,
+      requester,
+    );
+
+    return {
+      newAccountIntegration,
+      result: { secrets, nonSensitiveCredentials, invalidFields },
+    };
   }
 
   async deactivate(accountIntegrationId: string, accountId: string) {
@@ -240,6 +256,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
             (secretRef) => secretRef.type === secret.type,
           );
           if (existingSecret) {
+            // Disable the old secret
             return this.secretManagerService.upsertSecretVersion(
               existingSecret.secretName,
               secret.secret,
@@ -262,6 +279,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       );
       return promiseAllResult;
     } catch (err) {
+      console.error(err);
       Sentry.captureException(err);
       throw err;
     }

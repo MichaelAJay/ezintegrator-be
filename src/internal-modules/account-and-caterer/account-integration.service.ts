@@ -178,7 +178,7 @@ export class AccountIntegrationService implements IAccountIntegrationProvider {
       case 'CRM':
         return this.accountCrmIntegrator.updateConfig(
           accountIntegrationId,
-          requester.accountId,
+          requester,
           configUpdate,
         );
       default:

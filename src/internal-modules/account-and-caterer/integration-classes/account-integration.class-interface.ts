@@ -15,7 +15,7 @@ export interface IAccountIntegrationClass {
    */
   updateConfig(
     accountIntegrationId: string,
-    requesterAccountId: string,
+    requester: { accountId: string; userId: string },
     configUpdate: Record<string, any>,
   ): any;
   deactivate(accountIntegrationId: string, accountId: string): any;
