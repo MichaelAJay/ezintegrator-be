@@ -103,7 +103,7 @@ model AccountCrm {
   crmId                   String
   nonSensitiveCredentials Json?
   isConfigured            Boolean                     @default(false)
-  isActive                Boolean                     @default(true)
+  isActive                Boolean                     @default(false) // Requires full configuration and "check integration process"
   account                 Account                     @relation(fields: [accountId], references: [id], onDelete: Cascade)
   integration             Crm                         @relation(fields: [crmId], references: [id])
   eventProcesses          AccountCrmEventProcess[]

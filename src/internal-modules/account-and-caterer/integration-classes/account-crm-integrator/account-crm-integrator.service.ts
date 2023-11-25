@@ -11,9 +11,10 @@ import { ValidationError } from '../../../../common/errors/validation-error';
 import { AccountSecretReferenceSecretTypeValues } from '../../../../external-modules';
 import { SecretManagerService } from '../../../../external-modules/secret-manager/secret-manager.service';
 import { AccountIntegrationDbHandlerService } from '../../../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
+import { AccountIntegrationHelperService } from '../../account-integration-helper/account-integration-helper.service';
+import { AccountIntegrationMapperService } from '../../account-integration-helper/account-integration-mapper.service';
 import { prepareAccountIntegrationConfigurationUpdate } from '../../utility/account-integration/prepare-configuration-update.utility-function';
 import { validateExistingSecrets } from '../../validators/account-integration-existing-secrets.schema-and-validator';
-import { AccountIntegrationMapperService } from '../account-integration-mapper.service';
 import { IAccountIntegrationClass } from '../account-integration.class-interface';
 
 @Injectable()
@@ -23,6 +24,7 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     private readonly accountIntegrationDbHandler: AccountIntegrationDbHandlerService,
     private readonly secretManagerService: SecretManagerService,
     private readonly accountSecretDbHandler: AccountSecretDbHandlerService,
+    private readonly accountIntegrationHelper: AccountIntegrationHelperService,
   ) {}
 
   async create(crmId: string, accountId: string): Promise<any> {
@@ -61,6 +63,36 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
   async retrieveAll(accountId: string) {
     return this.accountIntegrationDbHandler.retrieveAccountCrms(accountId);
   }
+  async retrieveGeneralizedAccountIntegration(accountIntegrationId: string) {
+    type AccountCrmWithCrmAndSecretRefs = AccountCrm & {
+      crm: Crm;
+      secretRefs: Array<AccountCrmSecretReference>;
+    };
+
+    /**
+     * @TODO GET RID OF THIS TYPE
+     */
+    const accountIntegration: AccountCrmWithCrmAndSecretRefs =
+      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
+        accountIntegrationId,
+        {
+          integration: { include: { validEventProcesses: true } },
+          secretRefs: true,
+        },
+      );
+
+    if (!accountIntegration) {
+      throw new NotFoundException('Record not found');
+    }
+
+    // Generalize result
+    const generalizedAccountIntegration =
+      this.accountIntegrationMapper.mapAccountIntegrationForConfig(
+        accountIntegration,
+        'CRM',
+      );
+    return { accountIntegration, generalizedAccountIntegration };
+  }
   update(args: any) {
     throw new Error('Method not implemented.');
   }
@@ -70,50 +102,26 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     requester: { accountId: string; userId: string },
     configUpdate: Record<string, any>,
   ) {
-    type AccountCrmWithCrmAndSecretRefs = AccountCrm & {
-      crm: Crm;
-      secretRefs: Array<AccountCrmSecretReference>;
-    };
-
-    /**
-     * @TODO GET RID OF THIS TYPE
-     */
-    const accountCrm: AccountCrmWithCrmAndSecretRefs =
-      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
-        accountIntegrationId,
-        {
-          integration: { include: { validEventProcesses: true } },
-          secretRefs: true,
-        },
-      );
-
-    if (!accountCrm) {
-      throw new NotFoundException('Record not found');
-    }
-
     // Generalize result
-    const accountIntegration =
-      this.accountIntegrationMapper.mapAccountIntegrationForConfig(
-        accountCrm,
-        'CRM',
-      );
+    let { accountIntegration, generalizedAccountIntegration } =
+      await this.retrieveGeneralizedAccountIntegration(accountIntegrationId);
 
     /**
      * @check — the target accountIntegration belongs to the same account as the requesting user
      */
-    if (accountIntegration.accountId !== requester.accountId) {
+    if (generalizedAccountIntegration.accountId !== requester.accountId) {
       throw new ConflictException();
     }
 
     // Get validated updates
     const { secrets, nonSensitiveCredentials, invalidFields } =
       prepareAccountIntegrationConfigurationUpdate(
-        accountIntegration.integration,
+        generalizedAccountIntegration.integration,
         configUpdate,
       );
 
     const updatedNonSensitiveCredentials = {
-      ...(accountCrm.nonSensitiveCredentials as object),
+      ...(accountIntegration.nonSensitiveCredentials as object),
       ...nonSensitiveCredentials,
     };
 
@@ -127,18 +135,36 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
 
     const secretsResult = await this.handleSecretsUpdate(
       accountIntegrationId,
-      accountCrm.secretRefs,
+      accountIntegration.secretRefs,
       secrets,
     );
 
-    const newAccountIntegration = await this.retrieveOne(
+    const afterUpdateResult = await this.retrieveGeneralizedAccountIntegration(
       accountIntegrationId,
-      requester,
     );
 
+    accountIntegration = afterUpdateResult.accountIntegration;
+    generalizedAccountIntegration =
+      afterUpdateResult.generalizedAccountIntegration;
+
+    // If fully configured, update accountIntegration record
+    const { isFullyConfigured, missingConfigs } =
+      this.accountIntegrationHelper.getAccountIntegrationConfigStatusAndMissingValues(
+        generalizedAccountIntegration,
+      );
+    if (isFullyConfigured && !accountIntegration.isConfigured) {
+      await this.accountIntegrationDbHandler.updateAccountCrm(
+        accountIntegrationId,
+        requester.accountId,
+        { isConfigured: true },
+      );
+      // Assumes reliability of above update operation - parity is always checked before "isActive" is set to true
+      accountIntegration.isConfigured = true;
+    }
+
     return {
-      newAccountIntegration,
-      result: { secrets, nonSensitiveCredentials, invalidFields },
+      accountIntegration,
+      result: { secrets, nonSensitiveCredentials, invalidFields }, // This should go away once the testing is done
     };
   }
 
@@ -152,6 +178,23 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     );
   }
   async activate(accountIntegrationId: string, accountId: string) {
+    /**
+     * @check — accountIntegration isConfigured
+     */
+    const accountIntegration =
+      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
+        accountIntegrationId,
+      );
+    if (!accountIntegration.isConfigured) {
+      if (accountIntegration.isActive) {
+        // This shouldn't be happening - it should deactivate and throw an error
+      } else {
+        throw new UnprocessableEntityException(
+          'The account integration is not fully configured.',
+        );
+      }
+    }
+
     return this.accountIntegrationDbHandler.updateAccountCrm(
       accountIntegrationId,
       accountId,
@@ -283,5 +326,9 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
       Sentry.captureException(err);
       throw err;
     }
+  }
+
+  async checkConfigurationExternally(): Promise<boolean> {
+    return false;
   }
 }

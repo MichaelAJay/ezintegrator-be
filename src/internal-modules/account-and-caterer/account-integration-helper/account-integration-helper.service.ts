@@ -7,13 +7,16 @@ import {
 import {
   IAccountIntegrationFieldConfigurationJson,
   IAccountIntegrationHelper,
-} from './interfaces';
+} from '../interfaces';
 import * as Sentry from '@sentry/node';
-import { PermissionNameValue } from '../../external-modules/db-client/models/role-and-permission.db-models';
-import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { IFullAccountIntegration } from './interfaces/account-integration.interface';
-import { AccountSecretReferenceSecretTypeValues } from '../../external-modules';
-import { IGetAccountIntegrationConfigStatusAndMissingValues } from './interfaces/method-returns';
+import { PermissionNameValue } from '../../../external-modules/db-client/models/role-and-permission.db-models';
+import { AccountPermissionService } from '../../security-utility/account-permission.service';
+import {
+  IAccountIntegrationWithConfigAndSystemIntegration,
+  IFullAccountIntegration,
+} from '../interfaces/account-integration.interface';
+import { AccountSecretReferenceSecretTypeValues } from '../../../external-modules';
+import { IGetAccountIntegrationConfigStatusAndMissingValues } from '../interfaces/method-returns';
 
 /**
  * This is a helper service for AccountIntegrationService
@@ -70,7 +73,7 @@ export class AccountIntegrationHelperService
   }
 
   getAccountIntegrationConfigStatusAndMissingValues(
-    accountIntegration: IFullAccountIntegration,
+    accountIntegration: IAccountIntegrationWithConfigAndSystemIntegration,
   ): IGetAccountIntegrationConfigStatusAndMissingValues {
     const configFromSystem =
       accountIntegration.integration.configurationTemplate;

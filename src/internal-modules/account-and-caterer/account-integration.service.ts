@@ -10,12 +10,12 @@ import * as Sentry from '@sentry/node';
 import { AccountIntegrationType } from './types';
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { AccountIntegrationHelperService } from './account-integration-helper.service';
+import { AccountIntegrationHelperService } from './account-integration-helper/account-integration-helper.service';
 import { IFullAccountIntegration } from './interfaces/account-integration.interface';
 import { validateGeneralizedAccountIntegration } from './validators/generalized-account-integration.schema-and-validator';
 import { AccountCrmIntegratorService } from './integration-classes/account-crm-integrator/account-crm-integrator.service';
-import { AccountIntegrationMapperService } from './integration-classes/account-integration-mapper.service';
 import { GetAccountIntegrationReturn } from './interfaces/method-returns/account-integration-helper/get-account-integration.method-return';
+import { AccountIntegrationMapperService } from './account-integration-helper/account-integration-mapper.service';
 
 // MAY NOT INJECT:
 // AccountSecretService
