@@ -1,4 +1,4 @@
-import { INutshellApiClientService } from '../../../../../../src/external-modules/crm-clients';
+import { INutshellApiClientService } from '../../../../../../src/external-modules/crm-client';
 
 export const mockNutshellApiClient: INutshellApiClientService = {
   getLead: jest.fn(),

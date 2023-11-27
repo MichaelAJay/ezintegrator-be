@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { FullAccountModel } from '../../../external-modules/db-client';
+import { IExternalIntegrationProvider } from 'src/external-modules/interfaces';
+import { FullAccountModel } from '../../db-client';
 import { NUTSHELL_API_METHODS } from './api-methods';
 import { INutshellApiClientService, INutshellCredentials } from './interfaces';
 import { NutshellApiCacheService } from './nutshell-api-cache.service';
 import { NutshellApiClientConfigurationService } from './nutshell-api-client-configuration.service';
 
 @Injectable()
-export class NutshellApiClientService implements INutshellApiClientService {
+export class NutshellApiClientService
+  implements INutshellApiClientService, IExternalIntegrationProvider
+{
   constructor(
     private readonly clientConfiguration: NutshellApiClientConfigurationService,
     private readonly cache: NutshellApiCacheService,
@@ -69,5 +72,9 @@ export class NutshellApiClientService implements INutshellApiClientService {
   }
   tryTwice() {
     throw new Error('Method not implemented.');
+  }
+
+  async checkConfiguration(args: any): Promise<boolean> {
+    return false;
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { SecretManagerService } from '../../../external-modules/secret-manager/secret-manager.service';
+import { SecretManagerService } from '../../secret-manager/secret-manager.service';
 import {
   INutshellApiClientConfigurationService,
   INutshellCredentials,

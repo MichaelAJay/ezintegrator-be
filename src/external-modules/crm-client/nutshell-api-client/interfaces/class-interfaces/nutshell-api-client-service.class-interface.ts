@@ -1,4 +1,4 @@
-import { FullAccountModel } from '../../../../../external-modules';
+import { FullAccountModel } from '../../../..';
 import { INutshellCredentials } from '../nutshell-credentials.interface';
 
 export interface INutshellApiClientService {

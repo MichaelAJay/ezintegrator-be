@@ -1,4 +1,4 @@
-import { INutshellApiCache } from '../../../../../../src/external-modules/crm-clients';
+import { INutshellApiCache } from '../../../../../../src/external-modules/crm-client';
 
 export const mockNutshellApiCacheService: INutshellApiCache = {
   cacheLead: jest.fn(),

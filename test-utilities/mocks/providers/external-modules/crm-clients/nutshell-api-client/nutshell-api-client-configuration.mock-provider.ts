@@ -1,4 +1,4 @@
-import { INutshellApiClientConfigurationService } from '../../../../../../src/external-modules/crm-clients';
+import { INutshellApiClientConfigurationService } from '../../../../../../src/external-modules/crm-client';
 
 export const mockNutshellApiClientConfigurationService: INutshellApiClientConfigurationService =
   {
