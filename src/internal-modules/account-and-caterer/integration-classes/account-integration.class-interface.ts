@@ -1,4 +1,5 @@
 import { AccountSecretReferenceSecretTypeValues } from '../../../external-modules';
+import { IAccountIntegrationWithConfigAndSystemIntegration } from '../interfaces/account-integration.interface';
 
 // All specific account integration providers (ex: AccountCrm) should implement this interface
 export interface IAccountIntegrationClass {
@@ -25,7 +26,7 @@ export interface IAccountIntegrationClass {
   activate(accountIntegrationId: string, accountId: string): any;
   delete(accountIntegrationId: string, accountId: string): any;
   /**
-   * @check existingSecrets is an array and every secret in existingSecrets is an object with "type" property
+   * @check existingSecrets is array and every secret in existingSecrets is an object with "type" property
    */
   handleSecretsUpdate(
     accountIntegrationId: string,
@@ -39,5 +40,12 @@ export interface IAccountIntegrationClass {
    * Performs an idempotent action on the external integration to confirm that the integration is fully configured
    * @check accountIntegration.isConfigured is true
    */
-  checkConfigurationExternally(): Promise<boolean>;
+  checkConfigurationExternally(
+    generalizedAccountIntegration: IAccountIntegrationWithConfigAndSystemIntegration,
+  ): Promise<boolean>;
 }
+
+/**
+ * Service providers that implement this interface should inject all external integrations
+ * Or alternatively, they should inject an external integration provider which injects all
+ */

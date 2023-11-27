@@ -18,6 +18,7 @@ const generalizedAccountIntegrationSchema: JSONSchemaType<IFullAccountIntegratio
       } as any,
       isConfigured: { type: 'boolean' },
       isActive: { type: 'boolean' },
+      isExternallyChecked: { type: 'boolean' },
       secretRefs: {
         type: 'array',
         items: {
@@ -80,6 +81,7 @@ const generalizedAccountIntegrationSchema: JSONSchemaType<IFullAccountIntegratio
       'nonSensitiveCredentials',
       'isConfigured',
       'isActive',
+      'isExternallyChecked',
       'secretRefs',
       'eventProcesses',
       'integration',

@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { SecretManagerService } from '../../../../external-modules/secret-manage
 import { AccountIntegrationDbHandlerService } from '../../../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountIntegrationHelperService } from '../../account-integration-helper/account-integration-helper.service';
 import { AccountIntegrationMapperService } from '../../account-integration-helper/account-integration-mapper.service';
+import { IAccountIntegrationWithConfigAndSystemIntegration } from '../../interfaces/account-integration.interface';
 import { prepareAccountIntegrationConfigurationUpdate } from '../../utility/account-integration/prepare-configuration-update.utility-function';
 import { validateExistingSecrets } from '../../validators/account-integration-existing-secrets.schema-and-validator';
 import { IAccountIntegrationClass } from '../account-integration.class-interface';
@@ -178,21 +180,24 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     );
   }
   async activate(accountIntegrationId: string, accountId: string) {
-    /**
-     * @check — accountIntegration isConfigured
-     */
-    const accountIntegration =
-      await this.accountIntegrationDbHandler.retrieveAccountCrmById(
-        accountIntegrationId,
-      );
-    if (!accountIntegration.isConfigured) {
-      if (accountIntegration.isActive) {
+    const { generalizedAccountIntegration } =
+      await this.retrieveGeneralizedAccountIntegration(accountIntegrationId);
+
+    if (generalizedAccountIntegration.accountId !== accountId) {
+      throw new ConflictException();
+    }
+
+    if (!generalizedAccountIntegration.isConfigured) {
+      if (generalizedAccountIntegration.isActive) {
         // This shouldn't be happening - it should deactivate and throw an error
       } else {
         throw new UnprocessableEntityException(
           'The account integration is not fully configured.',
         );
       }
+    }
+
+    if (!generalizedAccountIntegration.isExternallyChecked) {
     }
 
     return this.accountIntegrationDbHandler.updateAccountCrm(
@@ -328,7 +333,23 @@ export class AccountCrmIntegratorService implements IAccountIntegrationClass {
     }
   }
 
-  async checkConfigurationExternally(): Promise<boolean> {
+  async checkConfigurationExternally(
+    generalizedAccountIntegration: IAccountIntegrationWithConfigAndSystemIntegration,
+  ): Promise<boolean> {
+    const { integration: systemIntegration } = generalizedAccountIntegration;
+    switch (systemIntegration.name) {
+      case 'NUTSHELL':
+        break;
+      default:
+        const err = new InternalServerErrorException(
+          'Unexpected system integration name',
+        );
+        Sentry.withScope((scope) => {
+          scope.setExtra('name', systemIntegration.name);
+          Sentry.captureException(err);
+        });
+        throw err;
+    }
     return false;
   }
 }

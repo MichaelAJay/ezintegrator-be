@@ -1,6 +1,9 @@
 import { JSONSchemaType } from 'ajv';
 import { ajv } from 'src/utility/singletons';
-import { accountSecretReferenceSecretTypes } from '../../../external-modules';
+import {
+  accountSecretReferenceSecretTypes,
+  integrationNames,
+} from '../../../external-modules';
 import { IAccountIntegrationWithConfigAndSystemIntegration } from '../interfaces/account-integration.interface';
 import { accountIntegrationValues } from '../types';
 
@@ -16,6 +19,7 @@ const accountIntegrationForConfigSchema: JSONSchemaType<IAccountIntegrationWithC
       } as any,
       isConfigured: { type: 'boolean' },
       isActive: { type: 'boolean' },
+      isExternallyChecked: { type: 'boolean' },
       secretRefs: {
         type: 'array',
         items: {
@@ -26,7 +30,7 @@ const accountIntegrationForConfigSchema: JSONSchemaType<IAccountIntegrationWithC
       integration: {
         type: 'object',
         properties: {
-          name: { type: 'string' },
+          name: { type: 'string', enum: integrationNames },
           configurationTemplate: {
             type: 'array',
             items: {
@@ -52,6 +56,7 @@ const accountIntegrationForConfigSchema: JSONSchemaType<IAccountIntegrationWithC
       'nonSensitiveCredentials',
       'isConfigured',
       'isActive',
+      'isExternallyChecked',
       'secretRefs',
       'integration',
     ],

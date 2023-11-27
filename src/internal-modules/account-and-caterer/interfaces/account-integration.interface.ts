@@ -2,6 +2,7 @@ import { EventType } from '../../../external-modules/db-client/types/event.type'
 import {
   AccountSecretReferenceSecretTypeValues,
   IntegrationActionValues,
+  IntegrationNameValues,
 } from '../../../external-modules';
 import { IAccountIntegrationFieldConfigurationJson } from './account-integration-fields.json-interface';
 import { CrmIntegrationActionValues } from 'src/external-modules/db-client/types/crm-integration-action.type';
@@ -14,6 +15,7 @@ export type IAccountIntegration = {
   nonSensitiveCredentials: Record<string, any> | null;
   isConfigured: boolean;
   isActive: boolean;
+  isExternallyChecked: boolean;
 };
 
 export type IFullAccountIntegration = IAccountIntegration & {
@@ -23,7 +25,7 @@ export type IFullAccountIntegration = IAccountIntegration & {
 };
 
 export interface ISystemIntegration {
-  name: string; // This could be a union of string literals
+  name: IntegrationNameValues; // This could be a union of string literals
   configurationTemplate: IAccountIntegrationFieldConfigurationJson[];
   validEventProcesses: IntegrationActionValues[];
 }

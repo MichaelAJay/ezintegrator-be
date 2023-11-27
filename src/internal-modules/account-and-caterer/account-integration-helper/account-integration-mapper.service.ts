@@ -33,6 +33,7 @@ export class AccountIntegrationMapperService
         nonSensitiveCredentials: accountIntegration.nonSensitiveCredentials,
         isConfigured: accountIntegration.isConfigured,
         isActive: accountIntegration.isActive,
+        isExternallyChecked: accountIntegration.isExternallyChecked,
       };
     } catch (err) {
       Sentry.captureException(err);
