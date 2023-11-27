@@ -74,7 +74,36 @@ export class NutshellApiClientService
     throw new Error('Method not implemented.');
   }
 
-  async checkConfiguration(args: any): Promise<boolean> {
-    return false;
+  // Helper methods
+  async checkConfiguration(
+    accountCredentials: INutshellCredentials,
+  ): Promise<boolean> {
+    try {
+      const client = await this.clientConfiguration.generateClient(
+        accountCredentials,
+      );
+      const response = await client.request(NUTSHELL_API_METHODS.add, [1, 2]);
+      return true; // Need to work on this
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  }
+
+  buildCredentials(
+    nonSensitiveCredentials: any,
+    secrets: any,
+  ): INutshellCredentials {
+    const apiKeySecret = secrets.find(
+      (secret: any) => secret.name === 'API_KEY',
+    );
+    if (!apiKeySecret) {
+      throw new Error('No api key secret');
+    }
+
+    return {
+      username: nonSensitiveCredentials.username,
+      apiKeySecretName: apiKeySecret.name,
+    };
   }
 }

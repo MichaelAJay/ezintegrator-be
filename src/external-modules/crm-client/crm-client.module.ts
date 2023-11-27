@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { CrmClientService } from './crm-client.service';
 import { NutshellApiClientModule } from './nutshell-api-client/nutshell-api-client.module';
-import { NutshellApiClientService } from './nutshell-api-client/nutshell-api-client.service';
 
 @Module({
   imports: [NutshellApiClientModule],
-  exports: [NutshellApiClientService],
+  providers: [CrmClientService],
+  exports: [CrmClientService],
 })
 export class CrmClientModule {}

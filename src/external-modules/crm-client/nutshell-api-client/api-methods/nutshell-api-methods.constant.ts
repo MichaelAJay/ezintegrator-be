@@ -1,3 +1,4 @@
 export const NUTSHELL_API_METHODS = {
-  getLead: 'getlead',
+  add: 'add', // used to perform integration credentials check
+  getLead: 'getLead',
 };
