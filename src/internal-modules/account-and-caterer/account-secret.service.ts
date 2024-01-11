@@ -7,7 +7,6 @@ import { SecretManagerService } from '../../external-modules/secret-manager/secr
 import { AccountIntegrationDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-integration.db-handler.service';
 import { AccountSecretDbHandlerService } from '../external-handlers/db-handlers/account-and-caterer.db-handler/account-secret.db-handler.service';
 import { AccountPermissionService } from '../security-utility/account-permission.service';
-import { AccountIntegrationService } from './account-integration.service';
 import { IAccountSecretProvider, IAddCrmSecretArgs } from './interfaces';
 import { IAccountIntegrationFieldConfigurationJson } from './interfaces/account-integration-fields.json-interface';
 
